@@ -1,0 +1,13 @@
+﻿@using netmockery
+@model ForwardResponseCreator
+Forward to <code>@Model.Url</code>
+@if (Model.ProxyUrl != null)
+{
+    <text><br>Proxy: <code>@Model.ProxyUrl</code></text>
+}
+
+@if (Model.StripPath != null)
+{
+    <text><br>Strip from path: <code>@Model.StripPath</code></text>
+
+}

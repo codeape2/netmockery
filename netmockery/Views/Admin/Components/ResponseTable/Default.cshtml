@@ -1,0 +1,53 @@
+﻿@using netmockery
+@model IEnumerable<ResponseRegistryItem>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Request Path</th>
+            <th>Request Body</th>
+            <th>Request Matcher</th>
+            <th>Response Body</th>
+            <th>Error</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ 
+            var i = 0;
+        }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Timestamp</td>
+                <td>@item.RequestPath</td>
+                <td>
+                    <pre>@item.RequestBody.Substring(0, 50)...</pre>
+                    <button class="btn" type="button" data-clipboard-target="#rq@(i)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span></button>
+                    <textarea class="hiddentextarea" id="rq@(i)">@item.RequestBody</textarea>
+                </td>
+                <td>
+                    @if (item.RequestMatcher != null)
+                    {
+                        <span class="rqmlink" data-rqm="@item.RequestMatcher.Index">#@item.RequestMatcher.Index</span>
+                    }
+                    
+                </td>
+                <td>
+                    @if (item.ResponseBody != null)
+                    {
+                        <pre>@item.ResponseBody.Substring(0, 50)...</pre>
+                        <a href="@Url.Action("DownloadResponse", new { requestId = item.Id })"><span class="glyphicon glyphicon-download"></span></a>
+                    }
+                </td>
+                <td>
+                    @if (item.Error != null)
+                    {
+                        @item.Error
+                    }
+                </td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
+

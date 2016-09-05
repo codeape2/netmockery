@@ -1,0 +1,74 @@
+﻿@using netmockery
+@model Endpoint
+
+@{ 
+    Layout = "Base";
+    var responseRegistry = ViewData["responseRegistry"] as ResponseRegistry;
+    var highlight = (int)ViewData["highlight"];
+}
+
+<h1>@Model.Name</h1>
+<p>
+    Path regex: <code>@Model.PathRegex</code>
+</p>
+
+<h2>Request handling rules</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                #
+            </th>
+            <th>
+                Request matcher
+            </th>
+            <th>
+                Response
+            </th>
+            <th>
+                Delay
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ var i = 0;}
+        @foreach (var t in Model.Responses)
+        {
+            var creator = t.Item2;
+            <tr id="rqm@(t.Item1.Index)"
+                @if (t.Item1.Index == highlight)
+                {
+                    <text>class="rqmrow info"</text>
+                }
+                else
+                {
+                    <text>class="rqmrow"</text>
+                }
+            >
+                <td>
+                    @(t.Item1.Index)
+                </td>
+                <td>
+                    @await Component.InvokeAsync("RequestMatcher", new { requestMatcher = t.Item1 })
+                </td>
+                <td>
+                    @await Component.InvokeAsync("ResponseCreator", new { index = i, responseCreator = creator, endpoint=Model })
+                </td>
+                <td>
+                    @if (creator.Delay > 0)
+                    {
+                        <text>@creator.Delay seconds</text>
+                    }
+                    else
+                    {
+                        <text>(no delay)</text>
+                    }
+                </td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("RequestsForEndpoint", new { endpointName = Model.Name })">Requests</a>

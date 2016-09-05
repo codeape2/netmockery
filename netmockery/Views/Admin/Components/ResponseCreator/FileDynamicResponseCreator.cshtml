@@ -1,0 +1,8 @@
+﻿@using netmockery
+@model FileDynamicResponseCreator
+Script: 
+<a href="@Url.Action("ViewRequestCreatorFile", new { name = (string)ViewData["endpointName"],  requestCreatorId = (int)ViewData["index"] })">
+    <code>@System.IO.Path.GetFileName(Model.Filename)</code>
+</a> 
+
+@Html.Partial("CommonSimpleResponseCreator", Model)

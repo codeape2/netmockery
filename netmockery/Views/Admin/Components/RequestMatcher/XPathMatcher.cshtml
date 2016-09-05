@@ -1,0 +1,12 @@
+﻿@using netmockery
+@model XPathMatcher
+
+Evaluate XPath <code>@Model.XPathExpresssion</code> against request body
+@if (Model.Namespaces.Length > 0)
+{
+    <br><text>Using namepaces:</text><br>
+    @for (var i = 0; i < Model.Namespaces.Length; i++)
+    {
+        @Model.Prefixes[i] : @Model.Namespaces[i]<br>
+    }
+}
