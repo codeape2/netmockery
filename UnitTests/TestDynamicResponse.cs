@@ -62,6 +62,7 @@ namespace UnitTests
             );
             Assert.Equal(1, ex.InnerExceptions.Count);
             Assert.IsType<DivideByZeroException>(ex.InnerExceptions[0]);
+            Assert.Contains("in :line 1", ex.InnerException.StackTrace);
         }
 
         [Fact]

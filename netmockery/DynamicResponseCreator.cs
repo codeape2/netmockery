@@ -14,8 +14,10 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
-        private Script<string> _script;
+        //private Script<string> _script;
         private string _sourceAtCompilationTime;
+        private Assembly _compiledAssembly;
+        private Type _compiledType;
 
         public string Evaluate(RequestInfo requestInfo)
         {
@@ -26,10 +28,10 @@ namespace netmockery
         {
             Debug.Assert(requestInfo != null);
             var sourceCode = SourceCode;
-            
-            if (_script == null || _sourceAtCompilationTime != sourceCode)
+
+            if (_compiledType == null || _sourceAtCompilationTime != sourceCode)
             {
-                _script = CSharpScript.Create<string>(
+                var script = CSharpScript.Create<string>(
                     sourceCode,
                     ScriptOptions.Default.WithReferences(
                         typeof(System.Linq.Enumerable).Assembly, // System.Core
@@ -37,11 +39,20 @@ namespace netmockery
                     ),
                     globalsType: typeof(RequestInfo)
                 );
-                _script.Compile();
+                var compilation = script.GetCompilation();
+                var ilstream = new MemoryStream();
+                var pdbstream = new MemoryStream();
+                compilation.Emit(ilstream, pdbstream);
+                _compiledAssembly = Assembly.Load(ilstream.GetBuffer(), pdbstream.GetBuffer());
+                _compiledType = _compiledAssembly.GetType("Submission#0");
                 _sourceAtCompilationTime = sourceCode;
             }
-            Debug.Assert(_script != null);
-            return (await _script.RunAsync(globals: requestInfo)).ReturnValue;
+            Debug.Assert(_compiledType != null);
+            var factory = _compiledType.GetMethod("<Factory>");
+            var submissionArray = new object[2];
+            submissionArray[0] = requestInfo;
+            Task<string> task = (Task<string>)factory.Invoke(null, new object[] { submissionArray });
+            return await task;
         }
 
         public override string GetBody(RequestInfo requestInfo) => Evaluate(requestInfo);
