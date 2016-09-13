@@ -77,7 +77,7 @@ namespace netmockery
                             {
                                 await Task.Delay(TimeSpan.FromSeconds(responseCreator.Delay));
                             }
-                            var responseBytes = await responseCreator.CreateResponseAsync(context.Request, requestBodyBytes, context.Response);
+                            var responseBytes = await responseCreator.CreateResponseAsync(context.Request, requestBodyBytes, context.Response, endpoint.Directory);
                             responseRegistryItem.ResponseBody = Encoding.UTF8.GetString(responseBytes);
                         }
                         else

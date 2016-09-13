@@ -164,6 +164,7 @@ namespace netmockery
             {
                 endpoint.Add(jsonResponse.match.CreateRequestMatcher(), jsonResponse.response.Validated().CreateResponseCreator(rootDir));
             }
+            endpoint.Directory = rootDir;
             return endpoint;
         }
     }

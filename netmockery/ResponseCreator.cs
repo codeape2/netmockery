@@ -20,6 +20,7 @@ namespace netmockery
         public string RequestBody;
         public string RequestPath;
         public IHeaderDictionary Headers;
+        public string EndpointDirectory;
     }
 
     public class BodyReplacement
@@ -31,12 +32,12 @@ namespace netmockery
     public abstract class ResponseCreator
     {
         public int Delay { get; set; } = 0;
-        public abstract Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response);
+        public abstract Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response, string endpointDirectory);
     }
 
     public abstract class SimpleResponseCreator : ResponseCreator
     {
-        public override async Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response)
+        public override async Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response, string endpointDirectory)
         {
             var responseBody = GetBodyAndExecuteReplacements(new RequestInfo
             {

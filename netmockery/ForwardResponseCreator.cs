@@ -36,7 +36,7 @@ namespace netmockery
 
         string[] HEADERS_TO_SKIP = new[] { "connection", "content-length", "content-type", "accept-encoding", "expect", "host" };
 
-        public override async Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] body, HttpResponse response)
+        public override async Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] body, HttpResponse response, string endpointDirectory)
         {
             var requestPath = request.Path.ToString();
             if (StripPath != null)

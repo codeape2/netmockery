@@ -13,8 +13,7 @@ namespace netmockery
         private string _name;
         private string _pathregex;
         private List<Tuple<RequestMatcher, ResponseCreator>> _responses = new List<Tuple<RequestMatcher, ResponseCreator>>();
-        private bool _anyHasBeenAdded = false;
-        
+        private bool _anyHasBeenAdded = false;        
 
         public Endpoint(string name, string pathregex)
         {
@@ -31,6 +30,8 @@ namespace netmockery
             _name = name;
             _pathregex = pathregex;
         }
+
+        public string Directory { get; set; }
 
         public string Name => _name;
         public string PathRegex => _pathregex;

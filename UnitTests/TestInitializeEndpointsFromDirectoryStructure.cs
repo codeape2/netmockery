@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -27,6 +28,7 @@ namespace UnitTests
             Assert.Equal("Endpoint1", ep0.Name);
             Assert.Equal("^/ep1/", ep0.PathRegex);
             Assert.Equal(0, ep0.Responses.Count());
+            Assert.Equal(Path.Combine(dc.DirectoryName, "endpoint1"), ep0.Directory);
 
             var ep1 = endpointCollection.Get("foo");
             Assert.Equal(2, ep1.Responses.Count());
