@@ -13,7 +13,11 @@ namespace netmockery
             var retval = new EndpointCollection { SourceDirectory = directoryName };
             foreach (var subdirectory in Directory.GetDirectories(directoryName))
             {
-                retval.Add(JSONReader.ReadEndpoint(File.ReadAllText(Path.Combine(subdirectory, "endpoint.json")), subdirectory));
+                var endpointFile = Path.Combine(subdirectory, "endpoint.json");
+                if (File.Exists(endpointFile))
+                {
+                    retval.Add(JSONReader.ReadEndpoint(File.ReadAllText(endpointFile), subdirectory));
+                }                
             }
             return retval;
         }

@@ -39,4 +39,28 @@ namespace UnitTests
             dc.Remove();
         }
     }
+
+    public class TestInitializeEndpointsWithNonEndpointDirectory : IDisposable
+    {
+        DirectoryCreator dc = new DirectoryCreator();
+
+        public TestInitializeEndpointsWithNonEndpointDirectory()
+        {
+            dc.AddFile("endpoint1\\endpoint.json", "{'name': 'Endpoint1', pathregex: '^/ep1/', responses: []}");
+            dc.AddFile("kith\\file.txt", "Ignore me!");
+        }
+
+        [Fact]
+        public void CanLoadOK()
+        {
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
+            Assert.Equal(1, endpointCollection.Endpoints.Count());
+        }
+
+        public void Dispose()
+        {
+            dc.Remove();
+        }
+
+    }
 }
