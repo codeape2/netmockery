@@ -43,7 +43,8 @@ namespace netmockery
             {
                 RequestBody = Encoding.UTF8.GetString(requestBody),
                 RequestPath = request.Path.ToString(),
-                Headers = request.Headers
+                Headers = request.Headers,
+                EndpointDirectory = endpointDirectory
             });
             response.ContentType = ContentType;
             await response.WriteAsync(responseBody, Encoding);
