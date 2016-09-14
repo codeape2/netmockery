@@ -11,9 +11,17 @@ namespace UnitTests
     {
         private string _directoryName;
 
-        public DirectoryCreator()
+        public DirectoryCreator(string directoryName = null)
         {
-            _directoryName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            if (directoryName != null)
+            {
+                _directoryName = directoryName;
+            }
+            else
+            {
+                _directoryName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            }
+            
             Debug.Assert(!Directory.Exists(_directoryName));
             Directory.CreateDirectory(_directoryName);
         }

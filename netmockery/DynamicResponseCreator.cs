@@ -40,7 +40,7 @@ namespace netmockery
                     );
                 if (FileSystemDirectory != null)
                 {
-                    scriptOptions = scriptOptions.WithSourceResolver(new SourceFileResolver(new string[0], FileSystemDirectory));
+                    scriptOptions = scriptOptions.WithSourceResolver(new SourceFileResolver(new string[0], Path.GetFullPath(FileSystemDirectory)));
                 }                
 
                 var script = CSharpScript.Create<string>(

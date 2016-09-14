@@ -104,4 +104,28 @@ namespace UnitTests
             dc.Dispose();
         }
     }
+
+    public class TestLoadScriptRelativePath : IDisposable
+    {
+        DirectoryCreator dc = new DirectoryCreator("_tmpscriptdir");
+
+        public TestLoadScriptRelativePath()
+        {
+            dc.AddFile("a\\main.csscript", "#load \"..\\b\\lib.csscript\"\nreturn f;");
+            dc.AddFile("b\\lib.csscript", "var f = \"foo\";");
+        }
+
+        [Fact]
+        public void ScriptCanLoadAnotherScript()
+        {
+            var drc = new FileDynamicResponseCreator(Path.Combine(dc.DirectoryName, "a\\main.csscript"));
+            var body = drc.GetBody(new RequestInfo());
+            Assert.Equal("foo", body);
+        }
+
+        public void Dispose()
+        {
+            dc.Dispose();
+        }
+    }
 }
