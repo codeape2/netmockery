@@ -81,13 +81,31 @@ namespace UnitTests
         }
     }
 
-    public class TestCheckScriptModifications
+    public class TestCheckScriptModifications : IDisposable
     {
+        private DirectoryCreator dc;
+        public TestCheckScriptModifications()
+        {
+            dc = new DirectoryCreator();
+            dc.AddFile("abc.txt", "abc");
+        }
+
+        public void Dispose()
+        {
+            dc.Dispose();
+        }
         [Fact]
         public void ReplacementWorks()
         {
             var code = DynamicResponseCreatorBase.CreateCorrectPathsInLoadStatements("#load \"foo.csscript\"", "C:\\dev");
             Assert.Equal("#load \"C:\\dev\\foo.csscript\"", code);
+        }
+
+        [Fact]
+        public void IncludesWork()
+        {
+            var code = DynamicResponseCreatorBase.ExecuteIncludes("aaa; #include \"abc.txt\"", dc.DirectoryName);
+            Assert.Equal("aaa; abc", code);
         }
     }
 

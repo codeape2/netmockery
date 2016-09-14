@@ -41,7 +41,14 @@ namespace netmockery
                     );
 
                 var script = CSharpScript.Create<string>(
-                    FileSystemDirectory != null ? CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory) : sourceCode,
+                    FileSystemDirectory != null 
+                        ?
+                        ExecuteIncludes(
+                            CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
+                            FileSystemDirectory
+                        )                        
+                        : 
+                        sourceCode,
                     scriptOptions,
                     globalsType: typeof(RequestInfo)
                 );
@@ -77,6 +84,19 @@ namespace netmockery
                 "#load \"(.*?)\"",
                 mo => "#load \"" + Path.GetFullPath(Path.Combine(directory, mo.Groups[1].Value)) + "\""
             );
+        }
+
+        static public string ExecuteIncludes(string sourceCode, string directory)
+        {
+            Debug.Assert(sourceCode != null);
+            Debug.Assert(directory != null);
+
+            return Regex.Replace(
+                sourceCode,
+                "#include \"(.*?)\"",
+                mo => File.ReadAllText(Path.GetFullPath(Path.Combine(directory, mo.Groups[1].Value)))
+            );
+
         }
 
         public override string GetBody(RequestInfo requestInfo) => Evaluate(requestInfo);
