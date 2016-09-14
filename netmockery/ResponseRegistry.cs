@@ -23,6 +23,14 @@ namespace netmockery
         public void WriteToConsole()
         {
             Console.WriteLine($"{Timestamp} {RequestPath} {Endpoint?.Name} {Error}");
+            if (RequestMatcher != null)
+            {
+                Console.WriteLine("    " + RequestMatcher.ToString());
+            }
+            if (ResponseCreator != null)
+            {
+                Console.WriteLine("    " + ResponseCreator.ToString());
+            }
         }
     }
 
