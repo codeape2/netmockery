@@ -1,6 +1,7 @@
 ﻿using netmockery;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -77,6 +78,30 @@ namespace UnitTests
         public void UsingSystemXmlLinq()
         {
             Assert.Equal("OK", Eval("using System.Xml.Linq; return \"OK\";"));
+        }
+    }
+
+    public class TestLoadScript : IDisposable
+    {
+        DirectoryCreator dc = new DirectoryCreator();
+
+        public TestLoadScript()
+        {
+            dc.AddFile("a\\main.csscript", "#load \"..\\b\\lib.csscript\"\nreturn f;");
+            dc.AddFile("b\\lib.csscript", "var f = \"foo\";");
+        }
+
+        [Fact]
+        public void ScriptCanLoadAnotherScript()
+        {
+            var drc = new FileDynamicResponseCreator(Path.Combine(dc.DirectoryName, "a\\main.csscript"));
+            var body = drc.GetBody(new RequestInfo());
+            Assert.Equal("foo", body);
+        }
+
+        public void Dispose()
+        {
+            dc.Dispose();
         }
     }
 }

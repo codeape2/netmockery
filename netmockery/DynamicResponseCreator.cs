@@ -19,6 +19,8 @@ namespace netmockery
         private Assembly _compiledAssembly;
         private Type _compiledType;
 
+        public virtual string FileSystemDirectory { get { return null; } }
+
         public string Evaluate(RequestInfo requestInfo)
         {
             return Task.Run(async () => await EvaluateAsync(requestInfo)).Result;
@@ -31,12 +33,19 @@ namespace netmockery
 
             if (_compiledType == null || _sourceAtCompilationTime != sourceCode)
             {
+                var scriptOptions = ScriptOptions.Default
+                    .WithReferences(
+                        typeof(Enumerable).Assembly, // System.Core
+                        typeof(System.Xml.Linq.XElement).Assembly // System.Xml.Linq
+                    );
+                if (FileSystemDirectory != null)
+                {
+                    scriptOptions = scriptOptions.WithSourceResolver(new SourceFileResolver(new string[0], FileSystemDirectory));
+                }                
+
                 var script = CSharpScript.Create<string>(
                     sourceCode,
-                    ScriptOptions.Default.WithReferences(
-                        typeof(System.Linq.Enumerable).Assembly, // System.Core
-                        typeof(System.Xml.Linq.XElement).Assembly // System.Xml.Linq
-                    ),
+                    scriptOptions,
                     globalsType: typeof(RequestInfo)
                 );
                 var compilation = script.GetCompilation();
@@ -92,6 +101,8 @@ namespace netmockery
 
         public override string SourceCode => File.ReadAllText(_filename);
 
+        public override string FileSystemDirectory => Path.GetDirectoryName(Filename);
+
         public override string ToString() => $"Execute script {_filename}";
     }
 
@@ -105,7 +116,7 @@ namespace netmockery
         {
             if (Assembly == null)
             {
-                Assembly = System.Reflection.Assembly.LoadFile(AssemblyFilename);
+                Assembly = Assembly.LoadFile(AssemblyFilename);
             }
             var type = Assembly.GetType(ClassName);
             var methodInfo = type.GetMethod(MethodName, BindingFlags.Public | BindingFlags.Static);
