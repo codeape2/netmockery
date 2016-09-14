@@ -40,6 +40,13 @@ namespace netmockery
                     globalsType: typeof(RequestInfo)
                 );
                 var compilation = script.GetCompilation();
+                var diagnostics = compilation.GetDiagnostics();
+                if (diagnostics.Count() > 0)
+                {
+                    var first = diagnostics[0];
+                    throw new Exception($"{first.Location.GetLineSpan()}: {first.GetMessage()}");
+                }
+                
                 var ilstream = new MemoryStream();
                 var pdbstream = new MemoryStream();
                 compilation.Emit(ilstream, pdbstream);

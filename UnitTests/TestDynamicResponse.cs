@@ -28,9 +28,11 @@ namespace UnitTests
         [Fact]
         public void CompilationErrorsAreThrown()
         {
-            Assert.ThrowsAny<Exception>(
+            var e = Assert.ThrowsAny<AggregateException>(
                 () => Eval("dlkj d")
             );
+
+            Assert.Contains("; expected", e.InnerException.ToString());
         }
 
         [Fact]
