@@ -16,7 +16,7 @@ namespace UnitTests
             Assert.NotNull(dc.DirectoryName);
             Assert.True(Directory.Exists(dc.DirectoryName));
 
-            dc.Remove();
+            dc.Dispose();
             Assert.False(Directory.Exists(dc.DirectoryName));
         }
     }
@@ -27,7 +27,7 @@ namespace UnitTests
 
         public void Dispose()
         {
-            dc.Remove();
+            dc.Dispose();
         }
 
         [Fact]

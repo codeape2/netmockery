@@ -36,7 +36,7 @@ namespace UnitTests
 
         public void Dispose()
         {
-            dc.Remove();
+            dc.Dispose();
         }
     }
 
@@ -59,7 +59,7 @@ namespace UnitTests
 
         public void Dispose()
         {
-            dc.Remove();
+            dc.Dispose();
         }
 
     }

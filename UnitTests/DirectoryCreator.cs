@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace UnitTests
 {
-    public class DirectoryCreator
+    public class DirectoryCreator : IDisposable
     {
         private string _directoryName;
 
@@ -26,7 +26,7 @@ namespace UnitTests
 
         public string DirectoryName => _directoryName;
 
-        public void Remove()
+        public void Dispose()
         {
             Directory.Delete(_directoryName, true);
         }
