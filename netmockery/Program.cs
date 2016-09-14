@@ -54,6 +54,10 @@ namespace netmockery
                         case "dump":
                             Dump(commandArgs);
                             break;
+
+                        case "runscript":
+                            RunScript(commandArgs);
+                            break;
                         default:
                             Error.WriteLine($"Unknown command {commandName}");
                             break;
@@ -64,6 +68,16 @@ namespace netmockery
             {
                 Error.WriteLine("Configuration directory not specified");
             }
+        }
+
+
+        public static void RunScript(string[] commandArgs)
+        {
+            var scriptfile = commandArgs[0];
+
+            var responseCreator = new FileDynamicResponseCreator(scriptfile);
+            var body = responseCreator.GetBody(new RequestInfo { EndpointDirectory = Path.GetDirectoryName(scriptfile) });
+            Console.WriteLine(body);
         }
 
         public static void Match(string[] args)
