@@ -5,8 +5,12 @@
         <tr>
             <th>Timestamp</th>
             <th>Request Path</th>
+            <th>Endpoint</th>
+            
             <th>Request Body</th>
             <th>Request Matcher</th>
+
+            <th>Response Creator</th>
             <th>Response Body</th>
             <th>Error</th>
         </tr>
@@ -21,16 +25,28 @@
                 <td>@item.Timestamp</td>
                 <td>@item.RequestPath</td>
                 <td>
-                    <pre>@item.RequestBody.Substring(0, 50)...</pre>
+                    @if (item.Endpoint != null)
+                    {
+                        <text>@item.Endpoint.Name</text>
+                    }
+                </td>
+                <td>
+                    <pre>@item.RequestBody.Substring(0, Math.Min(50, item.RequestBody.Length))...</pre>
                     <button class="btn" type="button" data-clipboard-target="#rq@(i)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span></button>
                     <textarea class="hiddentextarea" id="rq@(i)">@item.RequestBody</textarea>
                 </td>
                 <td>
                     @if (item.RequestMatcher != null)
                     {
-                        <span class="rqmlink" data-rqm="@item.RequestMatcher.Index">#@item.RequestMatcher.Index</span>
+                        @await Component.InvokeAsync("RequestMatcher", new { requestMatcher = item.RequestMatcher })
                     }
                     
+                </td>
+                <td>
+                    @if (item.ResponseCreator != null)
+                    {
+                        @await Component.InvokeAsync("ResponseCreator", new { responseCreator = item.ResponseCreator, endpoint = item.Endpoint })
+                    }
                 </td>
                 <td>
                     @if (item.ResponseBody != null)

@@ -31,7 +31,7 @@
             <td>@Html.ActionLink(endpoint.Name, "EndpointDetails", new { name = endpoint.Name })</td>
             <td><code>@endpoint.PathRegex</code></td>
             <td>@endpoint.Responses.Count()</td>
-            <td>@responseRegistry.ForEndpoint(endpoint.Name).Count()</td>
+            <td><a href="@Url.Action("RequestsForEndpoint", new { endpointName = endpoint.Name })"><span class="badge">@responseRegistry.ForEndpoint(endpoint.Name).Count()</span></a></td>
         </tr>
         }
 
