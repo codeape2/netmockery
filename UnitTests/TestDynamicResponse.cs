@@ -81,6 +81,16 @@ namespace UnitTests
         }
     }
 
+    public class TestCheckScriptModifications
+    {
+        [Fact]
+        public void ReplacementWorks()
+        {
+            var code = DynamicResponseCreatorBase.CreateCorrectPathsInLoadStatements("#load \"foo.csscript\"", "C:\\dev");
+            Assert.Equal("#load \"C:\\dev\\foo.csscript\"", code);
+        }
+    }
+
     public class TestLoadScript : IDisposable
     {
         DirectoryCreator dc = new DirectoryCreator();

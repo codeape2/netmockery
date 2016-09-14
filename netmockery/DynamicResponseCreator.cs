@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace netmockery
@@ -38,13 +39,9 @@ namespace netmockery
                         typeof(Enumerable).Assembly, // System.Core
                         typeof(System.Xml.Linq.XElement).Assembly // System.Xml.Linq
                     );
-                if (FileSystemDirectory != null)
-                {
-                    scriptOptions = scriptOptions.WithSourceResolver(new SourceFileResolver(new string[0], Path.GetFullPath(FileSystemDirectory)));
-                }                
 
                 var script = CSharpScript.Create<string>(
-                    sourceCode,
+                    FileSystemDirectory != null ? CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory) : sourceCode,
                     scriptOptions,
                     globalsType: typeof(RequestInfo)
                 );
@@ -69,6 +66,17 @@ namespace netmockery
             submissionArray[0] = requestInfo;
             Task<string> task = (Task<string>)factory.Invoke(null, new object[] { submissionArray });
             return await task;
+        }
+
+        static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
+        {
+            Debug.Assert(sourceCode != null);
+            Debug.Assert(directory != null);
+            return Regex.Replace(
+                sourceCode, 
+                "#load \"(.*?)\"",
+                mo => "#load \"" + Path.GetFullPath(Path.Combine(directory, mo.Groups[1].Value)) + "\""
+            );
         }
 
         public override string GetBody(RequestInfo requestInfo) => Evaluate(requestInfo);
