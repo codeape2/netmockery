@@ -87,13 +87,8 @@ namespace netmockery
 
                 if (context.Request.Path.ToString() == "/")
                 {
-                    var indexFile = Path.Combine(Program.EndpointCollection.SourceDirectory, "index.html");
-                    if (File.Exists(indexFile))
-                    {
-                        var responseCreator = new FileResponse(indexFile) { ContentType = "text/html" };
-                        await responseCreator.CreateResponseAsync(context.Request, requestBodyBytes, context.Response, null);
-                        return;
-                    }
+                    context.Response.Redirect("/__netmockery/Home");
+                    return;
                 }
                 var responseRegistryItem = new ResponseRegistryItem
                 {

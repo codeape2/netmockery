@@ -13,7 +13,7 @@ namespace netmockery.Controllers
         {
             var markdown = new Markdown();
             var text = markdown.Transform(System.IO.File.ReadAllText("documentation.md"));
-            return View(model: text);
+            return View("DisplayMarkdown", text);
         }
     }
 }
