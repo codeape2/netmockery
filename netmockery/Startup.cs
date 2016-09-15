@@ -73,7 +73,7 @@ namespace netmockery
             app.UseMvc(
                 routes => routes.MapRoute(
                     name: "Default", 
-                    template: "__netmockery/{controller=Admin}/{action=Index}"
+                    template: "__netmockery/{controller=Endpoints}/{action=Index}"
                 )
             );
             app.UseStaticFiles();

@@ -1,0 +1,42 @@
+﻿@using netmockery
+@model IEnumerable<ResponseRegistryItem>
+
+@{ 
+    Layout = "Base";
+    var page = (int)ViewData["page"];
+    var PAGESIZE = (int)ViewData["PAGESIZE"];
+    var currentAction = ViewContext.ActionDescriptor.RouteValues["action"];
+}
+
+@functions {
+    public object actionvalues(int page)
+    {
+        dynamic retval = new System.Dynamic.ExpandoObject();
+        var dictionary = (IDictionary<string, object>)retval;
+        foreach (var item in ViewContext.ModelState)
+        {
+            dictionary.Add(item.Key, item.Value.RawValue);
+        }
+        retval.page = page;
+        return retval;
+
+    }
+}
+
+<h2>Responses @ViewData["title"]</h2>
+@await Component.InvokeAsync("ResponseTable", new { rows = Model })
+
+<nav>
+    <ul class="pager">
+        @if (page > 1)
+        {
+            <li class="previous"><a href="@Url.Action(currentAction, actionvalues(page - 1))"><span aria-hidden="true">&larr;</span> Previous</a></li>
+        }
+        
+        @if (Model.Count() == PAGESIZE)
+        {
+            <li class="next"><a href="@Url.Action(currentAction, actionvalues(page + 1))">Next <span aria-hidden="true">&rarr;</span></a></li>
+        }
+        
+    </ul>
+</nav>

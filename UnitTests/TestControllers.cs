@@ -14,8 +14,8 @@ namespace UnitTests
         public void DisplayListOfEndpoints()
         {
             //TODO: add value to the test
-            var adminController = new AdminController(null, null);
-            var index = adminController.Index();
+            var controller = new EndpointsController(null, null);
+            var index = controller.Index();
             Console.WriteLine(index);
         }
     }

@@ -71,4 +71,4 @@
     </tbody>
 </table>
 
-<a href="@Url.Action("RequestsForEndpoint", new { endpointName = Model.Name })">Requests</a>
+@Html.ActionLink("Responses", "ForEndpoint", "Responses", new { endpointName = Model.Name })

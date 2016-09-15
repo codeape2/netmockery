@@ -1,9 +1,0 @@
-﻿@using netmockery
-@model IEnumerable<ResponseRegistryItem>
-
-@{ 
-    Layout = "Base";
-}
-
-<h2>Requests @ViewData["title"]</h2>
-@await Component.InvokeAsync("ResponseTable", new { rows = Model })

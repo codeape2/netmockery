@@ -6,12 +6,9 @@
             <th>Timestamp</th>
             <th>Request Path</th>
             <th>Endpoint</th>
-            
-            <th>Request Body</th>
             <th>Request Matcher</th>
-
             <th>Response Creator</th>
-            <th>Response Body</th>
+            <th>Details</th>
             <th>Error</th>
         </tr>
     </thead>
@@ -22,25 +19,19 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Timestamp</td>
+                <td>@item.Timestamp.ToString("HH:mm:ss.fff")</td>
                 <td>@item.RequestPath</td>
                 <td>
                     @if (item.Endpoint != null)
                     {
-                        <text>@item.Endpoint.Name</text>
+                        @Html.ActionLink(item.Endpoint.Name, "EndpointDetails", "Endpoints", new { name = item.Endpoint.Name })
                     }
-                </td>
-                <td>
-                    <pre>@item.RequestBody.Substring(0, Math.Min(50, item.RequestBody.Length))...</pre>
-                    <button class="btn" type="button" data-clipboard-target="#rq@(i)"><span class="glyphicon glyphicon-copy" aria-hidden="true"></span></button>
-                    <textarea class="hiddentextarea" id="rq@(i)">@item.RequestBody</textarea>
                 </td>
                 <td>
                     @if (item.RequestMatcher != null)
                     {
                         @await Component.InvokeAsync("RequestMatcher", new { requestMatcher = item.RequestMatcher })
-                    }
-                    
+                    }                    
                 </td>
                 <td>
                     @if (item.ResponseCreator != null)
@@ -49,11 +40,9 @@
                     }
                 </td>
                 <td>
-                    @if (item.ResponseBody != null)
-                    {
-                        <pre>@item.ResponseBody.Substring(0, 50)...</pre>
-                        <a href="@Url.Action("DownloadResponse", new { requestId = item.Id })"><span class="glyphicon glyphicon-download"></span></a>
-                    }
+                    @Html.ActionLink("Request", "RequestDetails", new { responseId = item.Id })
+                    <br>
+                    @Html.ActionLink("Response", "ResponseDetails", new { responseId = item.Id })
                 </td>
                 <td>
                     @if (item.Error != null)
