@@ -58,6 +58,11 @@ namespace netmockery
                         case "runscript":
                             RunScript(commandArgs);
                             break;
+
+                        case "viewscript":
+                            ViewScript(commandArgs);
+                            break;
+
                         default:
                             Error.WriteLine($"Unknown command {commandName}");
                             break;
@@ -76,8 +81,17 @@ namespace netmockery
             var scriptfile = commandArgs[0];
 
             var responseCreator = new FileDynamicResponseCreator(scriptfile);
-            var body = responseCreator.GetBody(new RequestInfo { EndpointDirectory = Path.GetDirectoryName(scriptfile) });
+            var body = responseCreator.GetBody(new RequestInfo {
+                RequestBody = commandArgs.Length == 2 ? File.ReadAllText(commandArgs[1]) : "",
+                EndpointDirectory = Path.GetDirectoryName(scriptfile)
+            });
             Console.WriteLine(body);
+        }
+
+        public static void ViewScript(string[] commandArgs)
+        {
+            var scriptfile = commandArgs[0];
+            Console.WriteLine(DynamicResponseCreatorBase.ExecuteIncludes(File.ReadAllText(scriptfile), Path.GetDirectoryName(scriptfile)));
         }
 
         public static void Match(string[] args)
