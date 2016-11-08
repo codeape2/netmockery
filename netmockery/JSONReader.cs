@@ -16,6 +16,28 @@ namespace netmockery
         }
     }
 
+    public class JSONTest
+    {
+        /*
+             {
+                'name': '/foo/ request works',
+                'requestpath': '/foo/',
+                'requestbody': 'heisann test',
+                'expectedresponsebody': 'FOOBARBOOBAR'
+            }
+
+         */
+        public string name;
+        public string requestpath;
+        public string requestbody;
+        public string expectedresponsebody;
+
+        public NetmockeryTestCase CreateTestCase()
+        {
+            return new NetmockeryTestCase { Name = name, RequestPath = requestpath, RequestBody = requestbody, ExpectedResponseBody = expectedresponsebody };
+        }
+    }
+
     public class JSONResponse
     {
         public JSONRequestMatcher match;

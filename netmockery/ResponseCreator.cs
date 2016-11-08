@@ -10,6 +10,76 @@ using System.Threading.Tasks;
 
 namespace netmockery
 {    
+    public interface IHttpResponseWrapper
+    {
+        string ContentType { set; }
+        Stream Body { get; }
+
+        Task WriteAsync(string content, Encoding encoding);
+    }
+
+    public interface IHttpRequestWrapper
+    {
+        PathString Path { get; }
+        IHeaderDictionary Headers { get; }
+    }
+
+    public class HttpRequestWrapper : IHttpRequestWrapper
+    {
+        HttpRequest httpRequest;
+
+        public HttpRequestWrapper(HttpRequest httpRequest)
+        {
+            Debug.Assert(httpRequest != null);
+            this.httpRequest = httpRequest;
+        }
+        public IHeaderDictionary Headers
+        {
+            get
+            {
+                return httpRequest.Headers;
+            }
+        }
+
+        public PathString Path
+        {
+            get
+            {
+                return httpRequest.Path;
+            }
+        }
+    }
+
+    public class HttpResponseWrapper : IHttpResponseWrapper
+    {
+        private HttpResponse httpResponse;
+        public HttpResponseWrapper(HttpResponse httpResponse)
+        {
+            Debug.Assert(httpResponse != null);
+            this.httpResponse = httpResponse;
+        }
+        public Stream Body
+        {
+            get
+            {
+                return httpResponse.Body;
+            }
+        }
+
+        public string ContentType
+        {
+            set
+            {
+                httpResponse.ContentType = value;
+            }
+        }
+
+        async public Task WriteAsync(string content, Encoding encoding)
+        {
+            await httpResponse.WriteAsync(content, encoding);
+        }
+    }
+
     public interface IResponseCreatorWithFilename
     {
         string Filename { get; }
@@ -32,12 +102,12 @@ namespace netmockery
     public abstract class ResponseCreator
     {
         public int Delay { get; set; } = 0;
-        public abstract Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response, string endpointDirectory);
+        public abstract Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, string endpointDirectory);
     }
 
     public abstract class SimpleResponseCreator : ResponseCreator
     {
-        public override async Task<byte[]> CreateResponseAsync(HttpRequest request, byte[] requestBody, HttpResponse response, string endpointDirectory)
+        public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, string endpointDirectory)
         {
             var responseBody = GetBodyAndExecuteReplacements(new RequestInfo
             {
