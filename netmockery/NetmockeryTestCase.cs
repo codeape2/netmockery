@@ -12,7 +12,7 @@ namespace netmockery
     public class TestCaseHttpRequest : IHttpRequestWrapper
     {
         private string path;
-        private HeaderDictionary headerDictionary;
+        private HeaderDictionary headerDictionary = new HeaderDictionary();
 
         public TestCaseHttpRequest(string path)
         {
@@ -100,6 +100,11 @@ namespace netmockery
                         var responseBody = Encoding.UTF8.GetString(responseBodyBytes);
                         retval.OK = responseBody == ExpectedResponseBody;
                         retval.Error = !retval.OK;
+                    
+                        if (retval.Error)
+                        {
+                            retval.Message = $"Expected response body:\n{ExpectedResponseBody}\n\nActual response body:\n{responseBody}";
+                        }
                     }
                     else
                     {
@@ -125,5 +130,32 @@ namespace netmockery
         public string Message;
         public Exception Exception;
         public NetmockeryTestCase TestCase;
+
+        public string ResultAsString
+        {
+            get
+            {
+                var shortstatus = "";
+                if (OK)
+                {
+                    shortstatus = "OK";
+                }
+                if (Error)
+                {
+                    shortstatus = "Fail";
+                }
+                if (Exception != null)
+                {
+                    shortstatus = "Error";
+                }
+
+                var retval = $"{shortstatus}\n{Message}";
+                if (Exception != null)
+                {
+                    retval += "\n" + Exception.ToString();
+                }
+                return retval;
+            }
+        }
     }
 }

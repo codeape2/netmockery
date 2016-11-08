@@ -63,6 +63,10 @@ namespace netmockery
                             ViewScript(commandArgs);
                             break;
 
+                        case "test":
+                            Test(commandArgs);
+                            break;
+
                         default:
                             Error.WriteLine($"Unknown command {commandName}");
                             break;
@@ -72,6 +76,32 @@ namespace netmockery
             else
             {
                 Error.WriteLine("Configuration directory not specified");
+            }
+        }
+
+
+        public static void Test(string[] commandArgs)
+        {
+            if (EndpointTestDefinition.HasTestSuite(EndpointCollection.SourceDirectory))
+            {
+                var testDefinitions = EndpointTestDefinition.ReadFromDirectory(EndpointCollection.SourceDirectory);
+                var errors = 0;
+                foreach (var test in testDefinitions.Tests)
+                {
+                    Write(test.Name.PadRight(40));
+                    var result = test.ExecuteAsync(EndpointCollection).Result;
+                    WriteLine(result.ResultAsString);
+                    if (result.Error)
+                    {
+                        errors++;
+                    }
+                }
+                WriteLine();
+                WriteLine($"Total: {testDefinitions.Tests.Count()} Errors: {errors}");
+            }
+            else
+            {
+                Error.WriteLine("ERROR: No test suite found");
             }
         }
 

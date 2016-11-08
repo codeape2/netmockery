@@ -9,6 +9,7 @@ using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 //using Microsoft.Net.Http.Headers;
 
 namespace netmockery
@@ -44,7 +45,8 @@ namespace netmockery
                 requestPath = Regex.Replace(requestPath, StripPath, "");
             }
             var httpMsg = new HttpRequestMessage(HttpMethod.Post, Url + requestPath);
-            
+
+            Debug.Assert(request.Headers != null);
             foreach (var header in request.Headers)
             {
                 if (! HEADERS_TO_SKIP.Contains(header.Key.ToLower()))
@@ -53,8 +55,11 @@ namespace netmockery
                 }
             }
             httpMsg.Content = new ByteArrayContent(body);
-            httpMsg.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(request.Headers["Content-Type"]);
-
+            if ((string) request.Headers["Content-Type"] != null)
+            {
+                httpMsg.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(request.Headers["Content-Type"]);
+            }
+            
             var httpClient = 
                 ProxyUrl == null ? 
                 new HttpClient() : 

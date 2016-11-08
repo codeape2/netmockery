@@ -19,13 +19,9 @@ namespace netmockery
     public class JSONTest
     {
         /*
-             {
-                'name': '/foo/ request works',
-                'requestpath': '/foo/',
-                'requestbody': 'heisann test',
-                'expectedresponsebody': 'FOOBARBOOBAR'
-            }
-
+         * Typer tester vi boer stoette:
+         * - expectedendpointname
+         * - expectedrequestmatcher
          */
         public string name;
         public string requestpath;
@@ -34,7 +30,11 @@ namespace netmockery
 
         public NetmockeryTestCase CreateTestCase()
         {
-            return new NetmockeryTestCase { Name = name, RequestPath = requestpath, RequestBody = requestbody, ExpectedResponseBody = expectedresponsebody };
+            if (requestpath == null)
+            {
+                throw new ArgumentNullException(nameof(requestpath));
+            }
+            return new NetmockeryTestCase { Name = name, RequestPath = requestpath, RequestBody = requestbody ?? "", ExpectedResponseBody = expectedresponsebody };
         }
     }
 
