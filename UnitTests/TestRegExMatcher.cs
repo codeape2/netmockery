@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using netmockery;
-
+using Microsoft.AspNetCore.Http;
 
 namespace UnitTests
 {
@@ -35,6 +35,14 @@ namespace UnitTests
         {
             var matcher = new RegexMatcher("<ssn>13116900217</ssn>");
             Assert.False(matcher.Matches(null, BODY, null));
+        }
+
+        [Fact]
+        public void MatchesBothUrlAndBody()
+        {
+            var matcher = new RegexMatcher("abcde");
+            Assert.True(matcher.Matches(new PathString("/foo/bar/ae/fx/"), "content in body: abcde", null));
+            Assert.True(matcher.Matches(new PathString("/foo/bar/abcde/fx/"), "", null));            
         }
 
     }

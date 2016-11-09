@@ -45,7 +45,7 @@ namespace netmockery
 
         public override bool Matches(PathString path, string body, IHeaderDictionary headers)
         {
-            return Regex.IsMatch(body, _regex);
+            return Regex.IsMatch(path.ToString(), _regex) || Regex.IsMatch(body, _regex);
         }
 
         public override string ToString()
