@@ -88,7 +88,7 @@ namespace netmockery
                 var errors = 0;
                 foreach (var test in testDefinitions.Tests)
                 {
-                    Write(test.Name.PadRight(40));
+                    Write(test.Name.PadRight(60));
                     var result = test.ExecuteAsync(EndpointCollection).Result;
                     WriteLine(result.ResultAsString);
                     if (result.Error)

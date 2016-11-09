@@ -27,14 +27,46 @@ namespace netmockery
         public string requestpath;
         public string requestbody;
         public string expectedresponsebody;
+        public string expectedrequestmatcher;
+        public string expectedresponsecreator;
+        public string expectedrequestcreator;
 
-        public NetmockeryTestCase CreateTestCase()
+        public JSONTest Validated()
         {
             if (requestpath == null)
             {
                 throw new ArgumentNullException(nameof(requestpath));
             }
-            return new NetmockeryTestCase { Name = name, RequestPath = requestpath, RequestBody = requestbody ?? "", ExpectedResponseBody = expectedresponsebody };
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            return this;
+        }
+
+        public NetmockeryTestCase CreateTestCase(string directory)
+        {
+            return new NetmockeryTestCase {
+                Name = name,
+                RequestPath = requestpath,
+                RequestBody = 
+                    requestbody != null && requestbody.StartsWith("file:")
+                    ?
+                    File.ReadAllText(Path.Combine(directory, requestbody.Substring(5)))
+                    :
+                    requestbody,
+
+                ExpectedRequestMatcher = expectedrequestmatcher,
+                ExpectedResponseCreator = expectedresponsecreator,
+
+                ExpectedResponseBody = 
+                    expectedresponsebody != null && expectedresponsebody.StartsWith("file:")
+                    ? 
+                    File.ReadAllText(Path.Combine(directory, expectedresponsebody.Substring(5)))
+                    : 
+                    expectedresponsebody
+            };
         }
     }
 

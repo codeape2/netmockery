@@ -173,7 +173,7 @@ namespace netmockery
 
         public override string GetBody(RequestInfo requestInfo) => File.ReadAllText(_filename);
 
-        public override string ToString() => $"File {_filename}";
+        public override string ToString() => $"File {Path.GetFileName(_filename)}";
     }
 
 }

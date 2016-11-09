@@ -131,7 +131,7 @@ namespace netmockery
 
         public override string FileSystemDirectory => Path.GetDirectoryName(Filename);
 
-        public override string ToString() => $"Execute script {_filename}";
+        public override string ToString() => $"Execute script {Path.GetFileName(_filename)}";
     }
 
     public class AssemblyResponseCreator : SimpleResponseCreator
