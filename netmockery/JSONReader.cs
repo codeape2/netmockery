@@ -22,10 +22,10 @@ namespace netmockery
         public string requestpath;
         public string querystring;
         public string requestbody;
-        public string expectedresponsebody;
+
         public string expectedrequestmatcher;
         public string expectedresponsecreator;
-        public string expectedrequestcreator;
+        public string expectedresponsebody;
 
         public JSONTest Validated()
         {

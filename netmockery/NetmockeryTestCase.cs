@@ -126,6 +126,10 @@ namespace netmockery
             return true;
         }
 
+        private const string ERROR_NOMATCHING_ENDPOINT = "No endpoint matches request path";
+        private const string ERROR_ENDPOINT_HAS_NO_MATCH = "Endpoint has no match for request";
+
+
         async public Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true)
         {
             Debug.Assert(endpointCollection != null);
@@ -136,7 +140,7 @@ namespace netmockery
                 var endpoint = endpointCollection.Resolve(RequestPath);
                 if (endpoint == null)
                 {
-                    retval.SetFailure("No endpoint matches request path");
+                    retval.SetFailure(ERROR_NOMATCHING_ENDPOINT);
                 }
                 else
                 {
@@ -169,7 +173,7 @@ namespace netmockery
                     }
                     else
                     {
-                        retval.SetFailure("Endpoint has not match for request");
+                        retval.SetFailure(ERROR_ENDPOINT_HAS_NO_MATCH);
                     }
                 }
             }
@@ -179,6 +183,28 @@ namespace netmockery
                 retval.SetException(exception);
             }
             return retval;
+        }
+
+        async public Task<Tuple<string, string>> GetResponseAsync(EndpointCollection endpointCollection)
+        {
+            var endpoint = endpointCollection.Resolve(RequestPath);
+            if (endpoint == null)
+            {
+                return Tuple.Create((string)null, ERROR_NOMATCHING_ENDPOINT);
+            }
+            bool singleMatch;
+            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null, out singleMatch);
+            if (matcher_and_creator != null)
+            {
+                var responseCreator = matcher_and_creator.Item2;
+                var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath), Encoding.UTF8.GetBytes(RequestBody), new TestCaseHttpResponse(), endpoint.Directory);
+                return Tuple.Create(Encoding.UTF8.GetString(responseBodyBytes), (string)null);
+            }
+            else
+            {
+                return Tuple.Create((string)null, ERROR_ENDPOINT_HAS_NO_MATCH);
+            }
+
         }
     }
 

@@ -186,6 +186,17 @@ namespace UnitTests
         }
 
         [Fact]
+        async public void CanGetResultBody()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "this is a test", expectedrequestmatcher = "Regex 'test'" })
+                .Validated().CreateTestCase(".");
+            var result = await testcase.GetResponseAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.Equal("FOOBARBOOBAR", result.Item1);
+            Assert.Null(result.Item2);
+        }
+
+        [Fact]
         async public void CanCheckExpectedResponseCreatorError()
         {
             var testcase =

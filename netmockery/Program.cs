@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.WindowsServices;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -18,6 +20,17 @@ namespace netmockery
         {
             EndpointCollection = EndpointCollectionReader.ReadFromDirectory(_configdirectory);
         }
+
+        private static IWebHost CreateWebHost(string contentRoot)
+        {
+            return new WebHostBuilder()
+                .UseKestrel()
+                .UseContentRoot(contentRoot)
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .Build();
+        }
+
         public static void Main(string[] args)
         {
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
@@ -30,15 +43,8 @@ namespace netmockery
 
                 if (args.Length == 1)
                 {
-                    var host = new WebHostBuilder()
-                        .UseKestrel()
-                        .UseContentRoot(Directory.GetCurrentDirectory())
-                        .UseIISIntegration()
-                        .UseStartup<Startup>()
-                        .Build();
-
                     WriteLine("Admin interface available on /__netmockery");
-                    host.Run();
+                    CreateWebHost(Directory.GetCurrentDirectory()).Run();
                 }
                 else
                 {
@@ -67,6 +73,11 @@ namespace netmockery
                             Test(commandArgs);
                             break;
 
+                        case "service":
+                            WriteLine("Running as service");
+                            RunAsService();
+                            break;
+
                         default:
                             Error.WriteLine($"Unknown command {commandName}");
                             break;
@@ -77,6 +88,11 @@ namespace netmockery
             {
                 Error.WriteLine("Configuration directory not specified");
             }
+        }
+
+        static public void RunAsService()
+        {
+            CreateWebHost(AppDomain.CurrentDomain.BaseDirectory).RunAsService();
         }
 
         static private string getSwitchValue(string[] commandArgs, string switchName)
@@ -114,7 +130,15 @@ namespace netmockery
 
                     if (containsSwitch(commandArgs, "--showResponse"))
                     {
-                        throw new NotImplementedException("TODO");
+                        var response = testCase.GetResponseAsync(EndpointCollection).Result;
+                        if (response.Item2 != null)
+                        {
+                            Error.WriteLine($"ERROR: {response.Item2}");
+                        }
+                        else
+                        {
+                            WriteLine(response.Item1);
+                        }
                     }
                     else
                     {
