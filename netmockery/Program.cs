@@ -79,30 +79,80 @@ namespace netmockery
             }
         }
 
+        static private string getSwitchValue(string[] commandArgs, string switchName)
+        {
+            var index = Array.FindIndex(commandArgs, v => v == switchName);
+            if (index == -1)
+            {
+                return null;
+            }
+            else
+            {
+                return commandArgs[index + 1];
+            }
+        }
+
+        static private bool containsSwitch(string[] commandArgs, string switchName)
+        {
+            Debug.Assert(commandArgs != null);
+            Debug.Assert(switchName != null);
+            return commandArgs.Contains(switchName);
+        }
+
 
         public static void Test(string[] commandArgs)
         {
             if (EndpointTestDefinition.HasTestSuite(EndpointCollection.SourceDirectory))
             {
                 var testDefinitions = EndpointTestDefinition.ReadFromDirectory(EndpointCollection.SourceDirectory);
-                var errors = 0;
-                foreach (var test in testDefinitions.Tests)
+
+                var only = getSwitchValue(commandArgs, "--only");
+                if (only != null)
                 {
-                    Write(test.Name.PadRight(60));
-                    var result = test.ExecuteAsync(EndpointCollection).Result;
-                    WriteLine(result.ResultAsString);
-                    if (result.Error)
+                    var index = int.Parse(only);
+                    var testCase = testDefinitions.Tests.ElementAt(index);
+
+                    if (containsSwitch(commandArgs, "--showResponse"))
                     {
-                        errors++;
+                        throw new NotImplementedException("TODO");
                     }
+                    else
+                    {
+                        ExecuteTestAndOutputResult(index, testCase);
+                    }
+                    
+                    return;
                 }
-                WriteLine();
-                WriteLine($"Total: {testDefinitions.Tests.Count()} Errors: {errors}");
+                TestAll(testDefinitions);
             }
             else
             {
                 Error.WriteLine("ERROR: No test suite found");
             }
+        }
+
+        private static NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index, NetmockeryTestCase test)
+        {
+            Write($"{index.ToString().PadLeft(3)} {test.Name.PadRight(60)}");
+            var result = test.ExecuteAsync(EndpointCollection).Result;
+            WriteLine(result.ResultAsString);
+            return result;
+        }
+
+        public static void TestAll(EndpointTestDefinition testDefinitions)
+        {
+            var errors = 0;
+            var index = 0;
+            foreach (var test in testDefinitions.Tests)
+            {
+                var result = ExecuteTestAndOutputResult(index ++, test);
+                if (result.Error)
+                {
+                    errors++;
+                }
+            }
+            WriteLine();
+            WriteLine($"Total: {testDefinitions.Tests.Count()} Errors: {errors}");
         }
 
 
