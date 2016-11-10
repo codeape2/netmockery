@@ -27,7 +27,7 @@ namespace UnitTests
         {
             var matcher = new XPathMatcher("//nhn:ssn = '13116900216'");
             matcher.AddNamespace("nhn", "http://register.nhn.no/Orchestration");
-            Assert.True(matcher.Matches(null, BODY, null));
+            Assert.True(matcher.Matches(null, new Microsoft.AspNetCore.Http.QueryString(), BODY, null));
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace UnitTests
         {
             var matcher = new XPathMatcher("//nhn:ssn = '13116900217'");
             matcher.AddNamespace("nhn", "http://register.nhn.no/Orchestration");
-            Assert.False(matcher.Matches(null, BODY, null));
+            Assert.False(matcher.Matches(null, new Microsoft.AspNetCore.Http.QueryString(), BODY, null));
         }
     }
 }

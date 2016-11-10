@@ -187,7 +187,7 @@ namespace netmockery
             }
             WriteLine($"Endpoint: {endpoint.Name}");
             bool singleMatch;
-            var responseMatch = endpoint.Resolve(new Microsoft.AspNetCore.Http.PathString(path), body, null, out singleMatch);
+            var responseMatch = endpoint.Resolve(new Microsoft.AspNetCore.Http.PathString(path), new Microsoft.AspNetCore.Http.QueryString(), body, null, out singleMatch);
             if (responseMatch == null)
             {
                 WriteLine("No match");

@@ -18,13 +18,9 @@ namespace netmockery
 
     public class JSONTest
     {
-        /*
-         * Typer tester vi boer stoette:
-         * - expectedendpointname
-         * - expectedrequestmatcher
-         */
         public string name;
         public string requestpath;
+        public string querystring;
         public string requestbody;
         public string expectedresponsebody;
         public string expectedrequestmatcher;
@@ -50,6 +46,7 @@ namespace netmockery
             return new NetmockeryTestCase {
                 Name = name,
                 RequestPath = requestpath,
+                QueryString = querystring,
                 RequestBody = 
                     requestbody != null && requestbody.StartsWith("file:")
                     ?

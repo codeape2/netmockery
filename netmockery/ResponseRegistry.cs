@@ -15,6 +15,7 @@ namespace netmockery
         public RequestMatcher RequestMatcher;
         public ResponseCreator ResponseCreator;
         public string RequestPath;
+        public string QueryString;
         public string RequestBody;
         public string ResponseBody;
         public string Error;

@@ -40,7 +40,7 @@ namespace netmockery
             if (endpoint != null)
             {
                 bool singleMatch;
-                var matcher_and_creator = endpoint.Resolve(context.Request.Path, requestBody, context.Request.Headers, out singleMatch);
+                var matcher_and_creator = endpoint.Resolve(context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers, out singleMatch);
                 if (matcher_and_creator != null)
                 {
                     var responseCreator = matcher_and_creator.Item2;
@@ -94,7 +94,8 @@ namespace netmockery
                 {
                     Timestamp = DateTime.Now,
                     RequestBody = requestBody,
-                    RequestPath = context.Request.Path.ToString()
+                    RequestPath = context.Request.Path.ToString(),
+                    QueryString = context.Request.QueryString.ToString()
                 };
 
                 try

@@ -62,10 +62,10 @@ namespace netmockery
             }
         }
 
-        public Tuple<RequestMatcher, ResponseCreator> Resolve(PathString path, string body, IHeaderDictionary headers, out bool singleMatch)
+        public Tuple<RequestMatcher, ResponseCreator> Resolve(PathString path, QueryString queryString, string body, IHeaderDictionary headers, out bool singleMatch)
         {
             singleMatch = true;
-            var candidates = (from t in _responses where t.Item1.Matches(path, body, headers) select t).Take(2);
+            var candidates = (from t in _responses where t.Item1.Matches(path, queryString, body, headers) select t).Take(2);
             if (! candidates.Any())
             {
                 return null;

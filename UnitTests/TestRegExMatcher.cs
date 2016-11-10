@@ -27,22 +27,29 @@ namespace UnitTests
         public void CanMatchBody()
         {
             var matcher = new RegexMatcher("<ssn>13116900216</ssn>");
-            Assert.True(matcher.Matches(null, BODY, null));
+            Assert.True(matcher.Matches(null, new QueryString(), BODY, null));
         }
 
         [Fact]
         public void NoMatch()
         {
             var matcher = new RegexMatcher("<ssn>13116900217</ssn>");
-            Assert.False(matcher.Matches(null, BODY, null));
+            Assert.False(matcher.Matches(null, new QueryString(), BODY, null));
         }
 
         [Fact]
         public void MatchesBothUrlAndBody()
         {
             var matcher = new RegexMatcher("abcde");
-            Assert.True(matcher.Matches(new PathString("/foo/bar/ae/fx/"), "content in body: abcde", null));
-            Assert.True(matcher.Matches(new PathString("/foo/bar/abcde/fx/"), "", null));            
+            Assert.True(matcher.Matches(new PathString("/foo/bar/ae/fx/"), new QueryString(), "content in body: abcde", null));
+            Assert.True(matcher.Matches(new PathString("/foo/bar/abcde/fx/"), new QueryString(), "", null));            
+        }
+
+        [Fact]
+        public void MatchesQueryString()
+        {
+            var matcher = new RegexMatcher("abcde");
+            Assert.True(matcher.Matches(new PathString("/foo/bar/"), new QueryString("?value=abcde"), "", null));
         }
 
     }

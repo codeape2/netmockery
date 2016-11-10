@@ -72,6 +72,7 @@ namespace netmockery
     {
         public string Name;
         public string RequestPath;
+        public string QueryString;
         public string RequestBody;
 
         public string ExpectedRequestMatcher;
@@ -140,7 +141,7 @@ namespace netmockery
                 else
                 {
                     bool singleMatch;
-                    var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), RequestBody, null, out singleMatch);
+                    var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null, out singleMatch);
                     if (matcher_and_creator != null)
                     {
                         var responseCreator = matcher_and_creator.Item2;

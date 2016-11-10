@@ -186,7 +186,7 @@ namespace UnitTests
         }
 
         [Fact]
-        async public void CanCheckExpectedResponseCreatorFailureError()
+        async public void CanCheckExpectedResponseCreatorError()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedresponsecreator = "File content.txt" })
@@ -200,12 +200,30 @@ namespace UnitTests
         }
 
         [Fact]
-        async public void CanCheckExpectedResponseCreatorFailureSuccess()
+        async public void CanCheckExpectedResponseCreatorSuccess()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "this is a test", expectedresponsecreator = "File content.txt" })
                 .Validated().CreateTestCase(".");
             Assert.Equal("File content.txt", testcase.ExpectedResponseCreator);
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.True(result.OK, result.Message);
+            Assert.Null(result.Message);
+        }
+
+        [Fact]
+        public void CanReadQueryString()
+        {
+            var testcase = (new JSONTest { querystring = "?foo=bar" }).CreateTestCase(".");
+            Assert.Equal("?foo=bar", testcase.QueryString);
+        }
+
+        [Fact]
+        async public void CanExecuteWithQueryStringFailure()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", querystring = "?a=test", requestbody = "foobar", expectedresponsecreator = "File content.txt" })
+                .Validated().CreateTestCase(".");
             var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK, result.Message);
             Assert.Null(result.Message);

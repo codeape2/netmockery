@@ -16,12 +16,12 @@ namespace netmockery
     public abstract class RequestMatcher
     {
         public int Index = -1;
-        public abstract bool Matches(PathString path, string body, IHeaderDictionary headers);
+        public abstract bool Matches(PathString path, QueryString queryString, string body, IHeaderDictionary headers);
     }
 
     public class AnyMatcher : RequestMatcher
     {
-        public override bool Matches(PathString path, string body, IHeaderDictionary headers)
+        public override bool Matches(PathString path, QueryString queryString, string body, IHeaderDictionary headers)
         {
             return true;
         }
@@ -43,9 +43,9 @@ namespace netmockery
 
         public string Expression => _regex;
 
-        public override bool Matches(PathString path, string body, IHeaderDictionary headers)
+        public override bool Matches(PathString path, QueryString queryString, string body, IHeaderDictionary headers)
         {
-            return Regex.IsMatch(path.ToString(), _regex) || Regex.IsMatch(body, _regex);
+            return Regex.IsMatch(path.ToString(), _regex) || Regex.IsMatch(queryString.ToString(), _regex) || Regex.IsMatch(body, _regex);
         }
 
         public override string ToString()
@@ -75,7 +75,7 @@ namespace netmockery
             _namespaces.Add(ns);
         }
 
-        public override bool Matches(PathString path, string body, IHeaderDictionary headers)
+        public override bool Matches(PathString path, QueryString queryString, string body, IHeaderDictionary headers)
         {
             var reader = XmlReader.Create(new StringReader(body));
             var root = XElement.Load(reader);

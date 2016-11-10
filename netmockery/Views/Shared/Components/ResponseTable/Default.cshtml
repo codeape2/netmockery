@@ -4,7 +4,7 @@
     <thead>
         <tr>
             <th>Timestamp</th>
-            <th>Request Path</th>
+            <th>Request</th>
             <th>Endpoint</th>
             <th>Request Matcher</th>
             <th>Response Creator</th>
@@ -20,7 +20,7 @@
         {
             <tr>
                 <td>@item.Timestamp.ToString("HH:mm:ss.fff")</td>
-                <td>@item.RequestPath</td>
+                <td>@(item.RequestPath)@(item.QueryString)</td>
                 <td>
                     @if (item.Endpoint != null)
                     {
