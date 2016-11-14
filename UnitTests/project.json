@@ -9,6 +9,13 @@
   },
 
   "frameworks": {
-    "net461": { }
+    "net461": {}
+  },
+
+  "buildOptions": {
+    "copyToOutput": [
+      "examples/",
+      "configurations_to_test.txt"
+    ]
   }
 }

@@ -1,0 +1,3 @@
+﻿#
+# Add endpoint collection definition directories to this file to automatically run test cases for the endpoint definitions
+#

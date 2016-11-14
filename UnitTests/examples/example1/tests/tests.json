@@ -1,0 +1,7 @@
+﻿[
+  {
+    "name": "Check foobar endpoint",
+    "requestpath": "/foobar",
+    "expectedresponsebody": "Hello world"
+  }
+]

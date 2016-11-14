@@ -1,0 +1,15 @@
+{
+  "name": "Simple endpoint",
+  "pathregex": "^/foobar",
+
+  "responses": [
+    {
+      "match": {},
+      "response": {
+        "literal": "Hello world",
+        "contenttype": "text/plain"
+      }
+    }
+  ]
+
+}
