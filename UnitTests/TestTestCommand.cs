@@ -100,6 +100,7 @@ namespace UnitTests
         {
             dc = new DirectoryCreator();
             dc.AddFile("endpoint1\\endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
+            dc.AddFile("endpoint1\\myscript.csscript", "return \"Hello world\";");
             dc.AddFile("endpoint1\\content.txt", "FOOBARBOOBAR");
             dc.AddFile("tests\\tests.json", TESTCOMMAND_CONSTANTS.TESTS);
             dc.AddFile("tests\\example.txt", "FOOBARBOOBAR");
@@ -127,6 +128,22 @@ namespace UnitTests
             Assert.Equal("/foo/", test.RequestPath);
             Assert.Equal("heisann test", test.RequestBody);
             Assert.Equal("FOOBARBOOBAR", test.ExpectedResponseBody);
+        }
+
+        [Fact]
+        async public void RequestBodyCanBeUnspecified()
+        {
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
+
+            var test = new NetmockeryTestCase
+            {
+                RequestPath = "/foo/",
+                ExpectedRequestMatcher = "Any request",
+                ExpectedResponseBody = "Hello world"
+            };
+
+            var result = await test.ExecuteAsync(endpointCollection, false);
+            Assert.True(result.OK, result.Message);
         }
 
         [Fact]

@@ -43,6 +43,12 @@ namespace UnitTests
         }
 
         [Fact]
+        public void CanAccessQueryString()
+        {
+            Assert.Equal("foobar?ama", Eval("RequestBody + RequestPath + QueryString", new RequestInfo { RequestBody = "foo", RequestPath = "bar", QueryString = "?ama" }));
+        }
+
+        [Fact]
         public void MultilineScript()
         {
             var code = @"var a = 2; var b = 3; (a + b).ToString()";

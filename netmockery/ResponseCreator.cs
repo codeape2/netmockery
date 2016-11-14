@@ -21,6 +21,7 @@ namespace netmockery
     public interface IHttpRequestWrapper
     {
         PathString Path { get; }
+        QueryString QueryString { get; }
         IHeaderDictionary Headers { get; }
     }
 
@@ -33,21 +34,9 @@ namespace netmockery
             Debug.Assert(httpRequest != null);
             this.httpRequest = httpRequest;
         }
-        public IHeaderDictionary Headers
-        {
-            get
-            {
-                return httpRequest.Headers;
-            }
-        }
-
-        public PathString Path
-        {
-            get
-            {
-                return httpRequest.Path;
-            }
-        }
+        public IHeaderDictionary Headers => httpRequest.Headers;
+        public PathString Path => httpRequest.Path;
+        public QueryString QueryString => httpRequest.QueryString;
     }
 
     public class HttpResponseWrapper : IHttpResponseWrapper
@@ -87,8 +76,9 @@ namespace netmockery
 
     public class RequestInfo
     {
-        public string RequestBody;
         public string RequestPath;
+        public string QueryString;
+        public string RequestBody;
         public IHeaderDictionary Headers;
         public string EndpointDirectory;
     }
@@ -111,8 +101,9 @@ namespace netmockery
         {
             var responseBody = GetBodyAndExecuteReplacements(new RequestInfo
             {
-                RequestBody = Encoding.UTF8.GetString(requestBody),
                 RequestPath = request.Path.ToString(),
+                QueryString = request.QueryString.ToString(),
+                RequestBody = Encoding.UTF8.GetString(requestBody),                
                 Headers = request.Headers,
                 EndpointDirectory = endpointDirectory
             });
