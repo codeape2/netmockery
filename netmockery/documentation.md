@@ -38,15 +38,113 @@ To uninstall:
 
 ## Directory structure
 
-TODO
+To configure netmockery, create a endpoint collection directory. An endpoint collection directory contains one or more subdirectories with ``endpoint.json`` 
+files that specify how netmockery should handle incoming requests.
+
+Example directory structure:
+
+    endpoint_collection_directory/
+        endpoint1/
+            endpoint.json
+        endpoint2/
+            endpoint.json
+        endpoint3/
+            endpoint.json
+
+## The ``endpoint.json`` file
+
+``endpoint.json`` contains:
+
+* ``name``: The endpoint's name. The name is for display in the web UI only.
+* ``pathregex``: A request path reqular expression, used in the first step of the incoming request handling.
+* ``responses``: A list of request matching rules and response creation steps for the endpoint.
+
+Example ``endpoint.json``:
+
+    {
+      "name": "Simple endpoint",
+      "pathregex": "^/foobar",
+
+      "responses": [
+        {
+          "match": {},
+
+          "literal": "Hello world",
+          "contenttype": "text/plain"
+        }
+      ]
+    }
 
 ## Request matching
 
-TODO
+The first step in handling incoming request is to check the incoming request's request path. The request path is matched against each ``pathregex`` for all
+endpoints in the endpoint collection directory. 
+
+Exactly one endpoint must match the request. If zero or more than one endpoint matches the incoming request,
+netmockery writes an error message to the console output, and returns nothing to the client.
+
+The second and final step in the request matching process is to check the incoming request against the list of rules in ``responses``. The first rule that matches
+the request will be used for creating the response. If no rule matches the request, netmockery writes an error message to the console output and returns nothing to
+the client.
+
+The ``match`` paramter within the ``responses`` list can match requests using one of these methods:
+
+### Match any request
+
+    "match": {}
+
+### Match a regular expression against the request path, query string and request body
+
+    "match": {
+        "regex": "..."
+    }
+
+### Match an XPath expression against the request body
+
+    "match": {
+        "xpath": "boolean XPath expression",
+
+        // ... define any namespace prefixes used in the xpath expression
+        "namespaces": [
+            {
+                "prefix": "prefix",
+                "ns": "namespace"
+            },
+
+            {
+                "prefix": "prefix2",
+                "ns": "namespace2"
+            }
+        ]
+    }
 
 ## Response creation
 
-TODO
+Several parameters inside the ``responses`` list control how netmockery creates the response.
+
+### Returning static responses
+
+* ``"literal": "This is the response to send"``: Returns the specified string
+* ``"file": "filename.ext"``: Returns content from the specified file. File names/paths are relative to the directory containing the ``endpoint.json`` file.
+
+### Executing a script to create a Response
+
+* ``"script": "scriptfilename.csscript"``: Execute the C# script specified. File names/paths are relative to the directory containing the ``endpoint.json`` file.
+
+Inside a script, the following global variables and functions are available:
+
+* ``RequestPath`` (string): The incoming request path
+* ``QueryString`` (string): The incoming request query string
+* ``RequestBody`` (string): The incoming request body
+* ``GetNow()`` (returns System.DateTime): The current time. See below for why you might want to use ``GetNow()`` inside your scripts instead of using ``System.DateTime.Now``.
+
+TODO: More scripting documentation.
+
+### Common parameters
+
+* ``contenttype``: Sets the content-type header. Not used for the forward request response creator.
+* ``replacements``: TODO: Document. Not used for the forward request response creator.
+* ``delay``: If set, netmockery waits for the specified number of seconds before returning the response to the client.
 
 <a name="tests"></a>
 # Writing tests

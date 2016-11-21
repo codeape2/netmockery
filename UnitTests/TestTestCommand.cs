@@ -19,6 +19,14 @@ namespace UnitTests
             'file': 'content.txt',
             'contenttype': 'text/plain'
         },
+
+{
+            'match': {'regex': 'replace'},
+            'file': 'content.txt',
+            'replacements': [{'search': 'FOO', 'replace': 'XXX'}],
+            'contenttype': 'text/plain'
+        },
+
         {
             'match': {},
             'script': 'myscript.csscript',
@@ -44,15 +52,16 @@ namespace UnitTests
     {
         'name': '/foo/ request works',
         'requestpath': '/foo/',
-        'requestbody': 'heisann test',
-        'expectedresponsebody': 'file:example.txt'
+        'requestbody': 'can I replace?',
+        'expectedresponsebody': 'XXXBARBOOBAR'
     },
 
     {
         'name': '/foo/ request works',
         'requestpath': '/foo/',
         'requestbody': 'file:example.txt',
-        'expectedresponsebody': 'file:example.txt'
+        'expectedresponsecreator': 'Execute script myscript.csscript',
+        'expectedresponsebody': 'file:response.txt'
     },
 
     {
@@ -105,6 +114,7 @@ namespace UnitTests
             dc.AddFile("endpoint1\\content.txt", "FOOBARBOOBAR");
             dc.AddFile("tests\\tests.json", TESTCOMMAND_CONSTANTS.TESTS);
             dc.AddFile("tests\\example.txt", "FOOBARBOOBAR");
+            dc.AddFile("tests\\response.txt", "Hello world");
             dc.AddFile("tests\\now.txt", "2015-01-01 12:01:31");
             dc.AddFile("getnow\\endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'script':'getnow.csscript'}]}");
             dc.AddFile("getnow\\getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
@@ -114,6 +124,14 @@ namespace UnitTests
         {
             dc.Dispose();
             RequestInfo.SetDynamicNow();
+        }
+
+        [Fact]
+        public void RunTestsWithReplacement()
+        {
+            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = testRunner.ExecuteTestAndOutputResult(1);
+            Assert.True(result.OK, result.ResultAsString);
         }
 
         [Fact]
@@ -199,7 +217,7 @@ namespace UnitTests
         async public void CanReadExpectedResponseBodyFromFile()
         {
             var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            var test = endpointTestDefinition.Tests.ElementAt(1);
+            var test = endpointTestDefinition.Tests.ElementAt(2);
 
             var result = await test.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName), handleErrors: false);
             Assert.True(result.OK, result.Message);
