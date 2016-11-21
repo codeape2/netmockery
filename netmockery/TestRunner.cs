@@ -60,7 +60,14 @@ namespace netmockery
             }
             else
             {
-                WriteLine(response.Item1);
+                if (IsOutputRedirected)
+                {
+                    Write(response.Item1);
+                }
+                else
+                {
+                    WriteLine(response.Item1);
+                }                
             }
         }
 
