@@ -29,7 +29,25 @@ namespace UnitTests
         public void AddFile(string filename, string content)
         {
             Directory.CreateDirectory(Path.Combine(_directoryName, Path.GetDirectoryName(filename)));
-            File.WriteAllText(Path.Combine(_directoryName, filename), content);
+            var filepath = Path.Combine(_directoryName, filename);
+            if (File.Exists(filepath))
+            {
+                throw new ArgumentException($"File {filepath} exists");
+            }
+            File.WriteAllText(filepath, content);
+        }
+
+        public void DeleteFile(string filename)
+        {
+            var filepath = Path.Combine(_directoryName, filename);
+            if (File.Exists(filepath))
+            {
+                File.Delete(filepath);
+            }
+            else
+            {
+                throw new FileNotFoundException(filepath);
+            }
         }
 
         public string DirectoryName => _directoryName;

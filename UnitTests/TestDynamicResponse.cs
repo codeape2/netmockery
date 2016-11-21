@@ -9,7 +9,7 @@ using Xunit;
 
 namespace UnitTests
 {
-    public class TestDynamicResponse
+    public class TestDynamicResponse 
     {
         static public string Eval(string code, RequestInfo requestInfo = null)
         {
@@ -18,12 +18,18 @@ namespace UnitTests
                 requestInfo = new RequestInfo();
             }
             return new LiteralDynamicResponseCreator(code).GetBody(requestInfo);
-            //return DynamicResponseCreatorBase.Evaluate(code, requestInfo);
         }
+
         [Fact]
         public void CanExecuteCode()
         {
             Assert.Equal("42", Eval("(40+2).ToString()"));
+        }
+
+        [Fact]
+        public void GetNowWorks()
+        {
+            Assert.Equal("System.DateTime", Eval("GetNow().GetType().ToString()"));
         }
 
         [Fact]

@@ -56,12 +56,17 @@ namespace UnitTests
         'name': '/foo/ request works',
         'requestpath': '/foo/',
         'requestbody': 'file:example.txt',
-        'expectedresponsebody': 'file:example.txt',
+        'expectedresponsebody': 'file:example.txt'
     },
 
+    {
+        'name': 'Getnow works',
+        'requestpath': '/getnow/',
+        'expectedrequestmatcher': 'Any request',
+        'expectedresponsebody': '2015-01-01 12:01:31'
+    }
 ]
 ";
-
     }
 
     public class TestTestCommandWithoutTestsuite : IDisposable
@@ -104,11 +109,15 @@ namespace UnitTests
             dc.AddFile("endpoint1\\content.txt", "FOOBARBOOBAR");
             dc.AddFile("tests\\tests.json", TESTCOMMAND_CONSTANTS.TESTS);
             dc.AddFile("tests\\example.txt", "FOOBARBOOBAR");
+            dc.AddFile("tests\\now.txt", "2015-01-01 12:01:31");
+            dc.AddFile("getnow\\endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'response': {'script':'getnow.csscript'}}]}");
+            dc.AddFile("getnow\\getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
         }
 
         public void Dispose()
         {
             dc.Dispose();
+            RequestInfo.SetDynamicNow();
         }
 
         [Fact]
@@ -122,7 +131,7 @@ namespace UnitTests
         public void CanReadTestsFromJSONFile()
         {
             var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            Assert.Equal(3, endpointTestDefinition.Tests.Count());
+            Assert.Equal(4, endpointTestDefinition.Tests.Count());
             var test = endpointTestDefinition.Tests.ElementAt(0);
             Assert.Equal("/foo/ request works", test.Name);
             Assert.Equal("/foo/", test.RequestPath);
@@ -145,6 +154,32 @@ namespace UnitTests
             var result = await test.ExecuteAsync(endpointCollection, false);
             Assert.True(result.OK, result.Message);
         }
+
+        [Fact]
+        public void TestsHaveConstantGetNow()
+        {
+            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = testRunner.ExecuteTestAndOutputResult(3);
+            Assert.True(result.OK, result.ResultAsString);
+        }
+
+        [Fact]
+        public void TestsCanHaveDynamicNow()
+        {
+            dc.DeleteFile("tests\\now.txt");
+            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = testRunner.ExecuteTestAndOutputResult(3);
+            Assert.True(result.Error, result.ResultAsString);
+            Assert.Null(result.Exception);
+        }
+
+        [Fact]
+        public void SetStaticGetNow()
+        {
+            RequestInfo.SetStaticNow(new DateTime(2015, 6, 7, 8, 9, 10));
+            Assert.Equal("2015-06-07 08:09:10", TestDynamicResponse.Eval("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")"));
+        }
+
 
         [Fact]
         public void RequestBodyCanBeReadFromFile()

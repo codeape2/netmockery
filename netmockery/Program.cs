@@ -120,34 +120,24 @@ namespace netmockery
         {
             if (EndpointTestDefinition.HasTestSuite(EndpointCollection.SourceDirectory))
             {
-                var testDefinitions = EndpointTestDefinition.ReadFromDirectory(EndpointCollection.SourceDirectory);
-
+                var testRunner = new TestRunner(EndpointCollection);
                 var only = getSwitchValue(commandArgs, "--only");
                 if (only != null)
                 {
                     var index = int.Parse(only);
-                    var testCase = testDefinitions.Tests.ElementAt(index);
-
                     if (containsSwitch(commandArgs, "--showResponse"))
                     {
-                        var response = testCase.GetResponseAsync(EndpointCollection).Result;
-                        if (response.Item2 != null)
-                        {
-                            Error.WriteLine($"ERROR: {response.Item2}");
-                        }
-                        else
-                        {
-                            WriteLine(response.Item1);
-                        }
+                        testRunner.ShowResponse(index);
                     }
                     else
                     {
-                        ExecuteTestAndOutputResult(index, testCase);
+                        testRunner.ExecuteTestAndOutputResult(index);
                     }
-                    
-                    return;
                 }
-                TestAll(testDefinitions);
+                else
+                {
+                    testRunner.TestAll();
+                }                
             }
             else
             {

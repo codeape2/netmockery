@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 
 namespace netmockery
 {
+    //TODO: Merge with TestRunner?
     public class EndpointTestDefinition
     {
         private NetmockeryTestCase[] testcases;
@@ -24,7 +25,18 @@ namespace netmockery
 
         static private string tests_directory(string directory) => Path.Combine(directory, "tests");
 
+        public void SetStaticTimeIfConfigured(string directory)
+        {
+            if (File.Exists(now_txt_filename(directory)))
+            {
+                var contents = File.ReadAllText(now_txt_filename(directory));
+                var datetime = DateTime.ParseExact(contents, "yyyy-MM-dd HH:mm:ss", null);
+                RequestInfo.SetStaticNow(datetime);
+            }
+        }
+
         static private string tests_json_filename(string directory) => Path.Combine(tests_directory(directory), "tests.json");
+        static private string now_txt_filename(string directory) => Path.Combine(tests_directory(directory), "now.txt");
 
         public static EndpointTestDefinition ReadFromDirectory(string directory)
         {

@@ -182,7 +182,7 @@ namespace netmockery
             if (matcher_and_creator != null)
             {
                 var responseCreator = matcher_and_creator.Item2;
-                var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath, QueryString), Encoding.UTF8.GetBytes(RequestBody), new TestCaseHttpResponse(), endpoint.Directory);
+                var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath, QueryString), Encoding.UTF8.GetBytes(RequestBody ?? ""), new TestCaseHttpResponse(), endpoint.Directory);
                 return Tuple.Create(Encoding.UTF8.GetString(responseBodyBytes), (string)null);
             }
             else

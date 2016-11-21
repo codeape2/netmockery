@@ -42,6 +42,12 @@ namespace UnitTests
                 CheckConfigdirectory(directory);
             }
         }
+
+        [Fact]
+        public void ShowResponseWorksAsExpected()
+        {
+            CheckOutput("examples/example1", 0);
+        }
         
         public void CheckConfigdirectory(string directory)
         {
@@ -59,6 +65,12 @@ namespace UnitTests
                 output.WriteLine(result.ResultAsString);
                 Assert.True(result.OK, $"Test case {result.TestCase.Name}, message '{result.Message}'");
             }
+        }
+
+        public void CheckOutput(string directory, int index)
+        {
+            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(directory));
+            testRunner.ShowResponse(index);
         }
     }
 }

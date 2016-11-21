@@ -81,6 +81,20 @@ namespace netmockery
         public string RequestBody;
         public IHeaderDictionary Headers;
         public string EndpointDirectory;
+
+        public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
+
+        private static DateTime _now = DateTime.MinValue;
+
+        public static void SetStaticNow(DateTime now)
+        {
+            _now = now;
+        }
+
+        public static void SetDynamicNow()
+        {
+            _now = DateTime.MinValue;
+        }
     }
 
     public class BodyReplacement
