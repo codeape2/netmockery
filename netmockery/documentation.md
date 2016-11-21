@@ -98,6 +98,15 @@ Command line:
 	# execute request specified by test N, but display respons (do not check test expectations)
 	netmockery.exe p:\ath\to\endpoint\directory test --only N --showResponse
 
+## Handling time when testing
+
+* If you have scripts that need the current date/time, do not use ``System.DateTime.Now``. 
+* Instead, use the ``GetNow()`` function inside your scripts.
+* When netmockery is running serving requests in the normal case, ``GetNow()`` returns ``System.DateTime.Now``.
+* But when running tests, ``GetNow()`` will return the timestamp specified in the special file ``tests\now.txt``. This file should contain a single line with the time stamp
+  in ``yyyy-MM-dd HH:mm:ss`` format.
+* Using ``GetNow()`` / ``now.txt`` you can create stable test cases, even if your scripted service simulators return dynamic data based on current time.
+
 <a name="misc"></a>
 # Misc
 
