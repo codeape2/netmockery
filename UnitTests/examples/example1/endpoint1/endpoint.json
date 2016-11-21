@@ -5,10 +5,9 @@
   "responses": [
     {
       "match": {},
-      "response": {
-        "literal": "Hello world",
-        "contenttype": "text/plain"
-      }
+
+      "literal": "Hello world",
+      "contenttype": "text/plain"
     }
   ]
 

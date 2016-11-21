@@ -70,51 +70,7 @@ namespace netmockery
     public class JSONResponse
     {
         public JSONRequestMatcher match;
-        public JSONResponseDefinition response;
-    }
 
-    public class JSONRequestMatcher
-    {
-        public string xpath;
-        public string regex;
-        public JSONXPathNamespace[] namespaces;
-
-        public RequestMatcher CreateRequestMatcher()
-        {
-            if (xpath != null)
-            {
-                var xpathMatcher = new XPathMatcher(xpath);
-                if (namespaces != null)
-                {
-                    foreach (var jsonNs in namespaces)
-                    {
-                        xpathMatcher.AddNamespace(jsonNs.prefix, jsonNs.ns);
-                    }
-                }
-                return xpathMatcher;
-            }
-            else if (regex != null)
-            {
-                return new RegexMatcher(regex);
-            }
-            return new AnyMatcher();
-        }
-    }
-
-    public class JSONXPathNamespace
-    {
-        public string prefix;
-        public string ns;
-    }
-
-    public class JSONReplacement
-    {
-        public string search;
-        public string replace;
-    }
-
-    public class JSONResponseDefinition
-    {
         public string literal;
 
         public string file;
@@ -123,7 +79,7 @@ namespace netmockery
         public string assembly;
         public string @class;
         public string method;
-        
+
         public string forward;
         public string proxy;
         public string strippath;
@@ -132,7 +88,7 @@ namespace netmockery
         public JSONReplacement[] replacements;
         public int delay;
 
-        public JSONResponseDefinition Validated()
+        public JSONResponse Validated()
         {
             var mutuallyExclusive = new[] { literal, file, script, assembly, forward };
             var mutExWithValues = from value in mutuallyExclusive where value != null select value;
@@ -199,6 +155,47 @@ namespace netmockery
 
             return responseCreator;
         }
+
+    }
+
+    public class JSONRequestMatcher
+    {
+        public string xpath;
+        public string regex;
+        public JSONXPathNamespace[] namespaces;
+
+        public RequestMatcher CreateRequestMatcher()
+        {
+            if (xpath != null)
+            {
+                var xpathMatcher = new XPathMatcher(xpath);
+                if (namespaces != null)
+                {
+                    foreach (var jsonNs in namespaces)
+                    {
+                        xpathMatcher.AddNamespace(jsonNs.prefix, jsonNs.ns);
+                    }
+                }
+                return xpathMatcher;
+            }
+            else if (regex != null)
+            {
+                return new RegexMatcher(regex);
+            }
+            return new AnyMatcher();
+        }
+    }
+
+    public class JSONXPathNamespace
+    {
+        public string prefix;
+        public string ns;
+    }
+
+    public class JSONReplacement
+    {
+        public string search;
+        public string replace;
     }
 
     public class JSONEndpoint
@@ -213,7 +210,7 @@ namespace netmockery
             var endpoint = new Endpoint(name, pathregex);
             foreach (var jsonResponse in responses)
             {
-                endpoint.Add(jsonResponse.match.CreateRequestMatcher(), jsonResponse.response.Validated().CreateResponseCreator(rootDir));
+                endpoint.Add(jsonResponse.match.CreateRequestMatcher(), jsonResponse.Validated().CreateResponseCreator(rootDir));
             }
             endpoint.Directory = rootDir;
             return endpoint;

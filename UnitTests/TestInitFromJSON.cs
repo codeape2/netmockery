@@ -17,22 +17,18 @@ namespace UnitTests
     'responses': [
         {
             'match': {'regex': 'test'},
-            'response': {
-                'file': 'content.txt',
-                'contenttype': 'text/plain',
-                'delay': 10
-            }
+            'file': 'content.txt',
+            'contenttype': 'text/plain',
+            'delay': 10
         },
         {
             'match': {},
-            'response': {
-                'script': 'myscript.csscript',
-                'contenttype': 'text/xml',
-                'replacements': [
-                    {'search': 'a', 'replace': 'b'},
-                    {'search': 'foo', 'replace': 'bar'}
-                ]
-            }
+            'script': 'myscript.csscript',
+            'contenttype': 'text/xml',
+            'replacements': [
+                {'search': 'a', 'replace': 'b'},
+                {'search': 'foo', 'replace': 'bar'}
+            ]
         }
     ]
 }
@@ -86,7 +82,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeXPathRequestMatcher()
         {
-            var response = ParseResponse("{'match': {'xpath': 'foo', 'namespaces': [{'prefix': 'foo', 'ns': 'urn:foo'}]}, 'response': {'file': 'foo.txt'}}");
+            var response = ParseResponse("{'match': {'xpath': 'foo', 'namespaces': [{'prefix': 'foo', 'ns': 'urn:foo'}]}, 'file': 'foo.txt'}");
             var xpathMatcher = response.Item1 as XPathMatcher;
             Assert.NotNull(xpathMatcher);
             Assert.Equal("foo", xpathMatcher.XPathExpresssion);
@@ -97,7 +93,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeRegExRequestMatcher()
         {
-            var response = ParseResponse("{'match': {'regex': 'foobar'}, 'response': {'file': 'foo.txt'}}");
+            var response = ParseResponse("{'match': {'regex': 'foobar'}, 'file': 'foo.txt'}");
             var regexMatcher = response.Item1 as RegexMatcher;
             Assert.NotNull(regexMatcher);
             Assert.Equal("foobar", regexMatcher.Expression);
@@ -106,7 +102,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeCompiledCreator()
         {
-            var response = ParseResponse("{'match': {'regex': 'foobar'}, 'response': {'assembly': 'foo.dll', 'class': 'Foo', 'method': 'Bar'}}");
+            var response = ParseResponse("{'match': {'regex': 'foobar'}, 'assembly': 'foo.dll', 'class': 'Foo', 'method': 'Bar'}");
             var responseCreator = response.Item2 as AssemblyResponseCreator;
             Assert.NotNull(responseCreator);
             Assert.Equal("r:\\oot\\directory\\foo.dll", responseCreator.AssemblyFilename);
@@ -117,7 +113,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeForwardCreator()
         {
-            var response = ParseResponse("{'match': {}, 'response': {'forward': 'http://foo.bar'}}");
+            var response = ParseResponse("{'match': {}, 'forward': 'http://foo.bar'}");
             var responseCreator = response.Item2 as ForwardResponseCreator;
             Assert.NotNull(responseCreator);
             Assert.Equal("http://foo.bar", responseCreator.Url);
@@ -128,7 +124,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeForwardCreatorWithProxyAndStripPath()
         {
-            var response = ParseResponse("{'match': {}, 'response': {'forward': 'http://foo.bar', 'proxy': 'http://localhost:1234', 'strippath': 'foo'}}");
+            var response = ParseResponse("{'match': {}, 'forward': 'http://foo.bar', 'proxy': 'http://localhost:1234', 'strippath': 'foo'}");
             var responseCreator = response.Item2 as ForwardResponseCreator;
             Assert.NotNull(responseCreator);
             Assert.Equal("http://foo.bar", responseCreator.Url);
@@ -139,7 +135,7 @@ namespace UnitTests
         [Fact]
         public void DeserializeLiteralResponse()
         {
-            var response = ParseResponse("{'match': {}, 'response': {'literal': 'Hello world', 'contenttype': 'text/plain'}}");
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'contenttype': 'text/plain'}");
             var responseCreator = response.Item2 as LiteralResponse;
             Assert.NotNull(responseCreator);
             Assert.Equal("Hello world", responseCreator.GetBody(null));

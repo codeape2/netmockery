@@ -16,21 +16,17 @@ namespace UnitTests
     'responses': [
         {
             'match': {'regex': 'test'},
-            'response': {
-                'file': 'content.txt',
-                'contenttype': 'text/plain'
-            }
+            'file': 'content.txt',
+            'contenttype': 'text/plain'
         },
         {
             'match': {},
-            'response': {
-                'script': 'myscript.csscript',
-                'contenttype': 'text/xml',
-                'replacements': [
-                    {'search': 'a', 'replace': 'b'},
-                    {'search': 'foo', 'replace': 'bar'}
-                ]
-            }
+            'script': 'myscript.csscript',
+            'contenttype': 'text/xml',
+            'replacements': [
+                {'search': 'a', 'replace': 'b'},
+                {'search': 'foo', 'replace': 'bar'}
+            ]
         }
     ]
 }
@@ -110,7 +106,7 @@ namespace UnitTests
             dc.AddFile("tests\\tests.json", TESTCOMMAND_CONSTANTS.TESTS);
             dc.AddFile("tests\\example.txt", "FOOBARBOOBAR");
             dc.AddFile("tests\\now.txt", "2015-01-01 12:01:31");
-            dc.AddFile("getnow\\endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'response': {'script':'getnow.csscript'}}]}");
+            dc.AddFile("getnow\\endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'script':'getnow.csscript'}]}");
             dc.AddFile("getnow\\getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
         }
 
