@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -33,6 +34,10 @@ namespace netmockery
 
         public static void Main(string[] args)
         {
+            if (IsOutputRedirected)
+            {
+                OutputEncoding = Encoding.UTF8;
+            }
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
             if (args.Length >= 1)
