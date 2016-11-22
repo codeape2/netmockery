@@ -123,7 +123,7 @@ namespace netmockery
 
         public static void Test(string[] commandArgs)
         {
-            if (EndpointTestDefinition.HasTestSuite(EndpointCollection.SourceDirectory))
+            if (TestRunner.HasTestSuite(EndpointCollection.SourceDirectory))
             {
                 var testRunner = new TestRunner(EndpointCollection);
                 var only = getSwitchValue(commandArgs, "--only");
@@ -149,31 +149,6 @@ namespace netmockery
                 Error.WriteLine("ERROR: No test suite found");
             }
         }
-
-        private static NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index, NetmockeryTestCase test)
-        {
-            Write($"{index.ToString().PadLeft(3)} {test.Name.PadRight(60)}");
-            var result = test.ExecuteAsync(EndpointCollection).Result;
-            WriteLine(result.ResultAsString);
-            return result;
-        }
-
-        public static void TestAll(EndpointTestDefinition testDefinitions)
-        {
-            var errors = 0;
-            var index = 0;
-            foreach (var test in testDefinitions.Tests)
-            {
-                var result = ExecuteTestAndOutputResult(index ++, test);
-                if (result.Error)
-                {
-                    errors++;
-                }
-            }
-            WriteLine();
-            WriteLine($"Total: {testDefinitions.Tests.Count()} Errors: {errors}");
-        }
-
 
         public static void RunScript(string[] commandArgs)
         {

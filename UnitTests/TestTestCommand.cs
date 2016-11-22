@@ -91,14 +91,14 @@ namespace UnitTests
         [Fact]
         public void CheckIfTestSuiteExists()
         {
-            Assert.False(EndpointTestDefinition.HasTestSuite(dc.DirectoryName));
+            Assert.False(TestRunner.HasTestSuite(dc.DirectoryName));
         }
 
         [Fact]
         public void WorksIfEndpointNamedTest()
         {
             dc.AddFile("tests\\endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
-            Assert.False(EndpointTestDefinition.HasTestSuite(dc.DirectoryName));
+            Assert.False(TestRunner.HasTestSuite(dc.DirectoryName));
         }
     }
 
@@ -137,16 +137,16 @@ namespace UnitTests
         [Fact]
         public void DetectsTestSuite()
         {
-            Assert.True(EndpointTestDefinition.HasTestSuite(dc.DirectoryName));
+            Assert.True(TestRunner.HasTestSuite(dc.DirectoryName));
 
         }
 
         [Fact]
         public void CanReadTestsFromJSONFile()
         {
-            var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            Assert.Equal(4, endpointTestDefinition.Tests.Count());
-            var test = endpointTestDefinition.Tests.ElementAt(0);
+            var tests = TestRunner.ReadFromDirectory(dc.DirectoryName);
+            Assert.Equal(4, tests.Count());
+            var test = tests.ElementAt(0);
             Assert.Equal("/foo/ request works", test.Name);
             Assert.Equal("/foo/", test.RequestPath);
             Assert.Equal("heisann test", test.RequestBody);
@@ -198,28 +198,31 @@ namespace UnitTests
         [Fact]
         public void RequestBodyCanBeReadFromFile()
         {
-            var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            var test = endpointTestDefinition.Tests.ElementAt(2);
+            var tests = TestRunner.ReadFromDirectory(dc.DirectoryName);
+            var test = tests.ElementAt(2);
             Assert.Equal("FOOBARBOOBAR", test.RequestBody);
         }
 
         [Fact]
         async public void CanExecuteTest()
         {
-            var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            var test = endpointTestDefinition.Tests.ElementAt(0);
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
+            var testRunner = new TestRunner(endpointCollection);
 
-            var result = await test.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName), handleErrors: false);
+            var test = testRunner.Tests.ElementAt(0);
+            var result = await test.ExecuteAsync(endpointCollection, handleErrors: false);
             Assert.True(result.OK);
         }
 
         [Fact]
         async public void CanReadExpectedResponseBodyFromFile()
         {
-            var endpointTestDefinition = EndpointTestDefinition.ReadFromDirectory(dc.DirectoryName);
-            var test = endpointTestDefinition.Tests.ElementAt(2);
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
+            var testRunner = new TestRunner(endpointCollection);
 
-            var result = await test.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName), handleErrors: false);
+            var test = testRunner.Tests.ElementAt(2);
+
+            var result = await test.ExecuteAsync(endpointCollection, handleErrors: false);
             Assert.True(result.OK, result.Message);
         }
 

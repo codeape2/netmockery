@@ -52,12 +52,12 @@ namespace UnitTests
         public void CheckConfigdirectory(string directory)
         {
             Assert.True(Directory.Exists(directory), $"Directory {directory} does not exist");
-            Assert.True(EndpointTestDefinition.HasTestSuite(directory), $"Directory {directory} has not test suite");
+            Assert.True(TestRunner.HasTestSuite(directory), $"Directory {directory} has not test suite");
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(directory);
             Assert.True(endpointCollection.Endpoints.Count() > 0, $"No endpoints defined in {directory}");
 
             output.WriteLine(directory);
-            var tests = EndpointTestDefinition.ReadFromDirectory(directory);
+            var tests = new TestRunner(endpointCollection);
             foreach (var test in tests.Tests)
             {
                 output.WriteLine(test.Name);
