@@ -33,7 +33,34 @@ namespace netmockery
             services.AddMvc();
         }
 
-        public async Task HandleRequest(ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
+        public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
+        {
+            var responseRegistryItem = new ResponseRegistryItem
+            {
+                Timestamp = DateTime.Now,
+                RequestBody = requestBody,
+                RequestPath = context.Request.Path.ToString(),
+                QueryString = context.Request.QueryString.ToString()
+            };
+
+            try
+            {
+                await HandleRequestInner(responseRegistryItem, context, requestBody, requestBodyBytes);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                responseRegistryItem.Error = e.ToString();
+            }
+            finally
+            {
+                responseRegistryItem.WriteToConsole();
+                _responseRegistry.Add(responseRegistryItem);
+            }
+
+        }
+
+        public async Task HandleRequestInner(ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
             var endpoint = Program.EndpointCollection.Resolve(context.Request.Path.ToString());
             responseRegistryItem.Endpoint = endpoint;
@@ -88,29 +115,10 @@ namespace netmockery
                 if (context.Request.Path.ToString() == "/")
                 {
                     context.Response.Redirect("/__netmockery/Home");
-                    return;
                 }
-                var responseRegistryItem = new ResponseRegistryItem
+                else
                 {
-                    Timestamp = DateTime.Now,
-                    RequestBody = requestBody,
-                    RequestPath = context.Request.Path.ToString(),
-                    QueryString = context.Request.QueryString.ToString()
-                };
-
-                try
-                {
-                    await HandleRequest(responseRegistryItem, context, requestBody, requestBodyBytes);
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine(e);
-                    responseRegistryItem.Error = e.ToString();
-                }
-                finally
-                {
-                    responseRegistryItem.WriteToConsole();
-                    _responseRegistry.Add(responseRegistryItem);
+                    await HandleRequest(context, requestBody, requestBodyBytes);
                 }
             });
             
