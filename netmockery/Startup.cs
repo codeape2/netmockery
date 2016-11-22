@@ -15,6 +15,7 @@ namespace netmockery
     public class Startup
     {
         static private ResponseRegistry _responseRegistry;
+        static public bool TestMode { get; set; } = false;
 
 
         static public void ReloadConfig()
@@ -80,7 +81,15 @@ namespace netmockery
                     {
                         await Task.Delay(TimeSpan.FromSeconds(responseCreator.Delay));
                     }
+
+                    if (TestMode)
+                    {
+                        context.Response.Headers["X-Netmockery-RequestMatcher"] = matcher_and_creator.Item1.ToString();
+                        context.Response.Headers["X-Netmockery-ResponseCreator"] = matcher_and_creator.Item2.ToString();
+                    }
+
                     var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint.Directory);
+                    
                     responseRegistryItem.ResponseBody = Encoding.UTF8.GetString(responseBytes);
                 }
                 else

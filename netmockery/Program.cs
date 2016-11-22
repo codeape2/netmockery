@@ -53,7 +53,7 @@ namespace netmockery
                 }
                 else
                 {
-                    Debug.Assert(args.Length > 1);
+                    Debug.Assert(args.Length >= 1);
                     var commandName = args[1];
                     var commandArgs = args.Skip(2).ToArray();
                     switch (commandName)
@@ -81,6 +81,13 @@ namespace netmockery
                         case "service":
                             WriteLine("Running as service");
                             RunAsService();
+                            break;
+
+                        case "servetests":
+                            WriteLine("Serving in test mode");
+                            WriteLine("Admin interface available on /__netmockery");
+                            Startup.TestMode = true;
+                            CreateWebHost(Directory.GetCurrentDirectory()).Run();
                             break;
 
                         default:
@@ -127,6 +134,11 @@ namespace netmockery
             {
                 var testRunner = new ConsoleTestRunner(EndpointCollection);
                 var only = getSwitchValue(commandArgs, "--only");
+                var url = getSwitchValue(commandArgs, "--url");
+                if (url != null)
+                {
+                    testRunner.Url = url;
+                }
                 if (only != null)
                 {
                     var index = int.Parse(only);
