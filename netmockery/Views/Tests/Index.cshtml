@@ -1,0 +1,31 @@
+﻿@using netmockery
+@model TestRunner
+
+@{
+    Layout = "Base";
+    var i = 0;
+}
+
+@Html.ActionLink("Run all tests", "RunAll")
+
+@foreach (var t in Model.Tests)
+{
+    <h3>@t.Name</h3>
+    <p>
+        <ul>
+            <li>Path: <code>@t.RequestPath</code></li>
+            @if (t.QueryString != null)
+            {
+                <li>Query string: @t.QueryString</li>
+            }
+            
+            @if (! string.IsNullOrEmpty(t.RequestBody))
+            {
+                <li>Request body:<br><pre>@t.RequestBody</pre></li>
+            }
+            <li><a target="_blank" href="@Url.Action("Run", new { index = i })">Run</a></li>
+            <li><a target="_blank" href="@Url.Action("ViewResponse", new { index = i++ })">View response</a></li>
+        </ul>
+    </p>
+
+}

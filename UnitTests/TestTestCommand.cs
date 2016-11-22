@@ -129,7 +129,7 @@ namespace UnitTests
         [Fact]
         public void RunTestsWithReplacement()
         {
-            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             var result = testRunner.ExecuteTestAndOutputResult(1);
             Assert.True(result.OK, result.ResultAsString);
         }
@@ -172,7 +172,7 @@ namespace UnitTests
         [Fact]
         public void TestsHaveConstantGetNow()
         {
-            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             var result = testRunner.ExecuteTestAndOutputResult(3);
             Assert.True(result.OK, result.ResultAsString);
         }
@@ -181,7 +181,7 @@ namespace UnitTests
         public void TestsCanHaveDynamicNow()
         {
             dc.DeleteFile("tests\\now.txt");
-            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             var result = testRunner.ExecuteTestAndOutputResult(3);
             Assert.True(result.Error, result.ResultAsString);
             Assert.Null(result.Exception);
@@ -207,7 +207,7 @@ namespace UnitTests
         async public void CanExecuteTest()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
-            var testRunner = new TestRunner(endpointCollection);
+            var testRunner = new ConsoleTestRunner(endpointCollection);
 
             var test = testRunner.Tests.ElementAt(0);
             var result = await test.ExecuteAsync(endpointCollection, handleErrors: false);
@@ -218,7 +218,7 @@ namespace UnitTests
         async public void CanReadExpectedResponseBodyFromFile()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
-            var testRunner = new TestRunner(endpointCollection);
+            var testRunner = new ConsoleTestRunner(endpointCollection);
 
             var test = testRunner.Tests.ElementAt(2);
 

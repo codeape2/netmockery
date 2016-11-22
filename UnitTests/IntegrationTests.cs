@@ -57,7 +57,7 @@ namespace UnitTests
             Assert.True(endpointCollection.Endpoints.Count() > 0, $"No endpoints defined in {directory}");
 
             output.WriteLine(directory);
-            var tests = new TestRunner(endpointCollection);
+            var tests = new ConsoleTestRunner(endpointCollection);
             foreach (var test in tests.Tests)
             {
                 output.WriteLine(test.Name);
@@ -69,7 +69,7 @@ namespace UnitTests
 
         public void CheckOutput(string directory, int index)
         {
-            var testRunner = new TestRunner(EndpointCollectionReader.ReadFromDirectory(directory));
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(directory));
             testRunner.ShowResponse(index);
         }
     }

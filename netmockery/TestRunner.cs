@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using static System.Console;
+
 
 namespace netmockery
 {
-    public class TestRunner
+    public abstract class TestRunner
     {
         private IEnumerable<NetmockeryTestCase> testcases;
         private EndpointCollection endpointCollection;
@@ -61,8 +60,7 @@ namespace netmockery
                     errors++;
                 }
             }
-            WriteLine();
-            WriteLine($"Total: {testcases.Count()} Errors: {errors}");
+            WriteSummary(errors);
         }
 
         public NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index)
@@ -72,9 +70,11 @@ namespace netmockery
 
         public NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index, NetmockeryTestCase test)
         {
-            Write($"{index.ToString().PadLeft(3)} {test.Name.PadRight(60)}");
+            WriteBeginTest(index, test);
+            
             var result = test.ExecuteAsync(endpointCollection).Result;
-            WriteLine(result.ResultAsString);
+            WriteResult(result);
+
             return result;
         }
 
@@ -84,20 +84,59 @@ namespace netmockery
             var response = testCase.GetResponseAsync(endpointCollection).Result;
             if (response.Item2 != null)
             {
-                Error.WriteLine($"ERROR: {response.Item2}");
+                WriteError(response.Item2);
             }
             else
             {
-                if (IsOutputRedirected)
-                {
-                    Write(response.Item1);
-                }
-                else
-                {
-                    WriteLine(response.Item1);
-                }                
+                WriteResponse(response.Item1);
             }
         }
 
+        public abstract void WriteBeginTest(int index, NetmockeryTestCase testcase);
+        public abstract void WriteResult(NetmockeryTestCaseResult result);
+        public abstract void WriteResponse(string response);
+        public abstract void WriteSummary(int errors);
+        public abstract void WriteError(string s);
+    }
+
+    public class ConsoleTestRunner : TestRunner
+    {
+        public ConsoleTestRunner(EndpointCollection endpointCollection) : base(endpointCollection)
+        {
+        }
+
+        public override void WriteBeginTest(int index, NetmockeryTestCase testcase)
+        {
+            Console.Write($"{index.ToString().PadLeft(3)} {testcase.Name.PadRight(60)}");
+        }
+
+        public override void WriteError(string s)
+        {
+            Console.Error.WriteLine($"ERROR: {s}");
+        }
+
+        public override void WriteResponse(string response)
+        {
+            if (Console.IsOutputRedirected)
+            {
+                Console.Write(response);
+            }
+            else
+            {
+                Console.WriteLine(response);
+            }
+
+        }
+
+        public override void WriteResult(NetmockeryTestCaseResult result)
+        {
+            Console.WriteLine(result.ResultAsString);
+        }
+
+        public override void WriteSummary(int errors)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"Total: {Tests.Count()} Errors: {errors}");
+        }
     }
 }

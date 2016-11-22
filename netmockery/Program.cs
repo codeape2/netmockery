@@ -125,7 +125,7 @@ namespace netmockery
         {
             if (TestRunner.HasTestSuite(EndpointCollection.SourceDirectory))
             {
-                var testRunner = new TestRunner(EndpointCollection);
+                var testRunner = new ConsoleTestRunner(EndpointCollection);
                 var only = getSwitchValue(commandArgs, "--only");
                 if (only != null)
                 {
