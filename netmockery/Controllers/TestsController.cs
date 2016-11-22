@@ -47,11 +47,17 @@ namespace netmockery.Controllers
     public class TestsController : Controller
     {
         private EndpointCollection endpoints;
+        private WebTestRunner testRunner;
 
         public TestsController(EndpointCollection endpoints)
         {
             this.endpoints = endpoints;
+            if (TestRunner.HasTestSuite(endpoints.SourceDirectory))
+            {
+                testRunner = new WebTestRunner(endpoints);
+            }            
         }
+
         public ActionResult Index()
         {            
             return View(new WebTestRunner(endpoints));
@@ -59,28 +65,31 @@ namespace netmockery.Controllers
 
         public ActionResult RunAll()
         {
-            var testRunner = new WebTestRunner(endpoints);
             testRunner.TestAll();
             return Content(testRunner.ToString());
         }
 
         public ActionResult Run(int index)
         {
-            var testRunner = new WebTestRunner(endpoints);
             testRunner.ExecuteTestAndOutputResult(index);
             return Content(testRunner.ToString());
         }
 
         public ActionResult ViewResponse(int index)
         {
-            var testRunner = new WebTestRunner(endpoints);
             testRunner.ShowResponse(index);
             return Content(testRunner.ToString());
         }
 
+        public ActionResult ExpectedResponseBody(int index)
+        {
+            var test = testRunner.Tests.ElementAt(index);
+            return Content(test.ExpectedResponseBody);
+        }
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (! TestRunner.HasTestSuite(endpoints.SourceDirectory))
+            if (testRunner == null)
             {
                 context.Result = View("NoTests", null);
             }

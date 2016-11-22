@@ -16,12 +16,24 @@
             <li>Path: <code>@t.RequestPath</code></li>
             @if (t.QueryString != null)
             {
-                <li>Query string: @t.QueryString</li>
+                <li>Query string: <code>@t.QueryString</code></li>
             }
             
             @if (! string.IsNullOrEmpty(t.RequestBody))
             {
                 <li>Request body:<br><pre>@t.RequestBody</pre></li>
+            }
+            @if (t.ExpectedRequestMatcher != null)
+            {
+                <li>Expected request matcher: @t.ExpectedRequestMatcher</li>
+            }
+            @if (t.ExpectedResponseCreator != null)
+            {
+                <li>Expected response creator: @t.ExpectedResponseCreator</li>
+            }
+            @if (t.ExpectedResponseBody != null)
+            {
+                <li>Has <a href="@Url.Action("ExpectedResponseBody", new { index = i })">expected response body</a></li>
             }
             <li><a target="_blank" href="@Url.Action("Run", new { index = i })">Run</a></li>
             <li><a target="_blank" href="@Url.Action("ViewResponse", new { index = i++ })">View response</a></li>
