@@ -43,8 +43,9 @@ namespace netmockery
     public class ResponseRegistry
     {
         private int _nextId;
-        private List<ResponseRegistryItem> _items = new List<ResponseRegistryItem>();
-        private List<FailedRequestItem> _failedRequests = new List<FailedRequestItem>();
+        private Queue<ResponseRegistryItem> _items = new Queue<ResponseRegistryItem>();
+
+        public int Capacity { get; set; } = 1000;
 
         public IEnumerable<ResponseRegistryItem> ForEndpoint(string endpointName)
         {
@@ -63,7 +64,11 @@ namespace netmockery
         {
             Debug.Assert(responseRegistryItem.Id == 0);
             responseRegistryItem.Id = ++_nextId;
-            _items.Add(responseRegistryItem);
+            if (_items.Count >= Capacity)
+            {
+                _items.Dequeue();
+            }
+            _items.Enqueue(responseRegistryItem);
         }
     }
 }
