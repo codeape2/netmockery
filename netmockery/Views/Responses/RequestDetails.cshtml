@@ -1,0 +1,23 @@
+﻿@using netmockery
+@model ResponseRegistryItem
+
+@{
+    Layout = "Base";
+}
+
+<h2>Request details</h2>
+
+<ul>
+    <li>Timestamp: <code>@Model.Timestamp.ToString("HH:mm:ss.fff")</code></li>
+    <li>Path: <code>@Model.RequestPath</code></li>
+    @if (! string.IsNullOrEmpty(Model.QueryString))
+    {
+        <li>Query string: <code>@Model.QueryString</code></li>
+    }
+    
+    @if (!string.IsNullOrEmpty(Model.RequestBody))
+    {
+        <li><a href="@Url.Action("RequestBody", new { responseId = Model.Id })">Request body</a>:<br><pre>@Model.RequestBody</pre></li>
+    }
+    
+</ul>

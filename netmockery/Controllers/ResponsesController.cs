@@ -37,6 +37,11 @@ namespace netmockery.Controllers
 
         public ActionResult RequestDetails(int responseId)
         {
+            return View(_responseRegistry.Get(responseId));
+        }
+
+        public ActionResult RequestBody(int responseId)
+        {
             return Content(_responseRegistry.Get(responseId).RequestBody);
         }
 
