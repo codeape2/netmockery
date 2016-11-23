@@ -28,6 +28,7 @@ namespace netmockery
         {
             ReloadConfig();
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient(typeof(EndpointCollection), serviceProvider => Program.EndpointCollection);
             services.AddTransient(typeof(ResponseRegistry), serviceProvider => _responseRegistry);
 

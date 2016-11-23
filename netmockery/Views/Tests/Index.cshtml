@@ -6,6 +6,19 @@
     var i = 0;
 }
 
+<p>
+    Test mode:
+    @if (Context.Request.Cookies.ContainsKey("testurl"))
+    {
+        <text>Execute over network</text>
+    }
+    else
+    {
+        <text>Internal</text>
+    }
+    @Html.ActionLink("Toggle test mode", "ToggleMode")
+</p>
+
 @Html.ActionLink("Run all tests", "RunAll")
 
 @foreach (var t in Model.Tests)
