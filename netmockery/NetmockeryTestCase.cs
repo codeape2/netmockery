@@ -117,6 +117,10 @@ namespace netmockery
             var retval = new NetmockeryTestCaseResult { TestCase = this };
             var client = new HttpClient();
             var requestUrl = url + RequestPath;
+            if (QueryString != null)
+            {
+                requestUrl += QueryString;
+            }
             HttpResponseMessage responseMessage;
             if (RequestBody != null)
             {
