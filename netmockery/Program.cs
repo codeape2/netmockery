@@ -32,12 +32,16 @@ namespace netmockery
                 .Build();
         }
 
-        public static void Main(string[] args)
+        private static void SetUtf8OutputEncodingIfOutputIsRedirected()
         {
             if (IsOutputRedirected)
             {
                 OutputEncoding = Encoding.UTF8;
             }
+        }
+
+        public static void Main(string[] args)
+        {
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
             if (args.Length >= 1)
@@ -55,6 +59,12 @@ namespace netmockery
                 {
                     Debug.Assert(args.Length > 1);
                     var commandName = args[1];
+
+                    if (commandName != "service")
+                    {
+                        SetUtf8OutputEncodingIfOutputIsRedirected();
+                    }
+
                     var commandArgs = args.Skip(2).ToArray();
                     switch (commandName)
                     {
