@@ -17,6 +17,11 @@ namespace netmockery
         private static string _configdirectory;
         public static EndpointCollection EndpointCollection { get; set; }
 
+        public static void UnitTest_SetConfigDirectory(string configDirectory)
+        {
+            _configdirectory = configDirectory;
+        }
+
         public static void ReloadConfig()
         {
             EndpointCollection = EndpointCollectionReader.ReadFromDirectory(_configdirectory);

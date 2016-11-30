@@ -112,11 +112,9 @@ namespace netmockery
             return true;
         }
 
-        async public Task<NetmockeryTestCaseResult> ExecuteAgainstUrlAsync(string url)
+        async public Task<NetmockeryTestCaseResult> ExecuteAgainstHttpClientAsync(HttpClient client, string requestUrl)
         {
             var retval = new NetmockeryTestCaseResult { TestCase = this };
-            var client = new HttpClient();
-            var requestUrl = url + RequestPath;
             if (QueryString != null)
             {
                 requestUrl += QueryString;
@@ -152,6 +150,12 @@ namespace netmockery
                 retval.SetFailure(message);
             }
             return retval;
+
+        }
+
+        async public Task<NetmockeryTestCaseResult> ExecuteAgainstUrlAsync(string url)
+        {
+            return await ExecuteAgainstHttpClientAsync(new HttpClient(), url + RequestPath);
         }
 
         private const string ERROR_NOMATCHING_ENDPOINT = "No endpoint matches request path";

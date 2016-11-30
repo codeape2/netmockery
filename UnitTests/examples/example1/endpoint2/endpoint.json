@@ -1,0 +1,14 @@
+{
+  "name": "Another simple endpoint",
+  "pathregex": "^/endpoint2",
+
+  "responses": [
+    {
+      "match": { "regex": "goodbye"},
+
+      "literal": "Goodbye world",
+      "contenttype": "text/plain"
+    }
+  ]
+
+}

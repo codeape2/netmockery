@@ -17,6 +17,8 @@ namespace netmockery
         static private ResponseRegistry _responseRegistry;
         static public bool TestMode { get; set; } = false;
 
+        static public ResponseRegistry ResponseRegistry => _responseRegistry;
+
 
         static public void ReloadConfig()
         {
