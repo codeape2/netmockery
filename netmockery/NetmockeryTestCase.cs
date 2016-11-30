@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net.Http;
 
 namespace netmockery
 {
@@ -109,6 +110,48 @@ namespace netmockery
 
             Debug.Assert(message == null);
             return true;
+        }
+
+        async public Task<NetmockeryTestCaseResult> ExecuteAgainstUrlAsync(string url)
+        {
+            var retval = new NetmockeryTestCaseResult { TestCase = this };
+            var client = new HttpClient();
+            var requestUrl = url + RequestPath;
+            if (QueryString != null)
+            {
+                requestUrl += QueryString;
+            }
+            HttpResponseMessage responseMessage;
+            if (RequestBody != null)
+            {
+                responseMessage = await client.PostAsync(requestUrl, new ByteArrayContent(Encoding.UTF8.GetBytes(RequestBody)));
+            }
+            else
+            {
+                responseMessage = await client.GetAsync(requestUrl);
+            }
+            var body = await responseMessage.Content.ReadAsStringAsync();
+
+            string message;
+            var requestMatcher = "";
+            if (responseMessage.Headers.Contains("X-Netmockery-RequestMatcher"))
+            {
+                requestMatcher = responseMessage.Headers.GetValues("X-Netmockery-RequestMatcher").ElementAt(0);
+            }
+            var responseCreator = "";
+            if (responseMessage.Headers.Contains("X-Netmockery-ResponseCreator"))
+            {
+                responseCreator = responseMessage.Headers.GetValues("X-Netmockery-ResponseCreator").ElementAt(0);
+            }
+            if (Evaluate(requestMatcher, responseCreator, body, out message))
+            {
+                retval.SetSuccess();
+            }
+            else
+            {
+                retval.SetFailure(message);
+            }
+            return retval;
         }
 
         private const string ERROR_NOMATCHING_ENDPOINT = "No endpoint matches request path";

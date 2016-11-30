@@ -48,19 +48,48 @@ namespace netmockery.Controllers
     {
         private EndpointCollection endpoints;
         private WebTestRunner testRunner;
+        private HttpContext httpContext;
 
-        public TestsController(EndpointCollection endpoints)
+        public TestsController(EndpointCollection endpoints, IHttpContextAccessor contextAccessor)
         {
             this.endpoints = endpoints;
+
+            // contextAccessor is injected so that Request is available inside constructor (via TestAgainstUrl property)
+            httpContext = contextAccessor.HttpContext;
+
+
             if (TestRunner.HasTestSuite(endpoints.SourceDirectory))
             {
                 testRunner = new WebTestRunner(endpoints);
+                if (TestAgainstUrl)
+                {
+                    testRunner.Url = "http://localhost:5000";
+                }
             }            
         }
 
         public ActionResult Index()
         {            
-            return View(new WebTestRunner(endpoints));
+            return View(testRunner);
+        }
+
+        const string TESTURLCOOKIE = "testurl";
+
+        /* See comment in constructor as to why injected HttpContext is used */
+        private bool TestAgainstUrl => httpContext.Request.Cookies.ContainsKey(TESTURLCOOKIE);
+                
+
+        public ActionResult ToggleMode()
+        {
+            if (TestAgainstUrl)
+            {
+                Response.Cookies.Delete(TESTURLCOOKIE);
+            }
+            else
+            {
+                Response.Cookies.Append(TESTURLCOOKIE, "yes");
+            }
+            return RedirectToAction("Index");
         }
 
         public ActionResult RunAll()

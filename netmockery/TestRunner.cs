@@ -13,6 +13,8 @@ namespace netmockery
         private IEnumerable<NetmockeryTestCase> testcases;
         private EndpointCollection endpointCollection;
 
+        public string Url { get; set; }
+
         public TestRunner(EndpointCollection endpointCollection)
         {
             this.endpointCollection = endpointCollection;
@@ -72,7 +74,7 @@ namespace netmockery
         {
             WriteBeginTest(index, test);
             
-            var result = test.ExecuteAsync(endpointCollection).Result;
+            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.ExecuteAsync(endpointCollection).Result;
             WriteResult(result);
 
             return result;

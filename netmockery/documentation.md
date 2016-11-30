@@ -185,6 +185,8 @@ Specifying the expectations:
 
 ## Running tests
 
+TODO: Document test modes (network and internal).
+
 Command line:
 
 	# run all tests
