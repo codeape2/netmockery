@@ -69,18 +69,25 @@ namespace netmockery.Controllers
         }
 
         public ActionResult Index()
-        {            
+        {
+            ViewData["TestAgainstUrl"] = TestAgainstUrl;
+            ViewData["CanSwitchMode"] = Startup.TestMode == true;
             return View(testRunner);
         }
 
         const string TESTURLCOOKIE = "testurl";
 
         /* See comment in constructor as to why injected HttpContext is used */
-        private bool TestAgainstUrl => httpContext.Request.Cookies.ContainsKey(TESTURLCOOKIE);
+        private bool TestAgainstUrl => Startup.TestMode == true && httpContext.Request.Cookies.ContainsKey(TESTURLCOOKIE);
                 
 
         public ActionResult ToggleMode()
         {
+            if (! Startup.TestMode)
+            {
+                return NotFound();
+            }
+
             if (TestAgainstUrl)
             {
                 Response.Cookies.Delete(TESTURLCOOKIE);
@@ -90,6 +97,11 @@ namespace netmockery.Controllers
                 Response.Cookies.Append(TESTURLCOOKIE, "yes");
             }
             return RedirectToAction("Index");
+        }
+
+        public ActionResult TestMode()
+        {
+            return Json(Startup.TestMode);
         }
 
         public ActionResult RunAll()

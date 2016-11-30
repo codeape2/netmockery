@@ -4,11 +4,14 @@
 @{
     Layout = "Base";
     var i = 0;
+
+    var CanSwitchMode = (bool)ViewData["CanSwitchMode"];
+    var TestAgainstUrl = (bool)ViewData["TestAgainstUrl"];
 }
 
 <p>
     Test mode:
-    @if (Context.Request.Cookies.ContainsKey("testurl"))
+    @if (TestAgainstUrl)
     {
         <text>Network</text>
     }
@@ -16,7 +19,11 @@
     {
         <text>Internal</text>
     }
-    @Html.ActionLink("Toggle test mode", "ToggleMode")
+
+    @if (CanSwitchMode)
+    {
+        @Html.ActionLink("Toggle test mode", "ToggleMode")
+    }    
 </p>
 
 @Html.ActionLink("Run all tests", "RunAll")

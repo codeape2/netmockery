@@ -22,11 +22,18 @@ namespace netmockery
             EndpointCollection = EndpointCollectionReader.ReadFromDirectory(_configdirectory);
         }
 
-        private static IWebHost CreateWebHost(string contentRoot)
+        private static IWebHost CreateWebHost(string contentRoot, string url = null)
         {
-            return new WebHostBuilder()
+            var webhostbuilder = new WebHostBuilder()
                 .UseKestrel()
-                .UseContentRoot(contentRoot)
+                .UseContentRoot(contentRoot);
+
+            if (url != null)
+            {
+                webhostbuilder = webhostbuilder.UseUrls(url);
+            }
+
+            return webhostbuilder
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
@@ -44,115 +51,69 @@ namespace netmockery
         {
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
-            if (args.Length >= 1)
-            {
-                Debug.Assert(Directory.Exists(args[0]));
-                _configdirectory = args[0];
-                ReloadConfig();
 
-                if (args.Length == 1)
-                {
+            ParsedCommandLine parsedArguments;
+            try
+            {
+                parsedArguments = CommandLineParser.ParseArguments(args);
+            }
+            catch (CommandLineParsingException clpe)
+            {
+                Error.WriteLine($"ERROR: {clpe.Message}");
+                return;
+            }            
+
+            Debug.Assert(Directory.Exists(parsedArguments.EndpointCollectionDirectory));
+            _configdirectory = parsedArguments.EndpointCollectionDirectory;
+            ReloadConfig();
+
+            if (parsedArguments.Command != CommandLineParser.COMMAND_SERVICE)
+            {
+                SetUtf8OutputEncodingIfOutputIsRedirected();
+            }
+
+            switch (parsedArguments.Command)
+            {
+                case CommandLineParser.COMMAND_NORMAL:
                     WriteLine("Admin interface available on /__netmockery");
-                    CreateWebHost(Directory.GetCurrentDirectory()).Run();
-                }
-                else
-                {
-                    Debug.Assert(args.Length >= 1);
-                    var commandName = args[1];
+                    Startup.TestMode = parsedArguments.TestMode;
+                    CreateWebHost(Directory.GetCurrentDirectory(), parsedArguments.Url).Run();
+                    break;
 
-                    if (commandName != "service")
-                    {
-                        SetUtf8OutputEncodingIfOutputIsRedirected();
-                    }
+                case CommandLineParser.COMMAND_SERVICE:
+                    RunAsService(parsedArguments);
+                    break;
 
-                    var commandArgs = args.Skip(2).ToArray();
-                    switch (commandName)
-                    {
-                        case "match":
-                            Match(commandArgs);
-                            break;
+                case CommandLineParser.COMMAND_TEST:
+                    Test(parsedArguments);
+                    break;
 
-                        case "dump":
-                            Dump(commandArgs);
-                            break;
+                case CommandLineParser.COMMAND_DUMP:
+                    Dump();
+                    break;
 
-                        case "runscript":
-                            RunScript(commandArgs);
-                            break;
-
-                        case "viewscript":
-                            ViewScript(commandArgs);
-                            break;
-
-                        case "test":
-                            Test(commandArgs);
-                            break;
-
-                        case "service":
-                            WriteLine("Running as service");
-                            RunAsService();
-                            break;
-
-                        case "servetests":
-                            WriteLine("Serving in test mode");
-                            WriteLine("Admin interface available on /__netmockery");
-                            Startup.TestMode = true;
-                            CreateWebHost(Directory.GetCurrentDirectory()).Run();
-                            break;
-
-                        default:
-                            Error.WriteLine($"Unknown command {commandName}");
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                Error.WriteLine("Configuration directory not specified");
-            }
+              }
         }
 
-        static public void RunAsService()
+        static public void RunAsService(ParsedCommandLine commandArgs)
         {
-            CreateWebHost(AppDomain.CurrentDomain.BaseDirectory).RunAsService();
-        }
-
-        static private string getSwitchValue(string[] commandArgs, string switchName)
-        {
-            var index = Array.FindIndex(commandArgs, v => v == switchName);
-            if (index == -1)
-            {
-                return null;
-            }
-            else
-            {
-                return commandArgs[index + 1];
-            }
-        }
-
-        static private bool containsSwitch(string[] commandArgs, string switchName)
-        {
-            Debug.Assert(commandArgs != null);
-            Debug.Assert(switchName != null);
-            return commandArgs.Contains(switchName);
+            CreateWebHost(AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
         }
 
 
-        public static void Test(string[] commandArgs)
+        public static void Test(ParsedCommandLine commandArgs)
         {
             if (TestRunner.HasTestSuite(EndpointCollection.SourceDirectory))
             {
                 var testRunner = new ConsoleTestRunner(EndpointCollection);
-                var only = getSwitchValue(commandArgs, "--only");
-                var url = getSwitchValue(commandArgs, "--url");
-                if (url != null)
+                if (commandArgs.Url != null)
                 {
-                    testRunner.Url = url;
+                    testRunner.Url = commandArgs.Url;
                 }
-                if (only != null)
+                if (commandArgs.Only != null)
                 {
-                    var index = int.Parse(only);
-                    if (containsSwitch(commandArgs, "--showResponse"))
+                    var index = int.Parse(commandArgs.Only);
+                    if (commandArgs.ShowResponse)
                     {
                         testRunner.ShowResponse(index);
                     }
@@ -172,17 +133,6 @@ namespace netmockery
             }
         }
 
-        public static void RunScript(string[] commandArgs)
-        {
-            var scriptfile = commandArgs[0];
-
-            var responseCreator = new FileDynamicResponseCreator(scriptfile);
-            var body = responseCreator.GetBody(new RequestInfo {
-                RequestBody = commandArgs.Length == 2 ? File.ReadAllText(commandArgs[1]) : "",
-                EndpointDirectory = Path.GetDirectoryName(scriptfile)
-            });
-            Console.WriteLine(body);
-        }
 
         public static void ViewScript(string[] commandArgs)
         {
@@ -190,31 +140,9 @@ namespace netmockery
             Console.WriteLine(DynamicResponseCreatorBase.ExecuteIncludes(File.ReadAllText(scriptfile), Path.GetDirectoryName(scriptfile)));
         }
 
-        public static void Match(string[] args)
-        {
-            var path = args[0];
-            var body = File.ReadAllText(args[1]);
-            
-            var endpoint = EndpointCollection.Resolve(path);
-            if (endpoint == null)
-            {
-                WriteLine("No endpoint match");
-                return;
-            }
-            WriteLine($"Endpoint: {endpoint.Name}");
-            bool singleMatch;
-            var responseMatch = endpoint.Resolve(new Microsoft.AspNetCore.Http.PathString(path), new Microsoft.AspNetCore.Http.QueryString(), body, null, out singleMatch);
-            if (responseMatch == null)
-            {
-                WriteLine("No match");
-                return;
-            }
-            WriteLine(responseMatch);
-        }
 
-        public static void Dump(string[] args)
+        public static void Dump()
         {
-            Debug.Assert(args.Length == 0);
             foreach (var endpoint in EndpointCollection.Endpoints)
             {
                 WriteLine($"{endpoint.Name} {endpoint.PathRegex}");
