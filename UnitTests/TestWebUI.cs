@@ -44,11 +44,14 @@ namespace UnitTests
             Assert.Equal("/__netmockery", response.Headers.Location.ToString());
         }
 
+        const int EXPECTED_NUMBER_OF_URLS = 16;
+        const int EXPECTED_EXTRA_URLS_PER_REQUEST = 2;
+
         [Fact]
         public async Task CheckAllUrlsNoRequestsMade()
         {
             var urls = await visitAllUrls("/__netmockery");
-            Assert.Equal(15, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS, urls.Count);
         }
 
         [Fact]
@@ -64,7 +67,7 @@ namespace UnitTests
             }
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
-            Assert.Equal(17, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS + testRunner.Tests.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
             Assert.Equal(testRunner.Tests.Count(), Startup.ResponseRegistry.Responses.Count());
         }
 
@@ -82,7 +85,7 @@ namespace UnitTests
             Assert.Equal("No endpoint matches request path", registryItem.Error);
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
-            Assert.Equal(17, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS + Startup.ResponseRegistry.Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
         }
 
         [Fact]
@@ -100,7 +103,7 @@ namespace UnitTests
             Assert.Equal("Endpoint has no match for request", registryItem.Error);
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
-            Assert.Equal(17, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS + Startup.ResponseRegistry.Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
 
         }
 

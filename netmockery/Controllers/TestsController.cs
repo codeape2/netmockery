@@ -106,9 +106,16 @@ namespace netmockery.Controllers
 
         public ActionResult RunAll()
         {
-            testRunner.TestAll();
+            testRunner.TestAll(false);
             return Content(testRunner.ToString());
         }
+
+        public ActionResult RunAllStopOnFirstError()
+        {
+            testRunner.TestAll(true);
+            return Content(testRunner.ToString());
+        }
+
 
         public ActionResult Run(int index)
         {
