@@ -22,10 +22,18 @@ namespace netmockery
         static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY };
         static private string[] BOOL_SWITCHES = new[] { BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_NOTESTMODE };
 
+        static private Dictionary<int, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<int, string[]> {
+            { COMMAND_NORMAL, new[] { VALUE_SWITCH_URL, BOOL_SWITCH_NOTESTMODE } },
+            { COMMAND_SERVICE, new[] { VALUE_SWITCH_URL } },
+            { COMMAND_TEST, new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY, BOOL_SWITCH_NOTESTMODE, BOOL_SWITCH_SHOWRESPONSE} },
+            { COMMAND_DUMP, new string[0] }
+        };
+
 
         static public ParsedCommandLine ParseArguments(string[] args)
         {
             var positionalArgs = new List<string>();
+            var seenSwitches = new List<string>();
             var switchValues = new Dictionary<string, string>();
             var boolValues = new Dictionary<string, bool>();
 
@@ -56,10 +64,12 @@ namespace netmockery
                             throw new CommandLineParsingException($"Argument --only: integer required");
                         }
                     }
+                    seenSwitches.Add(arg);
                 }
                 else if (BOOL_SWITCHES.Contains(arg))
                 {
                     boolValues[arg] = true;
+                    seenSwitches.Add(arg);
                 }
                 else if (arg.StartsWith("--"))
                 {
@@ -105,6 +115,22 @@ namespace netmockery
                         throw new CommandLineParsingException($"Unknown command '{positionalArgs.ElementAt(1)}'");
                 }
             }
+
+            // validation
+            var validSwitchesForCommand = VALID_SWITHCES_BY_COMMAND[command];
+            foreach (var seenSwitch in seenSwitches)
+            {
+                if (! validSwitchesForCommand.Contains(seenSwitch))
+                {
+                    var message = $"'{seenSwitch}' is not a valid argument";
+                    if (command != COMMAND_NORMAL)
+                    {
+                        message += $" for the '{positionalArgs.ElementAt(1)}' command";
+                    }
+                    throw new CommandLineParsingException(message);
+                }
+            }
+
             return new ParsedCommandLine
             {
                 Command = command,

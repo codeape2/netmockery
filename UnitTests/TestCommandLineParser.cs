@@ -124,6 +124,25 @@ namespace UnitTests
             Assert.Equal("c:\\foo\\bar", result.EndpointCollectionDirectory);
         }
 
+        [Fact]
+        public void InvalidArgumentsForDumpCommand()
+        {
+            AssertGivesException("'--only' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--only", "2" });
+            AssertGivesException("'--url' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--url", "http://localhost:5000/" });
+        }
+
+        [Fact]
+        public void InvalidArgumentsForNormalCommand()
+        {
+            AssertGivesException("'--only' is not a valid argument", new[] { "c:\\foo\\bar", "--only", "2" });
+        }
+
+        [Fact]
+        public void InvalidArgumentsForServiceCommand()
+        {
+            AssertGivesException("'--only' is not a valid argument for the 'service' command", new[] { "c:\\foo\\bar", "service", "--only", "2" });
+        }
+
         public void AssertGivesException(string expectedMessage, string[] args)
         {
             var tx = Assert.Throws<CommandLineParsingException>(() => ParseArguments(args));
