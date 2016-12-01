@@ -108,6 +108,17 @@ namespace UnitTests
             Assert.Equal(COMMAND_TEST, result.Command);
             Assert.Equal("1", result.Only);
             Assert.True(result.ShowResponse);
+            Assert.False(result.Stop);
+        }
+
+        [Fact]
+        public void TestWithStopOption()
+        {
+            var result = ParseArguments(new[] { "c:\\dir\\foo", "test", "--stop" });
+            Assert.Equal(COMMAND_TEST, result.Command);
+            Assert.Equal(null, result.Only);
+            Assert.False(result.ShowResponse);
+            Assert.True(result.Stop);
         }
 
         [Fact]

@@ -129,7 +129,7 @@ namespace netmockery
                 }
                 else
                 {
-                    testRunner.TestAll();
+                    testRunner.TestAll(commandArgs.Stop);
                 }                
             }
             else

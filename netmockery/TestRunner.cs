@@ -49,8 +49,8 @@ namespace netmockery
             return from jsontest in jsonTests select jsontest.Validated().CreateTestCase(tests_directory(directory));
         }
 
-
-        public void TestAll()
+        
+        public void TestAll(bool stopAfterFirstFailure)
         {
             var errors = 0;
             var index = 0;
@@ -60,6 +60,11 @@ namespace netmockery
                 if (result.Error)
                 {
                     errors++;
+                }
+
+                if (result.Error && stopAfterFirstFailure)
+                {
+                    break;
                 }
             }
             WriteSummary(errors);
