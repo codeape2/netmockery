@@ -15,7 +15,6 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
-        //private Script<string> _script;
         private string _sourceAtCompilationTime;
         private Assembly _compiledAssembly;
         private Type _compiledType;
