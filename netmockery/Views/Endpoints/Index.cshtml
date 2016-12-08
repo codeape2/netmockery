@@ -12,6 +12,7 @@
 </p>
 <p>
     @Html.ActionLink("Reload Configuration", "ReloadConfig", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+    @Html.ActionLink("View reload history", "ReloadHistory")
 </p>
 
 <h2>Endpoints</h2>
@@ -21,7 +22,7 @@
             <th>Name</th>
             <th>Path regex</th>
             <th>#Request matchers</th>
-            <th>#Requests handled since startup</th>
+            <th>#Requests handled</th>
         </tr>
     </thead>
     <tbody>

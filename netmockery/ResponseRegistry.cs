@@ -57,6 +57,11 @@ namespace netmockery
             return _items.Where(item => item.Id == id).Single();
         }
 
+        public void Clear()
+        {
+            _items.Clear();
+        }
+
         public IEnumerable<ResponseRegistryItem> Responses => _items.Reverse<ResponseRegistryItem>();
 
         [MethodImpl(MethodImplOptions.Synchronized)]

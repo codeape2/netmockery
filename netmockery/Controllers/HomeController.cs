@@ -11,16 +11,16 @@ namespace netmockery.Controllers
 {
     public class HomeController : Controller
     {
-        private string _directory;
+        private EndpointCollection _endpointCollection;
 
         public HomeController(EndpointCollection endpointCollection)
         {
-            _directory = endpointCollection.SourceDirectory;
+            _endpointCollection = endpointCollection;
         }
 
         public ActionResult Index()
         {
-            var indexFile = IO.Path.Combine(Program.EndpointCollection.SourceDirectory, "index.md");
+            var indexFile = IO.Path.Combine(_endpointCollection.SourceDirectory, "index.md");
             if (IO.File.Exists(indexFile))
             {
                 return View("DisplayMarkdown", new Markdown().Transform(IO.File.ReadAllText(indexFile)));

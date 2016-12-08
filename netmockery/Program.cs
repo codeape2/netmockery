@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.WindowsServices;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,25 +15,17 @@ namespace netmockery
 {
     public class Program
     {
-        private static string _configdirectory;
-        public static EndpointCollection EndpointCollection { get; set; }
-
-        public static void UnitTest_SetConfigDirectory(string configDirectory)
+        public static IWebHost CreateWebHost(string endpointCollectionDirectory, string contentRoot, string url)
         {
-            _configdirectory = configDirectory;
-        }
-
-        public static void ReloadConfig()
-        {
-            EndpointCollection = EndpointCollectionReader.ReadFromDirectory(_configdirectory);
-        }
-
-        private static IWebHost CreateWebHost(string contentRoot, string url = null)
-        {
+            var endpointCollectionProvider = new EndpointCollectionProvider(endpointCollectionDirectory);
+            Action<IServiceCollection> initialSvcConfig = (IServiceCollection serviceCollection) =>
+            {
+                serviceCollection.AddTransient(serviceProvider => endpointCollectionProvider);
+            };
             var webhostbuilder = new WebHostBuilder()
+                .ConfigureServices(initialSvcConfig)
                 .UseKestrel()
                 .UseContentRoot(contentRoot);
-
             if (url != null)
             {
                 webhostbuilder = webhostbuilder.UseUrls(url);
@@ -69,8 +62,7 @@ namespace netmockery
             }            
 
             Debug.Assert(Directory.Exists(parsedArguments.EndpointCollectionDirectory));
-            _configdirectory = parsedArguments.EndpointCollectionDirectory;
-            ReloadConfig();
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.EndpointCollectionDirectory);
 
             if (parsedArguments.Command != CommandLineParser.COMMAND_SERVICE)
             {
@@ -82,7 +74,7 @@ namespace netmockery
                 case CommandLineParser.COMMAND_NORMAL:
                     WriteLine("Admin interface available on /__netmockery");
                     Startup.TestMode = parsedArguments.TestMode;
-                    CreateWebHost(Directory.GetCurrentDirectory(), parsedArguments.Url).Run();
+                    CreateWebHost(parsedArguments.EndpointCollectionDirectory, Directory.GetCurrentDirectory(), parsedArguments.Url).Run();
                     break;
 
                 case CommandLineParser.COMMAND_SERVICE:
@@ -90,11 +82,11 @@ namespace netmockery
                     break;
 
                 case CommandLineParser.COMMAND_TEST:
-                    Test(parsedArguments);
+                    Test(parsedArguments, endpointCollection);
                     break;
 
                 case CommandLineParser.COMMAND_DUMP:
-                    Dump();
+                    Dump(endpointCollection);
                     break;
 
               }
@@ -102,15 +94,15 @@ namespace netmockery
 
         static public void RunAsService(ParsedCommandLine commandArgs)
         {
-            CreateWebHost(AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
+            CreateWebHost(commandArgs.EndpointCollectionDirectory, AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
         }
 
 
-        public static void Test(ParsedCommandLine commandArgs)
+        public static void Test(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
         {
-            if (TestRunner.HasTestSuite(EndpointCollection.SourceDirectory))
+            if (TestRunner.HasTestSuite(endpointCollection.SourceDirectory))
             {
-                var testRunner = new ConsoleTestRunner(EndpointCollection);
+                var testRunner = new ConsoleTestRunner(endpointCollection);
                 if (commandArgs.Url != null)
                 {
                     testRunner.Url = commandArgs.Url;
@@ -146,9 +138,9 @@ namespace netmockery
         }
 
 
-        public static void Dump()
+        public static void Dump(EndpointCollection endpointCollection)
         {
-            foreach (var endpoint in EndpointCollection.Endpoints)
+            foreach (var endpoint in endpointCollection.Endpoints)
             {
                 WriteLine($"{endpoint.Name} {endpoint.PathRegex}");
                 foreach (var response in endpoint.Responses)

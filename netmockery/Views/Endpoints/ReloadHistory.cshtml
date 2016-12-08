@@ -1,0 +1,18 @@
+﻿@using netmockery
+
+@{ 
+    Layout = "Base";
+    var now = (DateTime) ViewData["Now"];
+    var reloadTimestamps = (DateTime[])ViewData["ReloadTimestamps"];
+}
+
+<h2>Reload History</h2>
+<p>
+    <ul>
+        @foreach (var ts in reloadTimestamps)
+        {
+            <li>@ts</li>
+        }
+        <li>Current time: @now</li>
+    </ul>
+</p>

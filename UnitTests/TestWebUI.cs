@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
+﻿using Microsoft.Extensions.DependencyInjection;
 using netmockery;
 using netmockery.Controllers;
 using System;
@@ -7,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xunit;
@@ -15,19 +13,22 @@ using Xunit.Abstractions;
 
 namespace UnitTests
 {
-    public class TestWebUI
+    public class TestWebUI : WebTestBase
     {
         private ITestOutputHelper output;
-        public TestServer server;
-        public HttpClient client;
+        private EndpointCollectionProvider endpointCollectionProvider;
 
         public TestWebUI(ITestOutputHelper output)
         {
             this.output = output;
-            Program.UnitTest_SetConfigDirectory("examples\\example1");
-            server = new TestServer(new WebHostBuilder().UseContentRoot("..\\..\\..\\..\\..\\netmockery").UseStartup<Startup>());
-            client = server.CreateClient();
+            endpointCollectionProvider = new EndpointCollectionProvider("examples\\example1");
+
+            CreateServerAndClient();
         }
+
+        public override EndpointCollectionProvider GetEndpointCollectionProvider() => endpointCollectionProvider;
+
+
         [Fact]
         public async Task RootRedirectsToHome()
         {
@@ -57,8 +58,8 @@ namespace UnitTests
         [Fact]
         public async Task CheckAllUrlsAfterTestRequestsMade()
         {
-            Assert.Equal(0, Startup.ResponseRegistry.Responses.Count());
-            var testRunner = new WebTestRunner(Program.EndpointCollection);
+            Assert.Equal(0, GetResponseRegistry().Responses.Count());
+            var testRunner = new WebTestRunner(endpointCollectionProvider.EndpointCollection);
             Assert.True(testRunner.Tests.Count() > 0);
             foreach (var test in testRunner.Tests)
             {
@@ -68,42 +69,48 @@ namespace UnitTests
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
             Assert.Equal(EXPECTED_NUMBER_OF_URLS + testRunner.Tests.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
-            Assert.Equal(testRunner.Tests.Count(), Startup.ResponseRegistry.Responses.Count());
+            
+            Assert.Equal(testRunner.Tests.Count(), GetResponseRegistry().Responses.Count());
+        }
+
+        ResponseRegistry GetResponseRegistry()
+        {
+            return server.Host.Services.GetService<ResponseRegistry>();
         }
 
         [Fact]
         public async Task CheckAllUrlsAfterFailingRequests()
         {
-            Assert.Equal(0, Startup.ResponseRegistry.Responses.Count());
+            Assert.Equal(0, GetResponseRegistry().Responses.Count());
 
             var response = await client.GetAsync("/lkj/");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             Assert.Equal("", content);
-            Assert.Equal(1, Startup.ResponseRegistry.Responses.Count());
-            var registryItem = Startup.ResponseRegistry.Responses.Single();
+            Assert.Equal(1, GetResponseRegistry().Responses.Count());
+            var registryItem = GetResponseRegistry().Responses.Single();
             Assert.Equal("No endpoint matches request path", registryItem.Error);
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
-            Assert.Equal(EXPECTED_NUMBER_OF_URLS + Startup.ResponseRegistry.Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS + GetResponseRegistry().Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
         }
 
         [Fact]
         public async Task CheckAllUrlsAfterNoMatchInEndpoint()
         {
-            Assert.Equal(0, Startup.ResponseRegistry.Responses.Count());
+            Assert.Equal(0, GetResponseRegistry().Responses.Count());
 
             var response = await client.GetAsync("/endpoint2");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             Assert.Equal("", content);
-            Assert.Equal(1, Startup.ResponseRegistry.Responses.Count());
+            Assert.Equal(1, GetResponseRegistry().Responses.Count());
 
-            var registryItem = Startup.ResponseRegistry.Responses.Single();
+            var registryItem = GetResponseRegistry().Responses.Single();
             Assert.Equal("Endpoint has no match for request", registryItem.Error);
 
             var urls = await visitAllUrls("/__netmockery", includeReloadConfig: false);
-            Assert.Equal(EXPECTED_NUMBER_OF_URLS + Startup.ResponseRegistry.Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
+            Assert.Equal(EXPECTED_NUMBER_OF_URLS + GetResponseRegistry().Responses.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
 
         }
 
@@ -161,6 +168,7 @@ namespace UnitTests
                 }
             }
         }
+
 
     }
 }

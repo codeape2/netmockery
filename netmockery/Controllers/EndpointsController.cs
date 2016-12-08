@@ -9,12 +9,14 @@ namespace netmockery.Controllers
 {
     public class EndpointsController : Controller
     {
+        private EndpointCollectionProvider _endpointCollectionProvider;
         private EndpointCollection _endpointCollection;
         private ResponseRegistry _responseRegistry;
 
-        public EndpointsController(EndpointCollection endpointCollection, ResponseRegistry responseRegistry)
+        public EndpointsController(EndpointCollectionProvider endpointCollectionProvider, ResponseRegistry responseRegistry)
         {
-            _endpointCollection = endpointCollection;
+            _endpointCollectionProvider = endpointCollectionProvider;
+            _endpointCollection = _endpointCollectionProvider.EndpointCollection;
             _responseRegistry = responseRegistry;
         }
 
@@ -26,12 +28,25 @@ namespace netmockery.Controllers
             return View(_endpointCollection);
         }
 
+        public ActionResult EndpointNames()
+        {
+            return Json(from e in _endpointCollection.Endpoints select e.Name);
+        }
+
 
 
         public ActionResult ReloadConfig()
         {
-            Startup.ReloadConfig();
+            _endpointCollectionProvider.Reload();
+            _responseRegistry.Clear();
             return RedirectToAction("Index");
+        }
+
+        public ActionResult ReloadHistory()
+        {
+            ViewData["Now"] = DateTime.Now;
+            ViewData["ReloadTimestamps"] = _endpointCollectionProvider.ReloadTimestamps;
+            return View();
         }
 
         public ActionResult EndpointDetails(string name, int highlight = -1)

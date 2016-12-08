@@ -14,15 +14,21 @@ namespace netmockery
 {
     public class Startup
     {
-        static private ResponseRegistry _responseRegistry;
+        private ResponseRegistry _responseRegistry;
+        private EndpointCollectionProvider _endpointCollectionProvider;
         static public bool TestMode { get; set; } = false;
 
-        static public ResponseRegistry ResponseRegistry => _responseRegistry;
+        public ResponseRegistry ResponseRegistry => _responseRegistry;
 
-
-        static public void ReloadConfig()
+        public Startup(EndpointCollectionProvider endpointCollectionProvider)
         {
-            Program.ReloadConfig();
+            Debug.Assert(endpointCollectionProvider != null);
+            _endpointCollectionProvider = endpointCollectionProvider;
+        }
+
+        
+        public void ReloadConfig()
+        {
             _responseRegistry = new ResponseRegistry();
         }
 
@@ -31,8 +37,8 @@ namespace netmockery
             ReloadConfig();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient(typeof(EndpointCollection), serviceProvider => Program.EndpointCollection);
             services.AddTransient(typeof(ResponseRegistry), serviceProvider => _responseRegistry);
+            services.AddTransient<EndpointCollection>(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
 
             services.AddMvc();
         }
@@ -66,7 +72,9 @@ namespace netmockery
 
         public async Task HandleRequestInner(ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
-            var endpoint = Program.EndpointCollection.Resolve(context.Request.Path.ToString());
+            Debug.Assert(_endpointCollectionProvider != null);
+            var endpointCollection = _endpointCollectionProvider.EndpointCollection;
+            var endpoint = endpointCollection.Resolve(context.Request.Path.ToString());
             responseRegistryItem.Endpoint = endpoint;
             if (endpoint != null)
             {
