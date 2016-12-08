@@ -90,6 +90,10 @@ namespace netmockery
 
         public JSONResponse Validated()
         {
+            if (match == null)
+            {
+                throw new ArgumentException("match must be specified");
+            }
             var mutuallyExclusive = new[] { literal, file, script, assembly, forward };
             var mutExWithValues = from value in mutuallyExclusive where value != null select value;
             if (mutExWithValues.Count() != 1)
@@ -210,7 +214,8 @@ namespace netmockery
             var endpoint = new Endpoint(name, pathregex);
             foreach (var jsonResponse in responses)
             {
-                endpoint.Add(jsonResponse.match.CreateRequestMatcher(), jsonResponse.Validated().CreateResponseCreator(rootDir));
+                var validatedJsonResponse = jsonResponse.Validated();
+                endpoint.Add(validatedJsonResponse.match.CreateRequestMatcher(), validatedJsonResponse.CreateResponseCreator(rootDir));
             }
             endpoint.Directory = rootDir;
             return endpoint;
