@@ -10,12 +10,6 @@ namespace UnitTests
     public class TestEndpoint
     {
         [Fact]
-        public void EmptyEndpoint()
-        {
-            //var endpoint = new Endpoint();
-        }
-
-        [Fact]
         public void EndpointMatches()
         {
             var endpoint = new Endpoint("Mock service", "^/NHNPersonvern/");
