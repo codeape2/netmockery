@@ -6,9 +6,9 @@ Content-type: @Model.ContentType
 
 @if (Model.Replacements.Length > 0)
 {
-    <text><br>Replacements:<br></text>
+    <text><br>Replacements:</text>
     foreach (var bodyReplacement in Model.Replacements)
     {
-<text><code>@bodyReplacement.SearchTerm</code> => <code>@bodyReplacement.ReplacementTerm</code></text>
+<text><br>'<code>@bodyReplacement.SearchTerm</code>' => '<code>@bodyReplacement.ReplacementTerm</code>'</text>
     }
 }
