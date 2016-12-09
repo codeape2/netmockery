@@ -12,7 +12,11 @@ Command line:
 
 	netmockery.exe p:\ath\to\endpoint\directory
 
-Netmockery starts and listens on port ``5000``.
+Netmockery starts and listens on ``localhost`` port ``5000``.
+
+To bind to another address/port, use the ``--url`` command line parameter. The command below binds netmockery to all network interfaces using port 9876.
+
+    netmockery.exe p:\ath\to\endpoint\directory --url http://*:9876
 
 ## Installing as windows service
 
@@ -80,14 +84,15 @@ Example ``endpoint.json``:
 The first step in handling incoming request is to check the incoming request's request path. The request path is matched against each ``pathregex`` for all
 endpoints in the endpoint collection directory. 
 
-Exactly one endpoint must match the request. If zero or more than one endpoint matches the incoming request,
-netmockery writes an error message to the console output, and returns nothing to the client.
+Exactly one endpoint must match the request. If zero endpoints matches the incoming request,
+netmockery writes an error message to the console output, and returns nothing to the client. If more than one endpoint
+matches the incoming request, netmockery writes an error message to the console output, and returns nothing to the client.
 
 The second and final step in the request matching process is to check the incoming request against the list of rules in ``responses``. The first rule that matches
 the request will be used for creating the response. If no rule matches the request, netmockery writes an error message to the console output and returns nothing to
 the client.
 
-The ``match`` paramter within the ``responses`` list can match requests using one of these methods:
+The ``match`` parameter within the ``responses`` list can match requests using one of these methods:
 
 ### Match any request
 
@@ -140,11 +145,183 @@ Inside a script, the following global variables and functions are available:
 
 TODO: More scripting documentation.
 
+### Forwarding requests
+
+You can configure a rule to forward the request to an external service:
+
+* ``"strippath": "^/myservice"``: A reqular expression that is removed from the request path when calling the external url.
+* ``"forward": "https://example.com/the/real/service"``: Forwards the request to the specified url
+* ``"proxy": "http://proxy:port"``: (optional) Uses the specified proxy when doing the request
+
+#### Example
+
+``endpoint.json``:
+
+    {
+      "name": "MyEndpoint",
+      "pathregex": "^/myservice",
+      "responses": [
+        {
+          "match": { "regex": "foobar" },
+          "file": "response.xml",
+          "contenttype": "text/xml"
+        },
+    
+        {
+          "match": { },
+          "strippath": "^/myservice"
+          "forward": "https://example.com/the/real/service",
+        }
+      ]
+    } 
+
+Request ``http://netmockery:NNNN/myservice/resource/foobar``:
+
+* The first rule matches
+* ``response.xml`` is returned to the client
+
+Request ``http://netmockery:NNNN/myservice/resource/another``:
+
+* The last rule (``"match": {}`` == any request) matches
+* The request path is ``/myservice/resource/another``
+* Stripping ``^/myservice`` from the request path, we get ``/resource/another``
+* ``/resource/another`` is appended to the ``forward`` URL ``https://example.com/the/real/service``
+* Netmockery makes a HTTP request to ``https://example.com/the/real/service/resource/another`` and returns the response to the client
+
+
 ### Common parameters
 
-* ``contenttype``: Sets the content-type header. Not used for the forward request response creator.
+* ``contenttype``: Sets the mediatype part of the content-type header. Not used for the forward request response creator.
+* ``charset``: Sets the charset part of the content-type header. Not used for the forward request response creator. See the section "Encodings" below
+for more information.
 * ``replacements``: TODO: Document. Not used for the forward request response creator.
 * ``delay``: If set, netmockery waits for the specified number of seconds before returning the response to the client.
+
+
+### Encodings
+
+#### Netmockery input file encoding
+
+* All netmockery *input* files should be in UTF-8 encoding:
+ * Json configuration files
+ * Static file responses (via ``"file"``)
+ * C# script files
+ * Test expectation response files
+
+#### HTTP Response encoding and the Content-Type header
+
+* The ``charset`` parameter determines the response encoding for netmockery responses (expect for forwarded external requests).
+* If no charset parameter is specified, netmockery uses ISO-8859-1 (latin1) encoding.
+* The Content-Type header for the responses is set in this manner:
+ * If ``contenttype`` is NOT set, no ``Content-Type`` header is set for the responses
+ * If ``contenttype`` is set to ``foo/bar`` and ``charset`` is NOT set
+  1. netmockery encodes the response using the ISO-8859-1 encoding
+  2. ``Content-Type`` = ``foo/bar; charset=iso-8859-1``
+ * If ``contenttype`` is set to ``foo/bar`` and ``charset`` is set to one of the supported encodings (see list below)
+  1. netmockery encodes the response using the specified encoding (eg. ``utf-8``)
+  2. ``Content-Type`` = ``foo/bar; charset=utf-8``
+* For forwarded external requests, not encoding and content-type handling is done.
+
+#### Valid charset names (not case sensitive)
+
+    US-ASCII
+    ISO_8859-1:1987
+    ISO_8859-2:1987
+    ISO_8859-3:1988
+    ISO_8859-4:1988
+    ISO_8859-5:1988
+    ISO_8859-6:1987
+    ISO_8859-7:1987
+    ISO_8859-8:1988
+    ISO_8859-9:1989
+    Shift_JIS
+    Extended_UNIX_Code_Packed_Format_for_Japanese
+    DIN_66003
+    NS_4551-1
+    SEN_850200_B
+    KS_C_5601-1987
+    ISO-2022-KR
+    EUC-KR
+    ISO-2022-JP
+    GB_2312-80
+    UNICODE-1-1-UTF-7
+    UTF-8
+    ISO-8859-13
+    ISO-8859-15
+    GBK
+    GB18030
+    ISO-10646-UCS-2
+    UTF-7
+    UTF-16BE
+    UTF-16LE
+    UTF-16
+    UTF-32
+    UTF-32BE
+    UTF-32LE
+    IBM850
+    IBM862
+    IBM-Thai
+    GB2312
+    Big5
+    macintosh
+    IBM037
+    IBM273
+    IBM277
+    IBM278
+    IBM280
+    IBM284
+    IBM285
+    IBM290
+    IBM297
+    IBM420
+    IBM423
+    IBM424
+    IBM437
+    IBM500
+    IBM852
+    IBM855
+    IBM857
+    IBM860
+    IBM861
+    IBM863
+    IBM864
+    IBM865
+    IBM869
+    IBM870
+    IBM871
+    IBM880
+    IBM905
+    IBM1026
+    KOI8-R
+    HZ-GB-2312
+    IBM866
+    IBM775
+    KOI8-U
+    IBM00858
+    IBM00924
+    IBM01140
+    IBM01141
+    IBM01142
+    IBM01143
+    IBM01144
+    IBM01145
+    IBM01146
+    IBM01147
+    IBM01148
+    IBM01149
+    Big5-HKSCS
+    windows-874
+    windows-1250
+    windows-1251
+    windows-1252
+    windows-1253
+    windows-1254
+    windows-1255
+    windows-1256
+    windows-1257
+    windows-1258
+    TIS-620
+
 
 <a name="tests"></a>
 # Writing tests
@@ -215,3 +392,4 @@ TODO: delay parameter
 TODO: index.md documentation
 
 TODO: other commands, dump
+
