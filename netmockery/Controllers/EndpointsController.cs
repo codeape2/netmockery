@@ -53,7 +53,14 @@ namespace netmockery.Controllers
         {
             ViewData["responseRegistry"] = _responseRegistry;
             ViewData["highlight"] = highlight;
+            ViewData["name"] = name;
             return View(_endpointCollection.Get(name));
+        }
+
+        public ActionResult EndpointJsonFile(string name)
+        {
+            var endpoint = _endpointCollection.Get(name);
+            return Content(System.IO.File.ReadAllText(System.IO.Path.Combine(endpoint.Directory, "endpoint.json")));
         }
 
         public ActionResult ViewRequestCreatorFile(string name, int requestCreatorId)

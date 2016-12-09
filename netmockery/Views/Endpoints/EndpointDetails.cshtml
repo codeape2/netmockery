@@ -7,7 +7,7 @@
     var highlight = (int)ViewData["highlight"];
 }
 
-<h1>@Model.Name</h1>
+<h1>@Model.Name <small>@Html.ActionLink("endpoint.json", "EndpointJsonFile", new { name=ViewData["name"] })</small></h1>
 <p>
     Path regex: <code>@Model.PathRegex</code>
 </p>
