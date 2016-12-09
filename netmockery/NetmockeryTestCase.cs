@@ -35,6 +35,7 @@ namespace netmockery
         string writtenContent;
         Encoding writtenEncoding;
         string contentType;
+        bool writeAsyncCalled = false;
 
         public Stream Body => memoryStream;
 
@@ -48,9 +49,22 @@ namespace netmockery
 
         async public Task WriteAsync(string content, Encoding encoding)
         {
+            Debug.Assert(writeAsyncCalled == false);
             writtenContent = content;
             writtenEncoding = encoding;
+            writeAsyncCalled = true;
+
             await Task.Yield();
+        }
+
+        public string GetWrittenResponseAsString()
+        {
+            if (! writeAsyncCalled)
+            {
+                throw new InvalidOperationException("This is a binary response");
+            }
+
+            return writtenContent;
         }
     }
 
@@ -166,55 +180,54 @@ namespace netmockery
         {
             Debug.Assert(endpointCollection != null);
 
-            var retval = new NetmockeryTestCaseResult { TestCase = this };
+            var testResult = new NetmockeryTestCaseResult { TestCase = this };
             try
             {
                 var endpoint = endpointCollection.Resolve(RequestPath);
                 if (endpoint == null)
                 {
-                    retval.SetFailure(ERROR_NOMATCHING_ENDPOINT);
+                    return testResult.SetFailure(ERROR_NOMATCHING_ENDPOINT);
+                }
+
+                bool singleMatch;
+                var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null, out singleMatch);
+                if (matcher_and_creator == null)
+                {
+                    return testResult.SetFailure(ERROR_ENDPOINT_HAS_NO_MATCH);
+                }
+                if (!HasExpectations)
+                {
+                    return testResult.SetFailure("Test case has no expectations");
+                }
+
+                var responseCreator = matcher_and_creator.Item2;
+                string responseBody = null;
+                if (NeedsResponseBody)
+                {
+                    var httpResponse = new TestCaseHttpResponse();
+                    var responseBodyBytes = await responseCreator.CreateResponseAsync(
+                        new TestCaseHttpRequest(RequestPath, QueryString), 
+                        Encoding.UTF8.GetBytes(RequestBody ?? ""), 
+                        httpResponse, 
+                        endpoint.Directory
+                    );
+                    responseBody = httpResponse.GetWrittenResponseAsString();
+                }
+                string message;
+                if (Evaluate(matcher_and_creator.Item1.ToString(), matcher_and_creator.Item2.ToString(), responseBody, out message))
+                {
+                    return testResult.SetSuccess();
                 }
                 else
                 {
-                    bool singleMatch;
-                    var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null, out singleMatch);
-                    if (matcher_and_creator != null)
-                    {
-                        var responseCreator = matcher_and_creator.Item2;
-                        string responseBody = null;
-                        if (! HasExpectations)
-                        {
-                            retval.SetFailure("Test case has no expectations");
-                        }
-                        else
-                        {
-                            if (NeedsResponseBody)
-                            {
-                                var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath, QueryString), Encoding.UTF8.GetBytes(RequestBody ?? ""), new TestCaseHttpResponse(), endpoint.Directory);
-                                responseBody = Encoding.UTF8.GetString(responseBodyBytes);
-                            }
-                            string message;
-                            if (Evaluate(matcher_and_creator.Item1.ToString(), matcher_and_creator.Item2.ToString(), responseBody, out message))
-                            {
-                                retval.SetSuccess();
-                            } else
-                            {
-                                retval.SetFailure(message);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        retval.SetFailure(ERROR_ENDPOINT_HAS_NO_MATCH);
-                    }
+                    return testResult.SetFailure(message);
                 }
             }
             catch (Exception exception)
             {
                 if (!handleErrors) throw;
-                retval.SetException(exception);
+                return testResult.SetException(exception);
             }
-            return retval;
         }
 
         async public Task<Tuple<string, string>> GetResponseAsync(EndpointCollection endpointCollection)
@@ -252,22 +265,25 @@ namespace netmockery
         public string Message => _message;
         public NetmockeryTestCase TestCase;
 
-        public void SetSuccess()
+        public NetmockeryTestCaseResult SetSuccess()
         {
             _ok = true;
+            return this;
         }
 
-        public void SetFailure(string message)
+        public NetmockeryTestCaseResult SetFailure(string message)
         {
             _ok = false;
             _message = message;
+            return this;
         }
 
-        public void SetException(Exception e)
+        public NetmockeryTestCaseResult SetException(Exception e)
         {
             Debug.Assert(e != null);
             SetFailure("Exception");
             _exception = e;
+            return this;
         }
 
         private static string indent(string s)

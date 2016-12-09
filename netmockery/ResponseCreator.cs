@@ -121,13 +121,18 @@ namespace netmockery
                 Headers = request.Headers,
                 EndpointDirectory = endpointDirectory
             });
-            response.ContentType = ContentType;
+            if (ContentType != null)
+            {
+                var contenttype = ContentType;
+                contenttype += $"; charset={Encoding.WebName}";
+                response.ContentType = contenttype;
+            }
             await response.WriteAsync(responseBody, Encoding);
-            return Encoding.UTF8.GetBytes(responseBody);
+            return Encoding.GetBytes(responseBody);
         }
         public string ContentType { get; set; }
         public abstract string GetBody(RequestInfo requestInfo);
-        public Encoding Encoding => Encoding.UTF8;
+        public Encoding Encoding { get; set; } = Encoding.GetEncoding("ISO-8859-1");
         
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 

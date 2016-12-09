@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace netmockery
 {
@@ -84,7 +85,9 @@ namespace netmockery
         public string proxy;
         public string strippath;
 
+        //TODO: contenttype should be renamed to mediatype
         public string contenttype;
+        public string charset;
         public JSONReplacement[] replacements;
         public int delay;
 
@@ -154,6 +157,12 @@ namespace netmockery
                 else
                 {
                     simpleResponseCreator.Replacements = new BodyReplacement[0];
+                }
+
+                Debug.Assert(simpleResponseCreator.Encoding == Encoding.GetEncoding("iso-8859-1"));
+                if (charset != null)
+                {
+                    simpleResponseCreator.Encoding = Encoding.GetEncoding(charset);
                 }
             }
 

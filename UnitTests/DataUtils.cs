@@ -17,7 +17,8 @@ namespace UnitTests
                 responses = new[] {
                     new JSONResponse {
                         match = new JSONRequestMatcher(),
-                        file = file
+                        file = file,
+                        contenttype = "text/plain"
                     }
                 }
             };
