@@ -8,6 +8,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace netmockery
 {
+    public class ResolutionResult
+    {
+        public RequestMatcher RequestMatcher;
+        public ResponseCreator ResponseCreator;
+        public bool SingleMatch;
+        public int MatchIndex => RequestMatcher.Index;
+    }
+
     public class Endpoint
     {
         private string _name;
@@ -62,19 +70,20 @@ namespace netmockery
             }
         }
 
-        public Tuple<RequestMatcher, ResponseCreator> Resolve(PathString path, QueryString queryString, string body, IHeaderDictionary headers, out bool singleMatch)
+        public ResolutionResult Resolve(PathString path, QueryString queryString, string body, IHeaderDictionary headers)
         {
-            singleMatch = true;
             var candidates = (from t in _responses where t.Item1.Matches(path, queryString, body, headers) select t).Take(2);
             if (! candidates.Any())
             {
                 return null;
             }
-            if (candidates.Count() > 1)
+            var matcherAndCreator = candidates.First();
+            return new ResolutionResult
             {
-                singleMatch = false;                
-            }
-            return candidates.First();
+                RequestMatcher = matcherAndCreator.Item1,
+                ResponseCreator = matcherAndCreator.Item2,
+                SingleMatch = candidates.Count() == 1,
+            };
         }
     }
 }

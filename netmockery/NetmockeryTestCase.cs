@@ -188,9 +188,9 @@ namespace netmockery
                 {
                     return testResult.SetFailure(ERROR_NOMATCHING_ENDPOINT);
                 }
+                testResult.EndpointName = endpoint.Name;
 
-                bool singleMatch;
-                var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null, out singleMatch);
+                var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
                 if (matcher_and_creator == null)
                 {
                     return testResult.SetFailure(ERROR_ENDPOINT_HAS_NO_MATCH);
@@ -200,7 +200,7 @@ namespace netmockery
                     return testResult.SetFailure("Test case has no expectations");
                 }
 
-                var responseCreator = matcher_and_creator.Item2;
+                var responseCreator = matcher_and_creator.ResponseCreator;
                 string responseBody = null;
                 if (NeedsResponseBody)
                 {
@@ -214,7 +214,7 @@ namespace netmockery
                     responseBody = httpResponse.GetWrittenResponseAsString();
                 }
                 string message;
-                if (Evaluate(matcher_and_creator.Item1.ToString(), matcher_and_creator.Item2.ToString(), responseBody, out message))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, out message))
                 {
                     return testResult.SetSuccess();
                 }
@@ -237,11 +237,10 @@ namespace netmockery
             {
                 return Tuple.Create((string)null, ERROR_NOMATCHING_ENDPOINT);
             }
-            bool singleMatch;
-            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null, out singleMatch);
+            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null);
             if (matcher_and_creator != null)
             {
-                var responseCreator = matcher_and_creator.Item2;
+                var responseCreator = matcher_and_creator.ResponseCreator;
                 var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath, QueryString), Encoding.UTF8.GetBytes(RequestBody ?? ""), new TestCaseHttpResponse(), endpoint.Directory);
                 return Tuple.Create(Encoding.UTF8.GetString(responseBodyBytes), (string)null);
             }
@@ -264,6 +263,8 @@ namespace netmockery
         public Exception Exception => _exception;
         public string Message => _message;
         public NetmockeryTestCase TestCase;
+        public string EndpointName;
+        public int ResponseIndex;
 
         public NetmockeryTestCaseResult SetSuccess()
         {

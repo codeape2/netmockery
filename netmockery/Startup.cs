@@ -78,15 +78,14 @@ namespace netmockery
             responseRegistryItem.Endpoint = endpoint;
             if (endpoint != null)
             {
-                bool singleMatch;
-                var matcher_and_creator = endpoint.Resolve(context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers, out singleMatch);
+                var matcher_and_creator = endpoint.Resolve(context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers);
                 if (matcher_and_creator != null)
                 {
-                    var responseCreator = matcher_and_creator.Item2;
+                    var responseCreator = matcher_and_creator.ResponseCreator;
 
-                    responseRegistryItem.RequestMatcher = matcher_and_creator.Item1;
+                    responseRegistryItem.RequestMatcher = matcher_and_creator.RequestMatcher;
                     responseRegistryItem.ResponseCreator = responseCreator;
-                    responseRegistryItem.SingleMatch = singleMatch;
+                    responseRegistryItem.SingleMatch = matcher_and_creator.SingleMatch;
 
                     if (responseCreator.Delay > 0)
                     {
@@ -95,8 +94,8 @@ namespace netmockery
 
                     if (TestMode)
                     {
-                        context.Response.Headers["X-Netmockery-RequestMatcher"] = matcher_and_creator.Item1.ToString();
-                        context.Response.Headers["X-Netmockery-ResponseCreator"] = matcher_and_creator.Item2.ToString();
+                        context.Response.Headers["X-Netmockery-RequestMatcher"] = matcher_and_creator.RequestMatcher.ToString();
+                        context.Response.Headers["X-Netmockery-ResponseCreator"] = matcher_and_creator.ResponseCreator.ToString();
                     }
 
                     var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint.Directory);
