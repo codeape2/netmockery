@@ -204,6 +204,46 @@ namespace UnitTests
         }
 
         [Fact]
+        public void TestRunnerKeepsTrackOfTestCoverage()
+        {
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            testRunner.TestAll(false);
+
+            var coverageInfo = testRunner.GetCoverageInfo();
+            Assert.NotNull(coverageInfo);
+
+            Assert.Equal(new[] { "foo", "GetNow" }, coverageInfo.EndpointsCovered);
+            Assert.Equal(0, coverageInfo.EndpointsNotCovered.Length);
+        }
+
+        [Fact]
+        public void TrackTestConverageByResponseRule()
+        {
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            testRunner.TestAll(false);
+
+            var coverageInfo = testRunner.GetCoverageInfo();
+            Assert.NotNull(coverageInfo);
+
+            Assert.Equal(new[] { "foo#0", "GetNow#0" }, coverageInfo.ResponseRulesCovered);
+            Assert.Equal(new[] { "foo#1", "foo#2" }, coverageInfo.ResponseRulesNotCovered);
+        }
+
+        [Fact]
+        public void TestRunnerKeepsTrackOfCoverageWhenRunningSingleTest()
+        {
+            var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            testRunner.ExecuteTestAndOutputResult(0);
+
+            var coverageInfo = testRunner.GetCoverageInfo();
+            Assert.NotNull(coverageInfo);
+
+            Assert.Equal(new[] { "foo" }, coverageInfo.EndpointsCovered);
+            Assert.Equal(new[] { "GetNow" }, coverageInfo.EndpointsNotCovered);
+
+        }
+
+        [Fact]
         async public void CanExecuteTest()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);

@@ -11,7 +11,8 @@ namespace netmockery
     public abstract class TestRunner
     {
         private IEnumerable<NetmockeryTestCase> testcases;
-        private EndpointCollection endpointCollection;
+        protected EndpointCollection endpointCollection;
+        protected HashSet<Tuple<string, int>> responsesCoveredByTests = new HashSet<Tuple<string, int>>();
 
         public string Url { get; set; }
 
@@ -82,6 +83,8 @@ namespace netmockery
             var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.ExecuteAsync(endpointCollection).Result;
             WriteResult(result);
 
+            responsesCoveredByTests.Add(Tuple.Create(result.EndpointName, result.ResponseIndex));
+
             return result;
         }
 
@@ -145,5 +148,41 @@ namespace netmockery
             Console.WriteLine();
             Console.WriteLine($"Total: {Tests.Count()} Errors: {errors}");
         }
+
+        public CoverageInfo GetCoverageInfo()
+        {
+            var allEndpoints = new HashSet<string>(from endpoint in endpointCollection.Endpoints select endpoint.Name);
+            var coveredEndpoints = new HashSet<string>(from tuple2 in responsesCoveredByTests select tuple2.Item1);
+
+            var allResponseRules = new HashSet<string>();
+            foreach (var endpoint in endpointCollection.Endpoints)
+            {
+                var i = 0;
+                foreach (var tuple2 in endpoint.Responses)
+                {
+                    allResponseRules.Add($"{endpoint.Name}#{i++}");
+                }
+            }
+
+            var coveredResponseRules = new HashSet<string>(from tuple2 in responsesCoveredByTests select $"{tuple2.Item1}#{tuple2.Item2}");
+
+            return new CoverageInfo
+            {
+                EndpointsCovered = coveredEndpoints.ToArray(),
+                EndpointsNotCovered = allEndpoints.Except(coveredEndpoints).ToArray(),
+
+                ResponseRulesCovered = coveredResponseRules.ToArray(),
+                ResponseRulesNotCovered = allResponseRules.Except(coveredResponseRules).ToArray()
+            };
+        }
+    }
+
+    public class CoverageInfo
+    {
+        public string[] EndpointsCovered;
+        public string[] EndpointsNotCovered;
+
+        public string[] ResponseRulesCovered;
+        public string[] ResponseRulesNotCovered;
     }
 }
