@@ -207,7 +207,7 @@ namespace UnitTests
         public void TestRunnerKeepsTrackOfTestCoverage()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            testRunner.TestAll(false);
+            testRunner.TestAll(false, true);
 
             var coverageInfo = testRunner.GetCoverageInfo();
             Assert.NotNull(coverageInfo);
@@ -220,7 +220,7 @@ namespace UnitTests
         public void TrackTestConverageByResponseRule()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            testRunner.TestAll(false);
+            testRunner.TestAll(false, false);
 
             var coverageInfo = testRunner.GetCoverageInfo();
             Assert.NotNull(coverageInfo);

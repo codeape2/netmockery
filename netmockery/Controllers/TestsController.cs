@@ -43,6 +43,11 @@ namespace netmockery.Controllers
         {
             response.AppendLine($"Total: {Tests.Count()} Errors: {errors}");
         }
+
+        public override void WriteLine(string s)
+        {
+            response.AppendLine(s);
+        }
     }
     public class TestsController : Controller
     {
@@ -106,13 +111,13 @@ namespace netmockery.Controllers
 
         public ActionResult RunAll()
         {
-            testRunner.TestAll(false);
+            testRunner.TestAll(false, true);
             return Content(testRunner.ToString());
         }
 
         public ActionResult RunAllStopOnFirstError()
         {
-            testRunner.TestAll(true);
+            testRunner.TestAll(true, false);
             return Content(testRunner.ToString());
         }
 

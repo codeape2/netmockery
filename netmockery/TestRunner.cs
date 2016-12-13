@@ -51,7 +51,7 @@ namespace netmockery
         }
 
         
-        public void TestAll(bool stopAfterFirstFailure)
+        public void TestAll(bool stopAfterFirstFailure, bool outputCoverage)
         {
             var errors = 0;
             var index = 0;
@@ -69,6 +69,28 @@ namespace netmockery
                 }
             }
             WriteSummary(errors);
+
+            if (outputCoverage)
+            {
+                WriteCoverage();
+            }
+        }
+
+        public void WriteCoverage()
+        {
+            var ci = GetCoverageInfo();
+            Debug.Assert(ci != null);
+
+            WriteLine("");
+            WriteLine($"Coverage: {ci.EndpointsCovered.Length} of {ci.EndpointsCovered.Length + ci.EndpointsNotCovered.Length} endpoints");
+            if (ci.EndpointsNotCovered.Length > 0)
+            {
+                WriteLine("Endpoints not covered:");
+                foreach (var endpointName in ci.EndpointsNotCovered)
+                {
+                    WriteLine(endpointName);
+                }
+            }
         }
 
         public NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index)
@@ -101,12 +123,40 @@ namespace netmockery
                 WriteResponse(response.Item1);
             }
         }
+        public CoverageInfo GetCoverageInfo()
+        {
+            var allEndpoints = new HashSet<string>(from endpoint in endpointCollection.Endpoints select endpoint.Name);
+            var coveredEndpoints = new HashSet<string>(from tuple2 in responsesCoveredByTests select tuple2.Item1);
+
+            var allResponseRules = new HashSet<string>();
+            foreach (var endpoint in endpointCollection.Endpoints)
+            {
+                var i = 0;
+                foreach (var tuple2 in endpoint.Responses)
+                {
+                    allResponseRules.Add($"{endpoint.Name}#{i++}");
+                }
+            }
+
+            var coveredResponseRules = new HashSet<string>(from tuple2 in responsesCoveredByTests select $"{tuple2.Item1}#{tuple2.Item2}");
+
+            return new CoverageInfo
+            {
+                EndpointsCovered = coveredEndpoints.ToArray(),
+                EndpointsNotCovered = allEndpoints.Except(coveredEndpoints).ToArray(),
+
+                ResponseRulesCovered = coveredResponseRules.ToArray(),
+                ResponseRulesNotCovered = allResponseRules.Except(coveredResponseRules).ToArray()
+            };
+        }
+
 
         public abstract void WriteBeginTest(int index, NetmockeryTestCase testcase);
         public abstract void WriteResult(NetmockeryTestCaseResult result);
         public abstract void WriteResponse(string response);
         public abstract void WriteSummary(int errors);
         public abstract void WriteError(string s);
+        public abstract void WriteLine(string s);
     }
 
     public class ConsoleTestRunner : TestRunner
@@ -149,31 +199,9 @@ namespace netmockery
             Console.WriteLine($"Total: {Tests.Count()} Errors: {errors}");
         }
 
-        public CoverageInfo GetCoverageInfo()
+        public override void WriteLine(string s)
         {
-            var allEndpoints = new HashSet<string>(from endpoint in endpointCollection.Endpoints select endpoint.Name);
-            var coveredEndpoints = new HashSet<string>(from tuple2 in responsesCoveredByTests select tuple2.Item1);
-
-            var allResponseRules = new HashSet<string>();
-            foreach (var endpoint in endpointCollection.Endpoints)
-            {
-                var i = 0;
-                foreach (var tuple2 in endpoint.Responses)
-                {
-                    allResponseRules.Add($"{endpoint.Name}#{i++}");
-                }
-            }
-
-            var coveredResponseRules = new HashSet<string>(from tuple2 in responsesCoveredByTests select $"{tuple2.Item1}#{tuple2.Item2}");
-
-            return new CoverageInfo
-            {
-                EndpointsCovered = coveredEndpoints.ToArray(),
-                EndpointsNotCovered = allEndpoints.Except(coveredEndpoints).ToArray(),
-
-                ResponseRulesCovered = coveredResponseRules.ToArray(),
-                ResponseRulesNotCovered = allResponseRules.Except(coveredResponseRules).ToArray()
-            };
+            Console.WriteLine(s);
         }
     }
 
