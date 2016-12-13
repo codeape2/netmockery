@@ -123,7 +123,6 @@ namespace UnitTests
         public void Dispose()
         {
             dc.Dispose();
-            RequestInfo.SetDynamicNow();
         }
 
         [Fact]
@@ -190,8 +189,7 @@ namespace UnitTests
         [Fact]
         public void SetStaticGetNow()
         {
-            RequestInfo.SetStaticNow(new DateTime(2015, 6, 7, 8, 9, 10));
-            Assert.Equal("2015-06-07 08:09:10", TestDynamicResponse.Eval("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")"));
+            Assert.Equal("2015-06-07 08:09:10", TestDynamicResponse.Eval("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")", now: new DateTime(2015, 6, 7, 8, 9, 10)));
         }
 
 

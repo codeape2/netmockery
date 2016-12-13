@@ -100,34 +100,78 @@ namespace netmockery
 
         public static void Test(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
         {
-            if (TestRunner.HasTestSuite(endpointCollection.SourceDirectory))
+            if (!TestRunner.HasTestSuite(endpointCollection.SourceDirectory))
             {
-                var testRunner = new ConsoleTestRunner(endpointCollection);
-                if (commandArgs.Url != null)
+                Error.WriteLine("ERROR: No test suite found");
+                return;
+            }
+
+            if (commandArgs.Diff && commandArgs.Only == null)
+            {
+                Error.WriteLine("ERROR: --diff can only be specified with --only");
+                return;
+            }
+
+            var testRunner = new ConsoleTestRunner(endpointCollection);
+            if (commandArgs.Url != null)
+            {
+                testRunner.Url = commandArgs.Url;
+            }
+
+            if (commandArgs.Only != null)
+            {
+                var index = int.Parse(commandArgs.Only);
+                if (commandArgs.Diff)
                 {
-                    testRunner.Url = commandArgs.Url;
+                    var testCase = testRunner.Tests.ElementAt(index);
+                    if (testCase.ExpectedResponseBody == null)
+                    {
+                        Error.WriteLine($"ERROR: Test case has no expected response body");
+                        return;
+                    }
+
+                    var responseTuple = testCase.GetResponseAsync(endpointCollection).Result;
+                    if (responseTuple.Item2 != null)
+                    {
+                        Error.WriteLine($"ERROR: {responseTuple.Item2}");
+                        return;
+                    }
+
+                    var expectedFilename = Path.GetTempFileName();
+                    var actualFilename = Path.GetTempFileName();
+
+                    File.WriteAllText(expectedFilename, testCase.ExpectedResponseBody);
+                    File.WriteAllText(actualFilename, responseTuple.Item1);
+
+                    StartExternalDiffTool(expectedFilename, actualFilename);
+
+                    return;
                 }
-                if (commandArgs.Only != null)
+                if (commandArgs.ShowResponse)
                 {
-                    var index = int.Parse(commandArgs.Only);
-                    if (commandArgs.ShowResponse)
-                    {
-                        testRunner.ShowResponse(index);
-                    }
-                    else
-                    {
-                        testRunner.ExecuteTestAndOutputResult(index);
-                    }
+                    testRunner.ShowResponse(index);
                 }
                 else
                 {
-                    testRunner.TestAll(commandArgs.Stop, true);
-                }                
+                    testRunner.ExecuteTestAndOutputResult(index);
+                }
             }
             else
             {
-                Error.WriteLine("ERROR: No test suite found");
+                testRunner.TestAll(commandArgs.Stop, true);
+            }                
+        }
+
+        public static void StartExternalDiffTool(string expectedFilename, string actualFilename)
+        {
+            var difftool = Environment.GetEnvironmentVariable("DIFFTOOL");
+            if (difftool == null)
+            {
+                Error.WriteLine("ERROR: No diff tool configured. Set DIFFTOOL environment variable to point to executable.");
+                return;
             }
+
+            Process.Start(difftool, $"\"{expectedFilename}\" \"{actualFilename}\"");
         }
 
 

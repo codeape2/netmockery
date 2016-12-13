@@ -76,6 +76,8 @@ namespace netmockery
 
     public class RequestInfo
     {
+        private DateTime _now = DateTime.MinValue;
+
         public string RequestPath;
         public string QueryString;
         public string RequestBody;
@@ -84,16 +86,9 @@ namespace netmockery
 
         public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
 
-        private static DateTime _now = DateTime.MinValue;
-
-        public static void SetStaticNow(DateTime now)
+        public void SetStaticNow(DateTime now)
         {
             _now = now;
-        }
-
-        public static void SetDynamicNow()
-        {
-            _now = DateTime.MinValue;
         }
     }
 

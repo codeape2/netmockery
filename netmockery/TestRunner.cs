@@ -13,8 +13,11 @@ namespace netmockery
         private IEnumerable<NetmockeryTestCase> testcases;
         protected EndpointCollection endpointCollection;
         protected HashSet<Tuple<string, int>> responsesCoveredByTests = new HashSet<Tuple<string, int>>();
+        private DateTime? now;
 
         public string Url { get; set; }
+
+        public DateTime? Now => now;
 
         public TestRunner(EndpointCollection endpointCollection)
         {
@@ -31,8 +34,7 @@ namespace netmockery
             if (File.Exists(now_txt_filename(directory)))
             {
                 var contents = File.ReadAllText(now_txt_filename(directory));
-                var datetime = DateTime.ParseExact(contents, "yyyy-MM-dd HH:mm:ss", null);
-                RequestInfo.SetStaticNow(datetime);
+                now = DateTime.ParseExact(contents, "yyyy-MM-dd HH:mm:ss", null);
             }
         }
 
@@ -102,7 +104,7 @@ namespace netmockery
         {
             WriteBeginTest(index, test);
             
-            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.ExecuteAsync(endpointCollection).Result;
+            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.ExecuteAsync(endpointCollection, now: now).Result;
             WriteResult(result);
 
             responsesCoveredByTests.Add(Tuple.Create(result.EndpointName, result.ResponseIndex));

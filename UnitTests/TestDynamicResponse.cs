@@ -11,11 +11,15 @@ namespace UnitTests
 {
     public class TestDynamicResponse 
     {
-        static public string Eval(string code, RequestInfo requestInfo = null)
+        static public string Eval(string code, RequestInfo requestInfo = null, DateTime? now = null)
         {
             if (requestInfo == null)
             {
                 requestInfo = new RequestInfo();
+            }
+            if (now != null)
+            {
+                requestInfo.SetStaticNow(now.Value);
             }
             return new LiteralDynamicResponseCreator(code).GetBody(requestInfo);
         }

@@ -61,7 +61,7 @@ namespace UnitTests
             foreach (var test in tests.Tests)
             {
                 output.WriteLine(test.Name);
-                var result = test.ExecuteAsync(endpointCollection).Result;
+                var result = test.ExecuteAsync(endpointCollection, now: tests.Now).Result;
                 output.WriteLine(result.ResultAsString);
                 Assert.True(result.OK, $"Test case {result.TestCase.Name}, message '{result.Message}'");
             }

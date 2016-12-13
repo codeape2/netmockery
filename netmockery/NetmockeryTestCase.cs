@@ -176,7 +176,7 @@ namespace netmockery
         private const string ERROR_ENDPOINT_HAS_NO_MATCH = "Endpoint has no match for request";
 
 
-        async public Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true)
+        async public Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
         {
             Debug.Assert(endpointCollection != null);
 
@@ -204,14 +204,25 @@ namespace netmockery
                 string responseBody = null;
                 if (NeedsResponseBody)
                 {
-                    var httpResponse = new TestCaseHttpResponse();
-                    var responseBodyBytes = await responseCreator.CreateResponseAsync(
-                        new TestCaseHttpRequest(RequestPath, QueryString), 
-                        Encoding.UTF8.GetBytes(RequestBody ?? ""), 
-                        httpResponse, 
-                        endpoint.Directory
-                    );
-                    responseBody = httpResponse.GetWrittenResponseAsString();
+                    var simpleResponseCreator = responseCreator as SimpleResponseCreator;
+                    if (simpleResponseCreator == null)
+                    {
+                        return testResult.SetFailure($"Response creator {responseCreator.ToString()} not supported by test framework");
+                    }
+
+                    var requestInfo = new RequestInfo
+                    {
+                        EndpointDirectory = endpoint.Directory,
+                        Headers = null,
+                        RequestPath = RequestPath,
+                        QueryString = QueryString,
+                        RequestBody = RequestBody
+                    };
+                    if (now != null)
+                    {
+                        requestInfo.SetStaticNow(now.Value);
+                    }
+                    responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
                 }
                 string message;
                 if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, out message))
@@ -240,9 +251,21 @@ namespace netmockery
             var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null);
             if (matcher_and_creator != null)
             {
-                var responseCreator = matcher_and_creator.ResponseCreator;
-                var responseBodyBytes = await responseCreator.CreateResponseAsync(new TestCaseHttpRequest(RequestPath, QueryString), Encoding.UTF8.GetBytes(RequestBody ?? ""), new TestCaseHttpResponse(), endpoint.Directory);
-                return Tuple.Create(Encoding.UTF8.GetString(responseBodyBytes), (string)null);
+                var responseCreator = matcher_and_creator.ResponseCreator as SimpleResponseCreator;
+                if (responseCreator == null)
+                {
+                    return Tuple.Create((string)null, $"This response creator is not supported by test framework: {matcher_and_creator.ResponseCreator.ToString()}");
+                }
+
+                var responseBody = responseCreator.GetBodyAndExecuteReplacements(new RequestInfo
+                {
+                    EndpointDirectory = endpoint.Directory,
+                    Headers = null,
+                    QueryString = QueryString,
+                    RequestBody = RequestBody,
+                    RequestPath = RequestPath
+                });
+                return Tuple.Create(responseBody, (string)null);
             }
             else
             {
