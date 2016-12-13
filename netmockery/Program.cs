@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -120,46 +121,68 @@ namespace netmockery
 
             if (commandArgs.Only != null)
             {
-                var index = int.Parse(commandArgs.Only);
-                if (commandArgs.Diff)
+                var indexes = ParseOnlyArgument(commandArgs.Only, (from testCase in testRunner.Tests select testCase.Name).ToArray());
+                if (indexes.Length == 0)
                 {
-                    var testCase = testRunner.Tests.ElementAt(index);
-                    if (testCase.ExpectedResponseBody == null)
-                    {
-                        Error.WriteLine($"ERROR: Test case has no expected response body");
-                        return;
-                    }
-
-                    var responseTuple = testCase.GetResponseAsync(endpointCollection).Result;
-                    if (responseTuple.Item2 != null)
-                    {
-                        Error.WriteLine($"ERROR: {responseTuple.Item2}");
-                        return;
-                    }
-
-                    var expectedFilename = Path.GetTempFileName();
-                    var actualFilename = Path.GetTempFileName();
-
-                    File.WriteAllText(expectedFilename, testCase.ExpectedResponseBody);
-                    File.WriteAllText(actualFilename, responseTuple.Item1);
-
-                    StartExternalDiffTool(expectedFilename, actualFilename);
-
-                    return;
+                    Error.WriteLine("ERROR: No testcases matches --only");
                 }
-                if (commandArgs.ShowResponse)
+
+                foreach (var index in indexes)
                 {
-                    testRunner.ShowResponse(index);
-                }
-                else
-                {
-                    testRunner.ExecuteTestAndOutputResult(index);
+                    if (commandArgs.Diff)
+                    {
+                        var testCase = testRunner.Tests.ElementAt(index);
+                        if (testCase.ExpectedResponseBody == null)
+                        {
+                            Error.WriteLine($"ERROR: Test case has no expected response body");
+                            return;
+                        }
+
+                        var responseTuple = testCase.GetResponse(endpointCollection, testRunner.Now);
+                        if (responseTuple.Item2 != null)
+                        {
+                            Error.WriteLine($"ERROR: {responseTuple.Item2}");
+                            return;
+                        }
+
+                        var expectedFilename = Path.GetTempFileName();
+                        var actualFilename = Path.GetTempFileName();
+
+                        File.WriteAllText(expectedFilename, testCase.ExpectedResponseBody);
+                        File.WriteAllText(actualFilename, responseTuple.Item1);
+
+                        StartExternalDiffTool(expectedFilename, actualFilename);
+                    }
+                    if (commandArgs.ShowResponse)
+                    {
+                        testRunner.ShowResponse(index);
+                    }
+                    else
+                    {
+                        testRunner.ExecuteTestAndOutputResult(index);
+                    }
                 }
             }
             else
             {
                 testRunner.TestAll(commandArgs.Stop, true);
             }                
+        }
+
+        public static int[] ParseOnlyArgument(string only, string[] names)
+        {
+            if (Regex.IsMatch(only, @"^\d+$"))
+            {
+                return new[] { int.Parse(only) };
+            }
+            else if (Regex.IsMatch(only, @"^(\d+)(,\d+)+$"))
+            {
+                return (from strval in only.Split(',') select int.Parse(strval)).ToArray();
+            }
+            else
+            {
+                return (from i in Enumerable.Range(0, names.Length) where names[i].ToLower().Contains(only.ToLower()) select i).ToArray();
+            }
         }
 
         public static void StartExternalDiffTool(string expectedFilename, string actualFilename)

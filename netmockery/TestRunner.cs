@@ -115,7 +115,7 @@ namespace netmockery
         public void ShowResponse(int index)
         {
             var testCase = testcases.ElementAt(index);
-            var response = testCase.GetResponseAsync(endpointCollection).Result;
+            var response = testCase.GetResponse(endpointCollection, Now);
             if (response.Item2 != null)
             {
                 WriteError(response.Item2);

@@ -122,12 +122,6 @@ namespace UnitTests
         }
 
         [Fact]
-        public void OnlyOptionMustBeNumeric()
-        {
-            AssertGivesException("Argument --only: integer required", new[] { "c:\\dir\\foo", "test", "--only", "a" });
-        }
-
-        [Fact]
         public void DumpCommand()
         {
             var result = ParseArguments(new[] { "c:\\foo\\bar", "dump" });

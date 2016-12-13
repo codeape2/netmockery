@@ -68,6 +68,8 @@ namespace netmockery
         }
     }
 
+
+    //TODO: Refactoring needed. Smell: RequestInfo is created in two different places (search for new RequestInfo)
     public class NetmockeryTestCase
     {
         public string Name;
@@ -241,14 +243,14 @@ namespace netmockery
             }
         }
 
-        async public Task<Tuple<string, string>> GetResponseAsync(EndpointCollection endpointCollection)
+        public Tuple<string, string> GetResponse(EndpointCollection endpointCollection, DateTime? now)
         {
             var endpoint = endpointCollection.Resolve(RequestPath);
             if (endpoint == null)
             {
                 return Tuple.Create((string)null, ERROR_NOMATCHING_ENDPOINT);
             }
-            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody, null);
+            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
             if (matcher_and_creator != null)
             {
                 var responseCreator = matcher_and_creator.ResponseCreator as SimpleResponseCreator;
@@ -257,14 +259,19 @@ namespace netmockery
                     return Tuple.Create((string)null, $"This response creator is not supported by test framework: {matcher_and_creator.ResponseCreator.ToString()}");
                 }
 
-                var responseBody = responseCreator.GetBodyAndExecuteReplacements(new RequestInfo
+                var requestInfo = new RequestInfo
                 {
                     EndpointDirectory = endpoint.Directory,
                     Headers = null,
                     QueryString = QueryString,
                     RequestBody = RequestBody,
                     RequestPath = RequestPath
-                });
+                };
+                if (now != null)
+                {
+                    requestInfo.SetStaticNow(now.Value);
+                }
+                var responseBody = responseCreator.GetBodyAndExecuteReplacements(requestInfo);
                 return Tuple.Create(responseBody, (string)null);
             }
             else

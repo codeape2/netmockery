@@ -57,15 +57,6 @@ namespace netmockery
                 {
                     var value = args[++i];
                     switchValues[arg] = value;
-
-                    if (arg == VALUE_SWITCH_ONLY)
-                    {
-                        int dummy;
-                        if (! int.TryParse(value, out dummy))
-                        {
-                            throw new CommandLineParsingException($"Argument --only: integer required");
-                        }
-                    }
                     seenSwitches.Add(arg);
                 }
                 else if (BOOL_SWITCHES.Contains(arg))
