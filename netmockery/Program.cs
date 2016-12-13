@@ -90,7 +90,29 @@ namespace netmockery
                     Dump(endpointCollection);
                     break;
 
+                case CommandLineParser.COMMAND_AMQP:
+                    Amqp(endpointCollection);
+                    break;
+
               }
+        }
+
+        static public void Amqp(EndpointCollection endpointCollection)
+        {
+            var amqpConfig = AMQPConfig.ReadFromDirectory(Path.Combine(endpointCollection.SourceDirectory, "amqp"));
+
+            WriteLine($"Starting AMQP on {amqpConfig.Uri}");
+            foreach (var queueAddress in amqpConfig.QueueAddresses)
+            {
+                WriteLine("    " + queueAddress);
+            }
+            WriteLine($"Total {amqpConfig.QueueAddresses.Count()} queues");
+
+            var stopper = amqpConfig.StartContainerHost();
+            WriteLine("Enter stops");
+            ReadLine();
+            WriteLine("Stopping AMQP");
+            stopper();
         }
 
         static public void RunAsService(ParsedCommandLine commandArgs)

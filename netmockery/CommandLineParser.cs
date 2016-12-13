@@ -12,6 +12,7 @@ namespace netmockery
         public const int COMMAND_SERVICE = 2;
         public const int COMMAND_TEST = 3;
         public const int COMMAND_DUMP = 4;
+        public const int COMMAND_AMQP = 5;
 
         private const string VALUE_SWITCH_URL = "--url";
         private const string VALUE_SWITCH_ONLY = "--only";
@@ -28,7 +29,8 @@ namespace netmockery
             { COMMAND_NORMAL, new[] { VALUE_SWITCH_URL, BOOL_SWITCH_NOTESTMODE } },
             { COMMAND_SERVICE, new[] { VALUE_SWITCH_URL } },
             { COMMAND_TEST, new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF} },
-            { COMMAND_DUMP, new string[0] }
+            { COMMAND_DUMP, new string[0] },
+            { COMMAND_AMQP, new string[0] }
         };
 
 
@@ -102,6 +104,10 @@ namespace netmockery
 
                     case "dump":
                         command = COMMAND_DUMP;
+                        break;
+
+                    case "amqp":
+                        command = COMMAND_AMQP;
                         break;
 
                     default:

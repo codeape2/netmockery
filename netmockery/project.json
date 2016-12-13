@@ -11,7 +11,8 @@
     "Markdown": "2.1.0",
     "Microsoft.AspNetCore.StaticFiles": "1.0.0",
     "System.Net.Http": "4.1.0",
-    "Microsoft.AspNetCore.Hosting.WindowsServices":  "1.1.0-preview1-final"
+    "Microsoft.AspNetCore.Hosting.WindowsServices": "1.1.0-preview1-final",
+    "AMQPNetLite": "1.2.2"
   },
 
   "tools": {
