@@ -159,7 +159,7 @@ namespace netmockery
                     simpleResponseCreator.Replacements = new BodyReplacement[0];
                 }
 
-                Debug.Assert(simpleResponseCreator.Encoding == Encoding.GetEncoding("iso-8859-1"));
+                Debug.Assert(simpleResponseCreator.Encoding == Encoding.UTF8);
                 if (charset != null)
                 {
                     simpleResponseCreator.Encoding = Encoding.GetEncoding(charset);

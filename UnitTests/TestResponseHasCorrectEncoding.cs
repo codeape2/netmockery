@@ -20,7 +20,7 @@ namespace UnitTests
             dc.AddFile("endpoint1\\myfile.txt", "æøå");
 
             var endpoint2 = DataUtils.CreateSimpleEndpoint("endpoint2", "myfile.txt", "/endpoint2");
-            endpoint2.responses[0].charset = "utf-8";
+            endpoint2.responses[0].charset = "latin1";
             dc.AddFile("endpoint2\\endpoint.json", JsonConvert.SerializeObject(endpoint2));
             dc.AddFile("endpoint2\\myfile.txt", "æøå");
             var tests = new List<JSONTest>(new[] {
@@ -43,27 +43,31 @@ namespace UnitTests
         }
 
         [Fact]
-        async public Task ResponseHasLatin1EncodingIfNotConfigured()
+        async public Task ResponseHasUtf8EncodingIfNotConfigured()
         {
             var response = await client.GetAsync("/endpoint1");
             var bytes = await response.Content.ReadAsByteArrayAsync();
-            var str = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-            Assert.Equal("æøå", str);
+            Assert.Equal("æøå", DecodeUtf8(bytes));
+            Assert.NotEqual("æøå", DecodeLatin1(bytes));
+        }
 
-            var utf8string = Encoding.UTF8.GetString(bytes);
-            Assert.NotEqual("æøå", utf8string);
+        private string DecodeLatin1(byte[] bytes)
+        {
+            return Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
+        }
+
+        private string DecodeUtf8(byte[] bytes)
+        {
+            return Encoding.UTF8.GetString(bytes);
         }
 
         [Fact]
-        async public Task ResponseCanBeUTF8IfConfigured()
+        async public Task ResponseCanBeLatin1IfConfigured()
         {
             var response = await client.GetAsync("/endpoint2");
             var bytes = await response.Content.ReadAsByteArrayAsync();
-            var str = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-            Assert.NotEqual("æøå", str);
-
-            var utf8string = Encoding.UTF8.GetString(bytes);
-            Assert.Equal("æøå", utf8string);
+            Assert.Equal("æøå", DecodeLatin1(bytes));
+            Assert.NotEqual("æøå", DecodeUtf8(bytes));
         }
 
         [Fact]
@@ -71,11 +75,11 @@ namespace UnitTests
         {
             var response = await client.GetAsync("/endpoint1");
             Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal("iso-8859-1", response.Content.Headers.ContentType.CharSet);
+            Assert.Equal("utf-8", response.Content.Headers.ContentType.CharSet);
 
             response = await client.GetAsync("/endpoint2");
             Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal("utf-8", response.Content.Headers.ContentType.CharSet);
+            Assert.Equal("iso-8859-1", response.Content.Headers.ContentType.CharSet);
         }
 
         //[Fact]

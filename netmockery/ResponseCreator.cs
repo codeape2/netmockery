@@ -127,7 +127,7 @@ namespace netmockery
         }
         public string ContentType { get; set; }
         public abstract string GetBody(RequestInfo requestInfo);
-        public Encoding Encoding { get; set; } = Encoding.GetEncoding("ISO-8859-1");
+        public Encoding Encoding { get; set; } = Encoding.UTF8;
         
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 
