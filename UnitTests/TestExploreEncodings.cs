@@ -16,6 +16,7 @@ namespace UnitTests
             AssertIsValidEncodingName("utf-8");
             AssertIsValidEncodingName("latin1");
             AssertIsValidEncodingName("iso-8859-1");
+            AssertIsValidEncodingName("ascii");
         }
 
         [Fact]
