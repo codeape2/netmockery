@@ -80,13 +80,15 @@ namespace netmockery
         public string ExpectedRequestMatcher;
         public string ExpectedResponseCreator;
 
+        public string ExpectedContentType;
+        public string ExpectedCharSet;
         public string ExpectedResponseBody;
 
         public bool NeedsResponseBody
         {
             get
             {
-                return (new[] { ExpectedResponseBody }).Any(val => val != null);
+                return (new[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
             }
         }
 
@@ -94,14 +96,17 @@ namespace netmockery
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator }).Any(val => val != null);
+                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
             }
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, out string message)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, out string message)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
+            Debug.Assert(contentType != null || !NeedsResponseBody);
+            Debug.Assert(charset != null || !NeedsResponseBody);
+
             Debug.Assert(requestMatcher != null);
             Debug.Assert(responseCreator != null);
             message = null;
@@ -121,6 +126,18 @@ namespace netmockery
             if (ExpectedResponseBody != null && ExpectedResponseBody != responseBody)
             {
                 message = $"Expected response body:\n{ExpectedResponseBody}\n\nActual response body:\n{responseBody}";
+                return false;
+            }
+
+            if (ExpectedContentType != null && ExpectedContentType != contentType)
+            {
+                message = $"Expected contenttype: '{ExpectedContentType}'\nActual: '{contentType}'";
+                return false;
+            }
+
+            if (ExpectedCharSet != null && ExpectedCharSet != charset)
+            {
+                message = $"Expected charset: '{ExpectedCharSet}'\nActual: '{charset}'";
                 return false;
             }
 
@@ -157,7 +174,15 @@ namespace netmockery
             {
                 responseCreator = responseMessage.Headers.GetValues("X-Netmockery-ResponseCreator").ElementAt(0);
             }
-            if (Evaluate(requestMatcher, responseCreator, body, out message))
+            var contentType = "";
+            var charset = "";
+            if (responseMessage.Content.Headers.ContentType != null)
+            {
+                contentType = responseMessage.Content.Headers.ContentType.MediaType;
+                charset = responseMessage.Content.Headers.ContentType.CharSet;
+            }
+
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, out message))
             {
                 retval.SetSuccess();
             }
@@ -204,6 +229,8 @@ namespace netmockery
 
                 var responseCreator = matcher_and_creator.ResponseCreator;
                 string responseBody = null;
+                string charset = "";
+                string contenttype = "";
                 if (NeedsResponseBody)
                 {
                     var simpleResponseCreator = responseCreator as SimpleResponseCreator;
@@ -225,9 +252,11 @@ namespace netmockery
                         requestInfo.SetStaticNow(now.Value);
                     }
                     responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
+                    contenttype = simpleResponseCreator.ContentType ?? "";
+                    charset = simpleResponseCreator.Encoding.WebName;
                 }
                 string message;
-                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, out message))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, out message))
                 {
                     return testResult.SetSuccess();
                 }

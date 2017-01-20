@@ -27,6 +27,8 @@ namespace netmockery
         public string expectedrequestmatcher;
         public string expectedresponsecreator;
         public string expectedresponsebody;
+        public string expectedcontenttype;
+        public string expectedcharset;
 
         public JSONTest Validated()
         {
@@ -58,6 +60,8 @@ namespace netmockery
                 ExpectedRequestMatcher = expectedrequestmatcher,
                 ExpectedResponseCreator = expectedresponsecreator,
 
+                ExpectedContentType = expectedcontenttype,
+                ExpectedCharSet = expectedcharset,
                 ExpectedResponseBody = 
                     expectedresponsebody != null && expectedresponsebody.StartsWith("file:")
                     ? 

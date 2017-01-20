@@ -31,6 +31,7 @@ namespace UnitTests
             'match': {},
             'script': 'myscript.csscript',
             'contenttype': 'text/xml',
+            'charset': 'ascii',
             'replacements': [
                 {'search': 'a', 'replace': 'b'},
                 {'search': 'foo', 'replace': 'bar'}
@@ -290,6 +291,68 @@ namespace UnitTests
                 .Validated().CreateTestCase(".");
             var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK);
+        }
+
+        [Fact]
+        async public Task CanCheckExpectedContentTypeSuccess()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcontenttype = "text/xml" })
+                .Validated().CreateTestCase(".");
+
+            Assert.True(testcase.HasExpectations);
+            Assert.True(testcase.NeedsResponseBody);
+            Assert.Equal("text/xml", testcase.ExpectedContentType);
+
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.True(result.OK);
+        }
+
+        [Fact]
+        async public Task CanCheckExpectedContentTypeError()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcontenttype = "text/plain" })
+                .Validated().CreateTestCase(".");
+
+            Assert.Equal("text/plain", testcase.ExpectedContentType);
+
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.Null(result.Exception);
+            Assert.True(result.Error);            
+            Assert.Equal("Expected contenttype: 'text/plain'\nActual: 'text/xml'", result.Message);
+        }
+
+        [Fact]
+        async public Task CanCheckExpectedCharSetSuccess()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcharset = "us-ascii" })
+                .Validated().CreateTestCase(".");
+
+            Assert.True(testcase.HasExpectations);
+            Assert.True(testcase.NeedsResponseBody);
+            Assert.Equal("us-ascii", testcase.ExpectedCharSet);
+
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.Null(result.Exception);
+            Assert.Equal(null, result.Message);
+            Assert.True(result.OK);
+        }
+
+        [Fact]
+        async public Task CanCheckExpectedCharSetError()
+        {
+            var testcase =
+                (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcharset = "utf-8" })
+                .Validated().CreateTestCase(".");
+
+            Assert.Equal("utf-8", testcase.ExpectedCharSet);
+
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            Assert.Null(result.Exception);
+            Assert.True(result.Error);
+            Assert.Equal("Expected charset: 'utf-8'\nActual: 'us-ascii'", result.Message);
         }
 
         [Fact]
