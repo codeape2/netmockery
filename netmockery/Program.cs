@@ -131,6 +131,13 @@ namespace netmockery
                 {
                     if (commandArgs.Diff)
                     {
+                        var diffTool = Environment.GetEnvironmentVariable("DIFFTOOL");
+                        if (diffTool == null)
+                        {
+                            Error.WriteLine("ERROR: No diff tool configured. Set DIFFTOOL environment variable to point to executable.");
+                            return;
+                        }
+
                         var testCase = testRunner.Tests.ElementAt(index);
                         if (testCase.ExpectedResponseBody == null)
                         {
@@ -151,15 +158,18 @@ namespace netmockery
                         File.WriteAllText(expectedFilename, testCase.ExpectedResponseBody);
                         File.WriteAllText(actualFilename, responseTuple.Item1);
 
-                        StartExternalDiffTool(expectedFilename, actualFilename);
-                    }
-                    if (commandArgs.ShowResponse)
-                    {
-                        testRunner.ShowResponse(index);
+                        StartExternalDiffTool(diffTool, expectedFilename, actualFilename);
                     }
                     else
                     {
-                        testRunner.ExecuteTestAndOutputResult(index);
+                        if (commandArgs.ShowResponse)
+                        {
+                            testRunner.ShowResponse(index);
+                        }
+                        else
+                        {
+                            testRunner.ExecuteTestAndOutputResult(index);
+                        }
                     }
                 }
             }
@@ -185,16 +195,13 @@ namespace netmockery
             }
         }
 
-        public static void StartExternalDiffTool(string expectedFilename, string actualFilename)
+        public static void StartExternalDiffTool(string diffTool, string expectedFilename, string actualFilename)
         {
-            var difftool = Environment.GetEnvironmentVariable("DIFFTOOL");
-            if (difftool == null)
-            {
-                Error.WriteLine("ERROR: No diff tool configured. Set DIFFTOOL environment variable to point to executable.");
-                return;
-            }
-
-            Process.Start(difftool, $"\"{expectedFilename}\" \"{actualFilename}\"");
+            Debug.Assert(diffTool != null);
+            Debug.Assert(File.Exists(expectedFilename));
+            Debug.Assert(File.Exists(actualFilename));
+            WriteLine($"Starting external diff tool {diffTool}");
+            Process.Start(diffTool, $"\"{expectedFilename}\" \"{actualFilename}\"");
         }
 
 
