@@ -380,6 +380,9 @@ Specifying the expectations:
 * ``expectedrequestmatcher``: Display name of request matcher
 * ``expectedresponsecreator``: Display name of response creator
 * ``expectedresponsebody``: Expected response body contents. If specified as ``file:filename``, the expected response body is read from the specified file.
+* ``expectedcontenttype``: Expected response content type
+* ``expectedcharset``: Expected response charset
+
 
 ## Running tests
 
