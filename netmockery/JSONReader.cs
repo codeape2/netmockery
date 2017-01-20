@@ -11,9 +11,9 @@ namespace netmockery
 {
     public static class JSONReader
     {
-        public static Endpoint ReadEndpoint(string jsonString, string rootDir)
+        public static Endpoint ReadEndpoint(string jsonString, string rootDir, JSONDefaults globalDefaults)
         {
-            return JsonConvert.DeserializeObject<JSONEndpoint>(jsonString).CreateEndpoint(rootDir);
+            return JsonConvert.DeserializeObject<JSONEndpoint>(jsonString).CreateEndpoint(rootDir, globalDefaults);
         }
     }
 
@@ -105,7 +105,11 @@ namespace netmockery
             }
             //TODO: Implement related validation
             //TODO: Implement set if main not set validation (i.e. proxy set but not forward)
+            
             //TODO: Implement invalid for type validation (i.e. contenttype if a forward response creator)
+            // but remember this is problematic in the case of global defaults
+            // unclean solution is to apply defaults after validation
+            // clean solution is to apply defaults only based on rules, i.e. for forward response creator, do not apply defaults
             return this;
         }
 
@@ -218,16 +222,56 @@ namespace netmockery
         public JSONResponse[] responses;
 
 
-        public Endpoint CreateEndpoint(string rootDir)
+        public Endpoint CreateEndpoint(string rootDir, JSONDefaults globalDefaults)
         {
             var endpoint = new Endpoint(name, pathregex);
+
+            var endpointDefaultsFile = Path.Combine(rootDir, "defaults.json");
+            var endpointDefaults =
+                File.Exists(endpointDefaultsFile)
+                ?
+                JsonConvert.DeserializeObject<JSONDefaults>(File.ReadAllText(endpointDefaultsFile))
+                :
+                null;
+
             foreach (var jsonResponse in responses)
             {
+                if (endpointDefaults != null)
+                {
+                    applyDefaults(endpointDefaults, jsonResponse);
+                }
+
+                if (globalDefaults != null)
+                {
+                    applyDefaults(globalDefaults, jsonResponse);
+                }
                 var validatedJsonResponse = jsonResponse.Validated();
                 endpoint.Add(validatedJsonResponse.match.CreateRequestMatcher(), validatedJsonResponse.CreateResponseCreator(rootDir));
             }
             endpoint.Directory = rootDir;
             return endpoint;
         }
+
+        private void applyDefaults(JSONDefaults defaults, JSONResponse jsonResponse)
+        {
+            Debug.Assert(defaults != null);
+            Debug.Assert(jsonResponse != null);
+
+            if (defaults.charset != null && jsonResponse.charset == null)
+            {
+                jsonResponse.charset = defaults.charset;
+            }
+
+            if (defaults.contenttype != null && jsonResponse.contenttype == null)
+            {
+                jsonResponse.contenttype = defaults.contenttype;
+            }
+        }
+    }
+
+    public class JSONDefaults
+    {
+        public string contenttype;
+        public string charset;
     }
 }

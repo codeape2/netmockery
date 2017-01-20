@@ -197,6 +197,27 @@ for more information.
 * ``replacements``: TODO: Document. Not used for the forward request response creator.
 * ``delay``: If set, netmockery waits for the specified number of seconds before returning the response to the client.
 
+### Defaults
+
+Default ``contenttype`` and ``charset`` can be configured by endpoint and for the entire endpoint collection.
+
+To set defaults for an endpoint, create a ``defaults.json`` file inside the endpoint directory (i.e. in the same directory as ``endpoint.json``).
+
+To set global defaults, create a ``defaults.json`` file in the endpoint collection directory (i.e. in the endpoint collection root directory).
+
+Example ``defaults.json`` file:
+
+    {
+      "contenttype": "application/xml",
+      "charset": "ascii"
+    } 
+
+If ``contenttype`` and/or ``charset`` is set on an individual request creator, it will override the defaults. Defaults defined on the endpoint level 
+overrides defaults on the endpoint collection level.
+
+If no defaults are used, the default for ``charset`` is utf-8. There is no default for ``contenttype``. See also the section 
+"HTTP Response encoding and the Content-Type header".
+
 
 ### Encodings
 
@@ -211,16 +232,16 @@ for more information.
 #### HTTP Response encoding and the Content-Type header
 
 * The ``charset`` parameter determines the response encoding for netmockery responses (expect for forwarded external requests).
-* If no charset parameter is specified, netmockery uses ISO-8859-1 (latin1) encoding.
+* If no charset parameter is specified, netmockery uses UTF-8 encoding.
 * The Content-Type header for the responses is set in this manner:
  * If ``contenttype`` is NOT set, no ``Content-Type`` header is set for the responses
  * If ``contenttype`` is set to ``foo/bar`` and ``charset`` is NOT set
-  1. netmockery encodes the response using the ISO-8859-1 encoding
-  2. ``Content-Type`` = ``foo/bar; charset=iso-8859-1``
- * If ``contenttype`` is set to ``foo/bar`` and ``charset`` is set to one of the supported encodings (see list below)
-  1. netmockery encodes the response using the specified encoding (eg. ``utf-8``)
+  1. netmockery encodes the response using the UTF-8 encoding
   2. ``Content-Type`` = ``foo/bar; charset=utf-8``
-* For forwarded external requests, not encoding and content-type handling is done.
+ * If ``contenttype`` is set to ``foo/bar`` and ``charset`` is set to one of the supported encodings (see list below)
+  1. netmockery encodes the response using the specified encoding (eg. ``iso-8859-1``)
+  2. ``Content-Type`` = ``foo/bar; charset=iso-8859-1``
+* For forwarded external requests, no encoding and content-type handling is done.
 
 #### Valid charset names (not case sensitive)
 

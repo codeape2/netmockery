@@ -37,14 +37,14 @@ namespace UnitTests
         [Fact]
         public void SimpleEndpointAttributes()
         {
-            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory");
+            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory", globalDefaults: null);
             Assert.Equal("foo", endpoint.Name);
             Assert.Equal("^/foo/$", endpoint.PathRegex);
         }
 
         private Tuple<RequestMatcher, ResponseCreator> ParseResponse(string json)
         {
-            var endpoint = JSONReader.ReadEndpoint("{'name': 'foo', 'pathregex': 'foo', 'responses': [" + json + "]}", "r:\\oot\\directory");
+            var endpoint = JSONReader.ReadEndpoint("{'name': 'foo', 'pathregex': 'foo', 'responses': [" + json + "]}", "r:\\oot\\directory", globalDefaults: null);
             var responses = endpoint.Responses.ToArray();
             Debug.Assert(responses.Length == 1);
             return responses[0];
@@ -53,7 +53,7 @@ namespace UnitTests
         [Fact]
         public void Responses()
         {
-            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory");
+            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory", globalDefaults: null);
             var responses = endpoint.Responses.ToArray();
             Assert.Equal(2, responses.Length);
 
