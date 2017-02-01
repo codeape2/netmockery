@@ -70,7 +70,7 @@ namespace UnitTests
                         match = new JSONRequestMatcher(),
                         file = "myfile.xml",
                         contenttype = "text/xml",
-                        httpStatusCode = "200"
+                        statuscode = 200
                     }
                 }
             };

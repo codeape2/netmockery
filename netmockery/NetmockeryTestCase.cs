@@ -93,12 +93,13 @@ namespace netmockery
         public string ExpectedContentType;
         public string ExpectedCharSet;
         public string ExpectedResponseBody;
+        public string ExpectedStatusCode;
 
         public bool NeedsResponseBody
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
+                return (new[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
@@ -106,16 +107,17 @@ namespace netmockery
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
+                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, out string message)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, out string message, string httpStatusCode)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
             Debug.Assert(contentType != null || !NeedsResponseBody);
             Debug.Assert(charset != null || !NeedsResponseBody);
+            Debug.Assert(httpStatusCode != null || !NeedsResponseBody);
 
             Debug.Assert(requestMatcher != null);
             Debug.Assert(responseCreator != null);
@@ -148,6 +150,12 @@ namespace netmockery
             if (ExpectedCharSet != null && ExpectedCharSet != charset)
             {
                 message = $"Expected charset: '{ExpectedCharSet}'\nActual: '{charset}'";
+                return false;
+            }
+
+            if (ExpectedStatusCode != null && ExpectedStatusCode != httpStatusCode)
+            {
+                message = $"Expected http status code: '{ExpectedStatusCode}'\nActual: '{httpStatusCode}'";
                 return false;
             }
 
@@ -186,13 +194,15 @@ namespace netmockery
             }
             var contentType = "";
             var charset = "";
+            var statusCode = "";
             if (responseMessage.Content.Headers.ContentType != null)
             {
                 contentType = responseMessage.Content.Headers.ContentType.MediaType;
                 charset = responseMessage.Content.Headers.ContentType.CharSet;
+                statusCode = responseMessage.StatusCode.ToString("d");
             }
 
-            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, out message))
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, out message, statusCode))
             {
                 retval.SetSuccess();
             }
@@ -241,6 +251,7 @@ namespace netmockery
                 string responseBody = null;
                 string charset = "";
                 string contenttype = "";
+                string statusCode = "";
                 if (NeedsResponseBody)
                 {
                     var simpleResponseCreator = responseCreator as SimpleResponseCreator;
@@ -264,9 +275,10 @@ namespace netmockery
                     responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
                     contenttype = simpleResponseCreator.ContentType ?? "";
                     charset = simpleResponseCreator.Encoding.WebName;
+                    statusCode = simpleResponseCreator.HttpStatusCode.ToString("d");
                 }
                 string message;
-                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, out message))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, out message, statusCode))
                 {
                     return testResult.SetSuccess();
                 }

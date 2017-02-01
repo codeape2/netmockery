@@ -30,6 +30,7 @@ namespace netmockery
         public string expectedresponsebody;
         public string expectedcontenttype;
         public string expectedcharset;
+        public string expectedstatuscode;
 
         public JSONTest Validated()
         {
@@ -51,7 +52,7 @@ namespace netmockery
                 Name = name,
                 RequestPath = requestpath,
                 QueryString = querystring,
-                RequestBody = 
+                RequestBody =
                     requestbody != null && requestbody.StartsWith("file:")
                     ?
                     File.ReadAllText(Path.Combine(directory, requestbody.Substring(5)))
@@ -63,6 +64,7 @@ namespace netmockery
 
                 ExpectedContentType = expectedcontenttype,
                 ExpectedCharSet = expectedcharset,
+                ExpectedStatusCode = expectedstatuscode,
                 ExpectedResponseBody = 
                     expectedresponsebody != null && expectedresponsebody.StartsWith("file:")
                     ? 
@@ -93,7 +95,7 @@ namespace netmockery
         //TODO: contenttype should be renamed to mediatype
         public string contenttype;
         public string charset;
-        public string httpStatusCode;
+        public int? statuscode;
         public JSONReplacement[] replacements;
         public int delay;
 
@@ -174,10 +176,9 @@ namespace netmockery
                 {
                     simpleResponseCreator.Encoding = Encoding.GetEncoding(charset);
                 }
-                HttpStatusCode statusCode;
-                if (Enum.TryParse(httpStatusCode, out statusCode))
+                if (statuscode != null)
                 {
-                    simpleResponseCreator.HttpStatusCode = statusCode;
+                    simpleResponseCreator.HttpStatusCode = (HttpStatusCode)statuscode;
                 }
             }
 
