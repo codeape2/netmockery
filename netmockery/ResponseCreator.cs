@@ -131,8 +131,8 @@ namespace netmockery
                 var contenttype = ContentType;
                 contenttype += $"; charset={Encoding.WebName}";
                 response.ContentType = contenttype;
-                response.HttpStatusCode = HttpStatusCode;
             }
+            response.HttpStatusCode = HttpStatusCode;
             await response.WriteAsync(responseBody, Encoding);
             return Encoding.GetBytes(responseBody);
         }

@@ -112,7 +112,7 @@ namespace netmockery
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, out string message, string httpStatusCode)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, string httpStatusCode, out string message)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
             Debug.Assert(contentType != null || !NeedsResponseBody);
@@ -199,10 +199,10 @@ namespace netmockery
             {
                 contentType = responseMessage.Content.Headers.ContentType.MediaType;
                 charset = responseMessage.Content.Headers.ContentType.CharSet;
-                statusCode = responseMessage.StatusCode.ToString("d");
             }
+            statusCode = responseMessage.StatusCode.ToString("d");
 
-            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, out message, statusCode))
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, statusCode, out message))
             {
                 retval.SetSuccess();
             }
@@ -278,7 +278,7 @@ namespace netmockery
                     statusCode = simpleResponseCreator.HttpStatusCode.ToString("d");
                 }
                 string message;
-                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, out message, statusCode))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out message))
                 {
                     return testResult.SetSuccess();
                 }
