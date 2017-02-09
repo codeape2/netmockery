@@ -123,6 +123,23 @@ The ``match`` parameter within the ``responses`` list can match requests using o
         ]
     }
 
+### Limiting HTTP methods
+
+The ``match`` object can have an optional ``methods`` property to match requests by HTTP method.
+
+Example, match PUT and POST requests:
+
+    "match": {
+        "methods": "PUT POST"
+    }
+
+Example, match regular expression, only GET requests:
+
+    "match": {
+        "regex": "...",
+        "methods": "GET"
+    }
+
 ## Response creation
 
 Several parameters inside the ``responses`` list control how netmockery creates the response.
