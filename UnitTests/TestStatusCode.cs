@@ -14,23 +14,23 @@ namespace UnitTests
         public void DefaultIs200()
         {            
             var responseCreator = CreateJsonResponse().Validated().CreateResponseCreator(".") as SimpleResponseCreator;
-            Assert.Equal(HttpStatusCode.OK, responseCreator.HttpStatusCode);
+            Assert.Equal(200, responseCreator.StatusCode);
         }
 
         [Fact]
         public void CanSetStatusCode()
         {
             var responseCreator = CreateJsonResponse(404).Validated().CreateResponseCreator(".") as SimpleResponseCreator;
-            Assert.NotEqual(HttpStatusCode.OK, responseCreator.HttpStatusCode);
-            Assert.Equal(HttpStatusCode.NotFound, responseCreator.HttpStatusCode);
+            Assert.NotEqual(200, responseCreator.StatusCode);
+            Assert.Equal(404, responseCreator.StatusCode);
         }
 
         [Fact]
         public void CanUseCustomCodes()
         {
             var responseCreator = CreateJsonResponse(422).Validated().CreateResponseCreator(".") as SimpleResponseCreator;
-            Assert.NotEqual(HttpStatusCode.OK, responseCreator.HttpStatusCode);
-            Assert.Equal(422, (int)responseCreator.HttpStatusCode);
+            Assert.NotEqual(200, responseCreator.StatusCode);
+            Assert.Equal(422, responseCreator.StatusCode);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace UnitTests
 
             var responseCreators = from t in endpoint3.Responses select (SimpleResponseCreator)t.Item2;
             Assert.All(responseCreators, r => Assert.Equal("text/plain", r.ContentType));
-            Assert.Equal(new[] { 200, 404, 499 }, from r in responseCreators select (int) r.HttpStatusCode);
+            Assert.Equal(new[] { 200, 404, 499 }, from r in responseCreators select (int) r.StatusCode);
         }
 
         [Fact]

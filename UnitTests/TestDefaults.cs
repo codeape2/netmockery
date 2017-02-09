@@ -172,7 +172,7 @@ namespace UnitTests
             InitializeEndpointCollectionWithGlobalDefaultsOnly();
 
             var responseCreator = endpointCollection.Get("lorem").Responses.Single().Item2 as SimpleResponseCreator;
-            Assert.Equal(HttpStatusCode.OK, responseCreator.HttpStatusCode);
+            Assert.Equal(200, responseCreator.StatusCode);
         }
     }
 }

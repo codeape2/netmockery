@@ -178,7 +178,7 @@ namespace netmockery
                 }
                 if (statuscode != null)
                 {
-                    simpleResponseCreator.HttpStatusCode = (HttpStatusCode)statuscode;
+                    simpleResponseCreator.StatusCode = statuscode.Value;
                 }
             }
 

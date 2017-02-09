@@ -132,14 +132,14 @@ namespace netmockery
                 contenttype += $"; charset={Encoding.WebName}";
                 response.ContentType = contenttype;
             }
-            response.HttpStatusCode = HttpStatusCode;
+            response.HttpStatusCode = (HttpStatusCode) StatusCode;
             await response.WriteAsync(responseBody, Encoding);
             return Encoding.GetBytes(responseBody);
         }
         public string ContentType { get; set; }
         public abstract string GetBody(RequestInfo requestInfo);
         public Encoding Encoding { get; set; } = Encoding.UTF8;
-        public HttpStatusCode HttpStatusCode { get; set; } = HttpStatusCode.OK;
+        public int StatusCode { get; set; } = 200;
 
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 

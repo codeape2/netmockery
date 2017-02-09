@@ -112,12 +112,12 @@ namespace netmockery
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, int httpStatusCode, out string message)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, int statuscode, out string message)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
             Debug.Assert(contentType != null || !NeedsResponseBody);
             Debug.Assert(charset != null || !NeedsResponseBody);
-            Debug.Assert(httpStatusCode != null || !NeedsResponseBody);
+            Debug.Assert(statuscode != 0 || !NeedsResponseBody);
 
             Debug.Assert(requestMatcher != null);
             Debug.Assert(responseCreator != null);
@@ -153,9 +153,9 @@ namespace netmockery
                 return false;
             }
 
-            if (ExpectedStatusCode != null && ExpectedStatusCode.Value != httpStatusCode)
+            if (ExpectedStatusCode != null && ExpectedStatusCode.Value != statuscode)
             {
-                message = $"Expected http status code: {ExpectedStatusCode.Value}\nActual: {httpStatusCode}";
+                message = $"Expected http status code: {ExpectedStatusCode.Value}\nActual: {statuscode}";
                 return false;
             }
 
@@ -273,7 +273,7 @@ namespace netmockery
                     responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
                     contenttype = simpleResponseCreator.ContentType ?? "";
                     charset = simpleResponseCreator.Encoding.WebName;
-                    statusCode = (int) simpleResponseCreator.HttpStatusCode;
+                    statusCode = simpleResponseCreator.StatusCode;
                 }
                 string message;
                 if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out message))
