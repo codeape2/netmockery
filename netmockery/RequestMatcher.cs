@@ -21,7 +21,7 @@ namespace netmockery
 
         public void SetMatchingHttpMethods(string methods) {
             Debug.Assert(methods != null);
-            _matchingHttpMethods = (from part in methods.Split(' ') where part.Length > 0 select part.ToLower()).ToArray();
+            _matchingHttpMethods = (from part in methods.Split(' ') where part.Length > 0 select part.ToUpper()).ToArray();
         }
 
         public bool MatchesAnyHttpMethod => _matchingHttpMethods == null || _matchingHttpMethods.Length == 0;
@@ -31,7 +31,15 @@ namespace netmockery
         public bool MatchesHttpMethod(string method)
         {
             Debug.Assert(method != null);
-            return MatchesAnyHttpMethod || _matchingHttpMethods.Contains(method.ToLower());
+            return MatchesAnyHttpMethod || _matchingHttpMethods.Contains(method.ToUpper());
+        }
+
+        public IEnumerable<string> MatchingHttpMethods
+        {
+            get
+            {
+                return _matchingHttpMethods;
+            }
         }
     }
 

@@ -1,0 +1,9 @@
+﻿@using netmockery
+@model RequestMatcher
+
+@if (! Model.MatchesAnyHttpMethod)
+{
+    <text><br>
+    HTTP Methods: @( string.Join(" ", Model.MatchingHttpMethods) )
+    </text>
+}

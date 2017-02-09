@@ -15,7 +15,7 @@
         },
 
         {
-            "match": { "regex": "499" },
+            "match": { "regex": "499", "methods": "GET" },
             "literal": "Hello world with 499",
             "statuscode": 499
         }
