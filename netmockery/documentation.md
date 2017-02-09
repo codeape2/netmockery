@@ -10,7 +10,7 @@
 
 Command line:
 
-	netmockery.exe p:\ath\to\endpoint\directory
+    netmockery.exe p:\ath\to\endpoint\directory
 
 Netmockery starts and listens on ``localhost`` port ``5000``.
 
@@ -194,6 +194,7 @@ Request ``http://netmockery:NNNN/myservice/resource/another``:
 * ``contenttype``: Sets the mediatype part of the content-type header. Not used for the forward request response creator.
 * ``charset``: Sets the charset part of the content-type header. Not used for the forward request response creator. See the section "Encodings" below
 for more information.
+* ``statuscode``: Sets the HTTP status code for the response (default: 200). Not used for the forward request response creator.
 * ``replacements``: TODO: Document. Not used for the forward request response creator.
 * ``delay``: If set, netmockery waits for the specified number of seconds before returning the response to the client.
 
@@ -351,22 +352,25 @@ Within a endpoint directory, a ``tests`` directory with a ``tests.json`` file de
 
 Example ``tests.json`` file:
 
-	[
-		{
-			'name': 'My first test',
-			'requestpath': '/somepath/',
-			
-			// optional request parameters:
-			//		querystring
-			//		requestbody
+    [
+        {
+            'name': 'My first test',
+            'requestpath': '/somepath/',
+            
+            // optional request parameters:
+            //		querystring
+            //		requestbody
 
-			// one or more test expectations:
-			//		expectedrequestmatcher
-			//		expectedresponsecreator
-			//		expectedresponsebody
-		},
-		// More test cases
-	]
+            // one or more test expectations:
+            //		expectedrequestmatcher
+            //		expectedresponsecreator
+            //		expectedresponsebody
+            //		expectedcontenttype
+            //		expectedcharset
+            //      expectedstatuscode
+        },
+        // More test cases
+    ]
 
 Specifying the request:
 
@@ -382,6 +386,7 @@ Specifying the expectations:
 * ``expectedresponsebody``: Expected response body contents. If specified as ``file:filename``, the expected response body is read from the specified file.
 * ``expectedcontenttype``: Expected response content type
 * ``expectedcharset``: Expected response charset
+* ``expectedstatuscode``: Expected response status code
 
 
 ## Running tests
@@ -390,14 +395,14 @@ TODO: Document test modes (network and internal).
 
 Command line:
 
-	# run all tests
-	netmockery.exe p:\ath\to\endpoint\directory test
+    # run all tests
+    netmockery.exe p:\ath\to\endpoint\directory test
 
-	# run single test, numeric parameter N specifies which test (first test is test 0 (zero))
-	netmockery.exe p:\ath\to\endpoint\directory test --only N
+    # run single test, numeric parameter N specifies which test (first test is test 0 (zero))
+    netmockery.exe p:\ath\to\endpoint\directory test --only N
 
-	# execute request specified by test N, but display respons (do not check test expectations)
-	netmockery.exe p:\ath\to\endpoint\directory test --only N --showResponse
+    # execute request specified by test N, but display respons (do not check test expectations)
+    netmockery.exe p:\ath\to\endpoint\directory test --only N --showResponse
 
 ## Handling time when testing
 
