@@ -104,7 +104,7 @@ namespace netmockery
         {
             WriteBeginTest(index, test);
             
-            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.ExecuteAsync(endpointCollection, now: now).Result;
+            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.Execute(endpointCollection, now: now);
             WriteResult(result);
 
             responsesCoveredByTests.Add(Tuple.Create(result.EndpointName, result.ResponseIndex));

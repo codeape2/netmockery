@@ -221,7 +221,7 @@ namespace netmockery
         private const string ERROR_ENDPOINT_HAS_NO_MATCH = "Endpoint has no match for request";
 
 
-        async public Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
+        public NetmockeryTestCaseResult Execute(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
         {
             Debug.Assert(endpointCollection != null);
 
