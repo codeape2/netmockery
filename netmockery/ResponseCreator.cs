@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace netmockery
 {    
@@ -14,6 +15,7 @@ namespace netmockery
     {
         string ContentType { set; }
         Stream Body { get; }
+        HttpStatusCode HttpStatusCode { set; }
 
         Task WriteAsync(string content, Encoding encoding);
     }
@@ -60,6 +62,14 @@ namespace netmockery
             set
             {
                 httpResponse.ContentType = value;
+            }
+        }
+
+        public HttpStatusCode HttpStatusCode
+        {
+            set
+            {
+                httpResponse.StatusCode = (int)value;
             }
         }
 
@@ -122,13 +132,15 @@ namespace netmockery
                 contenttype += $"; charset={Encoding.WebName}";
                 response.ContentType = contenttype;
             }
+            response.HttpStatusCode = (HttpStatusCode) StatusCode;
             await response.WriteAsync(responseBody, Encoding);
             return Encoding.GetBytes(responseBody);
         }
         public string ContentType { get; set; }
         public abstract string GetBody(RequestInfo requestInfo);
         public Encoding Encoding { get; set; } = Encoding.UTF8;
-        
+        public int StatusCode { get; set; } = 200;
+
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 
         public string GetBodyAndExecuteReplacements(RequestInfo requestInfo)

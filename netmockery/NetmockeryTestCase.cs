@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net.Http;
+using System.Net;
 
 namespace netmockery
 {
@@ -35,6 +36,7 @@ namespace netmockery
         string writtenContent;
         Encoding writtenEncoding;
         string contentType;
+        int statusCode;
         bool writeAsyncCalled = false;
 
         public Stream Body => memoryStream;
@@ -44,6 +46,14 @@ namespace netmockery
             set
             {
                 contentType = value;
+            }
+        }
+
+        public HttpStatusCode HttpStatusCode
+        {
+            set
+            {
+                statusCode = (int)value;
             }
         }
 
@@ -83,12 +93,13 @@ namespace netmockery
         public string ExpectedContentType;
         public string ExpectedCharSet;
         public string ExpectedResponseBody;
+        public int? ExpectedStatusCode;
 
         public bool NeedsResponseBody
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
+                return (new object[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
@@ -96,16 +107,17 @@ namespace netmockery
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet }).Any(val => val != null);
+                return (new object[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, out string message)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, int statuscode, out string message)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
             Debug.Assert(contentType != null || !NeedsResponseBody);
             Debug.Assert(charset != null || !NeedsResponseBody);
+            Debug.Assert(statuscode != 0 || !NeedsResponseBody);
 
             Debug.Assert(requestMatcher != null);
             Debug.Assert(responseCreator != null);
@@ -138,6 +150,12 @@ namespace netmockery
             if (ExpectedCharSet != null && ExpectedCharSet != charset)
             {
                 message = $"Expected charset: '{ExpectedCharSet}'\nActual: '{charset}'";
+                return false;
+            }
+
+            if (ExpectedStatusCode != null && ExpectedStatusCode.Value != statuscode)
+            {
+                message = $"Expected http status code: {ExpectedStatusCode.Value}\nActual: {statuscode}";
                 return false;
             }
 
@@ -182,7 +200,7 @@ namespace netmockery
                 charset = responseMessage.Content.Headers.ContentType.CharSet;
             }
 
-            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, out message))
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, (int)responseMessage.StatusCode, out message))
             {
                 retval.SetSuccess();
             }
@@ -203,7 +221,7 @@ namespace netmockery
         private const string ERROR_ENDPOINT_HAS_NO_MATCH = "Endpoint has no match for request";
 
 
-        async public Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
+        public NetmockeryTestCaseResult Execute(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
         {
             Debug.Assert(endpointCollection != null);
 
@@ -231,6 +249,7 @@ namespace netmockery
                 string responseBody = null;
                 string charset = "";
                 string contenttype = "";
+                int statusCode = 0;
                 if (NeedsResponseBody)
                 {
                     var simpleResponseCreator = responseCreator as SimpleResponseCreator;
@@ -254,9 +273,10 @@ namespace netmockery
                     responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
                     contenttype = simpleResponseCreator.ContentType ?? "";
                     charset = simpleResponseCreator.Encoding.WebName;
+                    statusCode = simpleResponseCreator.StatusCode;
                 }
                 string message;
-                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, out message))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out message))
                 {
                     return testResult.SetSuccess();
                 }

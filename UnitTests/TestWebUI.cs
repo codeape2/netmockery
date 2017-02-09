@@ -45,7 +45,7 @@ namespace UnitTests
             Assert.Equal("/__netmockery", response.Headers.Location.ToString());
         }
 
-        const int EXPECTED_NUMBER_OF_URLS = 19;
+        const int EXPECTED_NUMBER_OF_URLS = 22;
         const int EXPECTED_EXTRA_URLS_PER_REQUEST = 2;
 
         [Fact]

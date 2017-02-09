@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Net;
 
 namespace netmockery
 {
@@ -29,6 +30,7 @@ namespace netmockery
         public string expectedresponsebody;
         public string expectedcontenttype;
         public string expectedcharset;
+        public int? expectedstatuscode;
 
         public JSONTest Validated()
         {
@@ -50,7 +52,7 @@ namespace netmockery
                 Name = name,
                 RequestPath = requestpath,
                 QueryString = querystring,
-                RequestBody = 
+                RequestBody =
                     requestbody != null && requestbody.StartsWith("file:")
                     ?
                     File.ReadAllText(Path.Combine(directory, requestbody.Substring(5)))
@@ -62,6 +64,7 @@ namespace netmockery
 
                 ExpectedContentType = expectedcontenttype,
                 ExpectedCharSet = expectedcharset,
+                ExpectedStatusCode = expectedstatuscode,
                 ExpectedResponseBody = 
                     expectedresponsebody != null && expectedresponsebody.StartsWith("file:")
                     ? 
@@ -92,6 +95,7 @@ namespace netmockery
         //TODO: contenttype should be renamed to mediatype
         public string contenttype;
         public string charset;
+        public int? statuscode;
         public JSONReplacement[] replacements;
         public int delay;
 
@@ -171,6 +175,10 @@ namespace netmockery
                 if (charset != null)
                 {
                     simpleResponseCreator.Encoding = Encoding.GetEncoding(charset);
+                }
+                if (statuscode != null)
+                {
+                    simpleResponseCreator.StatusCode = statuscode.Value;
                 }
             }
 

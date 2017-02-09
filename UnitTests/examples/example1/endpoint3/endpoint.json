@@ -1,0 +1,23 @@
+﻿{
+    "name": "StatusCodes",
+    "pathregex": "/statuscode",
+
+    "responses": [
+        {
+            "match": { "regex": "200" },
+            "literal": "Hello world with 200"
+        },
+
+        {
+            "match": { "regex": "404" },
+            "literal": "Hello world with 404",
+            "statuscode": 404
+        },
+
+        {
+            "match": { "regex": "499" },
+            "literal": "Hello world with 499",
+            "statuscode": 499
+        }
+    ]
+}
