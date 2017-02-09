@@ -4,6 +4,13 @@
 <br>
 Content-type: @Model.ContentType
 
+@if (Model.StatusCode != 200)
+{
+    <text>
+    <br>HTTP status code: @Model.StatusCode
+    </text>
+}
+
 @if (Model.Replacements.Length > 0)
 {
     <text><br>Replacements:</text>
