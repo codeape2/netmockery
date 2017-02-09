@@ -21,7 +21,7 @@ namespace netmockery
         private string _name;
         private string _pathregex;
         private List<Tuple<RequestMatcher, ResponseCreator>> _responses = new List<Tuple<RequestMatcher, ResponseCreator>>();
-        private bool _anyHasBeenAdded = false;        
+        private bool _ruleThatCatchesEveryThingHasBeenAdded = false;        
 
         public Endpoint(string name, string pathregex)
         {
@@ -57,22 +57,27 @@ namespace netmockery
             Debug.Assert(responseCreator != null);
             Debug.Assert(requestMatcher.Index == -1);
 
-            if (_anyHasBeenAdded)
+            if (_ruleThatCatchesEveryThingHasBeenAdded)
             {
-                throw new ArgumentException("The endpoint contains a response matching any request, you cannot add more responses");
+                throw new ArgumentException("The endpoint contains a response matching any request/method, you cannot add more responses");
             }
 
             requestMatcher.Index = _responses.Count;
             _responses.Add(Tuple.Create(requestMatcher, responseCreator));
-            if (requestMatcher is AnyMatcher)
+            if (requestMatcher is AnyMatcher && requestMatcher.MatchesAnyHttpMethod)
             {
-                _anyHasBeenAdded = true;
+                _ruleThatCatchesEveryThingHasBeenAdded = true;
             }
         }
 
-        public ResolutionResult Resolve(PathString path, QueryString queryString, string body, IHeaderDictionary headers)
+        public ResolutionResult Resolve(string httpMethod, PathString path, QueryString queryString, string body, IHeaderDictionary headers)
         {
-            var candidates = (from t in _responses where t.Item1.Matches(path, queryString, body, headers) select t).Take(2);
+            var candidates = (
+                from t in _responses
+                where t.Item1.MatchesHttpMethod(httpMethod) && t.Item1.Matches(path, queryString, body, headers)
+                select t
+                ).Take(2);
+
             if (! candidates.Any())
             {
                 return null;

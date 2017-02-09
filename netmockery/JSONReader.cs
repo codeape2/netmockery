@@ -21,6 +21,7 @@ namespace netmockery
     public class JSONTest
     {
         public string name;
+        public string method;
         public string requestpath;
         public string querystring;
         public string requestbody;
@@ -50,6 +51,7 @@ namespace netmockery
         {
             return new NetmockeryTestCase {
                 Name = name,
+                Method = method ?? "GET",
                 RequestPath = requestpath,
                 QueryString = querystring,
                 RequestBody =
@@ -189,12 +191,14 @@ namespace netmockery
 
     public class JSONRequestMatcher
     {
+        public string methods;
         public string xpath;
         public string regex;
         public JSONXPathNamespace[] namespaces;
 
         public RequestMatcher CreateRequestMatcher()
         {
+            RequestMatcher retval;
             if (xpath != null)
             {
                 var xpathMatcher = new XPathMatcher(xpath);
@@ -205,13 +209,21 @@ namespace netmockery
                         xpathMatcher.AddNamespace(jsonNs.prefix, jsonNs.ns);
                     }
                 }
-                return xpathMatcher;
+                retval = xpathMatcher;
             }
             else if (regex != null)
             {
-                return new RegexMatcher(regex);
+                retval = new RegexMatcher(regex);
             }
-            return new AnyMatcher();
+            else
+            {
+                retval = new AnyMatcher();
+            }
+            if (methods != null)
+            {
+                retval.SetMatchingHttpMethods(methods);
+            }
+            return retval;
         }
     }
 

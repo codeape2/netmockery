@@ -78,7 +78,7 @@ namespace netmockery
             responseRegistryItem.Endpoint = endpoint;
             if (endpoint != null)
             {
-                var matcher_and_creator = endpoint.Resolve(context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers);
+                var matcher_and_creator = endpoint.Resolve(context.Request.Method, context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers);
                 if (matcher_and_creator != null)
                 {
                     var responseCreator = matcher_and_creator.ResponseCreator;

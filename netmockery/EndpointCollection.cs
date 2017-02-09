@@ -36,5 +36,16 @@ namespace netmockery
         {
             return (from endpoint in _endpoints where endpoint.Matches(path) select endpoint).SingleOrDefault();
         }
+
+        static public EndpointCollection WithEndpoints(params Endpoint[] endpoints)
+        {
+            var retval = new EndpointCollection();
+            foreach (var endpoint in endpoints)
+            {
+                retval.Add(endpoint);
+            }
+
+            return retval;
+        }
     }
 }

@@ -83,6 +83,8 @@ namespace netmockery
     public class NetmockeryTestCase
     {
         public string Name;
+
+        public string Method = "GET";
         public string RequestPath;
         public string QueryString;
         public string RequestBody;
@@ -235,7 +237,7 @@ namespace netmockery
                 }
                 testResult.EndpointName = endpoint.Name;
 
-                var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
+                var matcher_and_creator = endpoint.Resolve(Method, new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
                 if (matcher_and_creator == null)
                 {
                     return testResult.SetFailure(ERROR_ENDPOINT_HAS_NO_MATCH);
@@ -299,7 +301,7 @@ namespace netmockery
             {
                 return Tuple.Create((string)null, ERROR_NOMATCHING_ENDPOINT);
             }
-            var matcher_and_creator = endpoint.Resolve(new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
+            var matcher_and_creator = endpoint.Resolve(Method, new PathString(RequestPath), new QueryString(QueryString), RequestBody ?? "", null);
             if (matcher_and_creator != null)
             {
                 var responseCreator = matcher_and_creator.ResponseCreator as SimpleResponseCreator;

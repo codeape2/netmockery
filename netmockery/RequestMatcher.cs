@@ -16,7 +16,23 @@ namespace netmockery
     public abstract class RequestMatcher
     {
         public int Index = -1;
+
+        private string[] _matchingHttpMethods;
+
+        public void SetMatchingHttpMethods(string methods) {
+            Debug.Assert(methods != null);
+            _matchingHttpMethods = (from part in methods.Split(' ') where part.Length > 0 select part.ToLower()).ToArray();
+        }
+
+        public bool MatchesAnyHttpMethod => _matchingHttpMethods == null || _matchingHttpMethods.Length == 0;
+
         public abstract bool Matches(PathString path, QueryString queryString, string body, IHeaderDictionary headers);
+
+        public bool MatchesHttpMethod(string method)
+        {
+            Debug.Assert(method != null);
+            return MatchesAnyHttpMethod || _matchingHttpMethods.Contains(method.ToLower());
+        }
     }
 
     public class AnyMatcher : RequestMatcher
