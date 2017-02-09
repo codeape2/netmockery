@@ -375,6 +375,7 @@ Example ``tests.json`` file:
             'requestpath': '/somepath/',
             
             // optional request parameters:
+            //      method
             //		querystring
             //		requestbody
 
@@ -393,6 +394,7 @@ Specifying the request:
 
 * ``name``: display name for test (required)
 * ``requestpath``: request path (required)
+* ``method``: HTTP method, default GET
 * ``querystring``: request query string
 * ``requestbody``: request body
 
