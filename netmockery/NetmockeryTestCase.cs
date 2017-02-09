@@ -93,13 +93,13 @@ namespace netmockery
         public string ExpectedContentType;
         public string ExpectedCharSet;
         public string ExpectedResponseBody;
-        public string ExpectedStatusCode;
+        public int? ExpectedStatusCode;
 
         public bool NeedsResponseBody
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
+                return (new object[] { ExpectedResponseBody, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
@@ -107,12 +107,12 @@ namespace netmockery
         {
             get
             {
-                return (new[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
+                return (new object[] { ExpectedResponseBody, ExpectedRequestMatcher, ExpectedResponseCreator, ExpectedContentType, ExpectedCharSet, ExpectedStatusCode }).Any(val => val != null);
             }
         }
 
 
-        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, string httpStatusCode, out string message)
+        public bool Evaluate(string requestMatcher, string responseCreator, string responseBody, string contentType, string charset, int httpStatusCode, out string message)
         {
             Debug.Assert(responseBody != null || !NeedsResponseBody);
             Debug.Assert(contentType != null || !NeedsResponseBody);
@@ -153,9 +153,9 @@ namespace netmockery
                 return false;
             }
 
-            if (ExpectedStatusCode != null && ExpectedStatusCode != httpStatusCode)
+            if (ExpectedStatusCode != null && ExpectedStatusCode.Value != httpStatusCode)
             {
-                message = $"Expected http status code: '{ExpectedStatusCode}'\nActual: '{httpStatusCode}'";
+                message = $"Expected http status code: {ExpectedStatusCode.Value}\nActual: {httpStatusCode}";
                 return false;
             }
 
@@ -194,15 +194,13 @@ namespace netmockery
             }
             var contentType = "";
             var charset = "";
-            var statusCode = "";
             if (responseMessage.Content.Headers.ContentType != null)
             {
                 contentType = responseMessage.Content.Headers.ContentType.MediaType;
                 charset = responseMessage.Content.Headers.ContentType.CharSet;
             }
-            statusCode = responseMessage.StatusCode.ToString("d");
 
-            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, statusCode, out message))
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, (int)responseMessage.StatusCode, out message))
             {
                 retval.SetSuccess();
             }
@@ -251,7 +249,7 @@ namespace netmockery
                 string responseBody = null;
                 string charset = "";
                 string contenttype = "";
-                string statusCode = "";
+                int statusCode = 0;
                 if (NeedsResponseBody)
                 {
                     var simpleResponseCreator = responseCreator as SimpleResponseCreator;
@@ -275,7 +273,7 @@ namespace netmockery
                     responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
                     contenttype = simpleResponseCreator.ContentType ?? "";
                     charset = simpleResponseCreator.Encoding.WebName;
-                    statusCode = simpleResponseCreator.HttpStatusCode.ToString("d");
+                    statusCode = (int) simpleResponseCreator.HttpStatusCode;
                 }
                 string message;
                 if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out message))

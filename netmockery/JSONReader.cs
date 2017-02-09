@@ -30,7 +30,7 @@ namespace netmockery
         public string expectedresponsebody;
         public string expectedcontenttype;
         public string expectedcharset;
-        public string expectedstatuscode;
+        public int? expectedstatuscode;
 
         public JSONTest Validated()
         {
