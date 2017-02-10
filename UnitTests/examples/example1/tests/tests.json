@@ -1,7 +1,20 @@
 ﻿[
-  {
-    "name": "Check foobar endpoint",
-    "requestpath": "/foobar",
-    "expectedresponsebody": "Hello world"
-  }
+    {
+        "name": "Check foobar endpoint",
+        "requestpath": "/foobar",
+        "expectedresponsebody": "Hello world"
+    },
+
+    {
+        "name": "All expectations",
+        "requestpath": "/foobar",
+        "method": "GET",
+        "querystring": "abc=def",
+        "requestbody": "foobar",
+
+        "expectedresponsebody": "Hello world",
+        "expectedcharset": "utf-8",
+        "expectedcontenttype": "text/plain",
+        "expectedstatuscode": 200
+    }
 ]

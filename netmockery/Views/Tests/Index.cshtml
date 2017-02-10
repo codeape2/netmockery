@@ -34,7 +34,7 @@
     <h3>@t.Name</h3>
     <p>
         <ul>
-            <li>Path: <code>@t.RequestPath</code></li>
+            <li>Request: @t.Method <code>@t.RequestPath</code></li>
             @if (t.QueryString != null)
             {
                 <li>Query string: <code>@t.QueryString</code></li>
@@ -54,7 +54,19 @@
             }
             @if (t.ExpectedResponseBody != null)
             {
-                <li>Has <a href="@Url.Action("ExpectedResponseBody", new { index = i })">expected response body</a></li>
+                <li>View <a href="@Url.Action("ExpectedResponseBody", new { index = i })">expected response body</a></li>
+            }
+            @if (t.ExpectedContentType != null)
+            {
+                <li>Expected content type: <code>@t.ExpectedContentType</code></li>
+            }
+            @if (t.ExpectedCharSet != null)
+            {
+                <li>Expected char set: <code>@t.ExpectedCharSet</code></li>
+            }
+            @if (t.ExpectedStatusCode != null)
+            {
+                <li>Expected status code: <code>@t.ExpectedStatusCode</code></li>
             }
             <li><a target="_blank" href="@Url.Action("Run", new { index = i })">Run</a></li>
             <li><a target="_blank" href="@Url.Action("ViewResponse", new { index = i++ })">View response</a></li>
