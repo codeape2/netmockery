@@ -34,7 +34,7 @@ namespace netmockery.Controllers
             response.Append(s);
         }
 
-        public override void WriteResult(NetmockeryTestCaseResult result)
+        public override void WriteResult(int index, NetmockeryTestCase testCase, NetmockeryTestCaseResult result)
         {
             response.AppendLine(result.ResultAsString);
         }

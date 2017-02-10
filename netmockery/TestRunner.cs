@@ -115,7 +115,7 @@ namespace netmockery
             WriteBeginTest(index, test);
             
             var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.Execute(endpointCollection, now: now);
-            WriteResult(result);
+            WriteResult(index, test, result);
 
             responsesCoveredByTests.Add(Tuple.Create(result.EndpointName, result.ResponseIndex));
 
@@ -164,7 +164,7 @@ namespace netmockery
 
 
         public abstract void WriteBeginTest(int index, NetmockeryTestCase testcase);
-        public abstract void WriteResult(NetmockeryTestCaseResult result);
+        public abstract void WriteResult(int index, NetmockeryTestCase testcase, NetmockeryTestCaseResult result);
         public abstract void WriteResponse(string response);
         public abstract void WriteSummary(int errors);
         public abstract void WriteError(string s);
@@ -200,9 +200,13 @@ namespace netmockery
 
         }
 
-        public override void WriteResult(NetmockeryTestCaseResult result)
+        public override void WriteResult(int index, NetmockeryTestCase netmockeryTestCase, NetmockeryTestCaseResult result)
         {
             Console.WriteLine(result.ResultAsString);
+            if (result.Error)
+            {
+                Console.WriteLine($"FAILURE test case {index} {netmockeryTestCase.Name}");
+            }
         }
 
         public override void WriteSummary(int errors)
