@@ -71,6 +71,9 @@ namespace UnitTests
             Assert.Equal(EXPECTED_NUMBER_OF_URLS + testRunner.Tests.Count() * EXPECTED_EXTRA_URLS_PER_REQUEST, urls.Count);
             
             Assert.Equal(testRunner.Tests.Count(), GetResponseRegistry().Responses.Count());
+
+            var response0 = GetResponseRegistry().Responses.First();
+            Assert.Equal("GET", response0.Method);
         }
 
         ResponseRegistry GetResponseRegistry()

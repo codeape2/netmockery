@@ -14,6 +14,7 @@ namespace netmockery
         public Endpoint Endpoint;
         public RequestMatcher RequestMatcher;
         public ResponseCreator ResponseCreator;
+        public string Method;
         public string RequestPath;
         public string QueryString;
         public string RequestBody;
@@ -21,16 +22,28 @@ namespace netmockery
         public string Error;
         public bool SingleMatch;
 
-        public void WriteToConsole()
+        public void WriteIncomingInfoToConsole()
         {
-            Console.WriteLine($"{Timestamp.ToString("HH:mm:ss.fff")} {RequestPath} {Endpoint?.Name} {Error}");
+            Console.WriteLine($"[{Id}] {Timestamp.ToString("HH:mm:ss.fff")} {Method} {RequestPath}");
+        }
+
+        public void WriteResolvedInfoToConsole()
+        {
+            if (Endpoint != null)
+            {
+                Console.WriteLine($"[{Id}] Endpoint: {Endpoint.Name}");
+            }
             if (RequestMatcher != null)
             {
-                Console.WriteLine("    " + RequestMatcher.ToString());
+                Console.WriteLine($"[{Id}] Request matcher: {RequestMatcher}");
             }
             if (ResponseCreator != null)
             {
-                Console.WriteLine("    " + ResponseCreator.ToString());
+                Console.WriteLine($"[{Id}] Response creator: {ResponseCreator}");
+            }
+            if (Error != null)
+            {
+                Console.WriteLine($"[{Id}] Error: {Error}");
             }
         }
     }
@@ -65,7 +78,7 @@ namespace netmockery
         public IEnumerable<ResponseRegistryItem> Responses => _items.Reverse<ResponseRegistryItem>();
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Add(ResponseRegistryItem responseRegistryItem)
+        public ResponseRegistryItem Add(ResponseRegistryItem responseRegistryItem)
         {
             Debug.Assert(responseRegistryItem.Id == 0);
             responseRegistryItem.Id = ++_nextId;
@@ -74,6 +87,7 @@ namespace netmockery
                 _items.Dequeue();
             }
             _items.Enqueue(responseRegistryItem);
+            return responseRegistryItem;
         }
     }
 }

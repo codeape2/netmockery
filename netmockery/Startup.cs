@@ -45,13 +45,16 @@ namespace netmockery
 
         public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
-            var responseRegistryItem = new ResponseRegistryItem
+            Debug.Assert(context != null);
+            var responseRegistryItem = _responseRegistry.Add(new ResponseRegistryItem
             {
                 Timestamp = DateTime.Now,
                 RequestBody = requestBody,
+                Method = context.Request.Method,
                 RequestPath = context.Request.Path.ToString(),
                 QueryString = context.Request.QueryString.ToString()
-            };
+            });
+            responseRegistryItem.WriteIncomingInfoToConsole();
 
             try
             {
@@ -64,8 +67,7 @@ namespace netmockery
             }
             finally
             {
-                responseRegistryItem.WriteToConsole();
-                _responseRegistry.Add(responseRegistryItem);
+                responseRegistryItem.WriteResolvedInfoToConsole();                
             }
 
         }
