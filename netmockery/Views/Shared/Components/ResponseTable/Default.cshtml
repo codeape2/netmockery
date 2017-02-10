@@ -20,7 +20,7 @@
         {
             <tr>
                 <td>@item.Timestamp.ToString("HH:mm:ss.fff")</td>
-                <td>@(item.RequestPath)@(item.QueryString)</td>
+                <td>@item.Method @(item.RequestPath)@(item.QueryString)</td>
                 <td>
                     @if (item.Endpoint != null)
                     {

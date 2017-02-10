@@ -9,6 +9,7 @@
 
 <ul>
     <li>Timestamp: <code>@Model.Timestamp.ToString("HH:mm:ss.fff")</code></li>
+    <li>Method: @Model.Method</li>
     <li>Path: <code>@Model.RequestPath</code></li>
     @if (! string.IsNullOrEmpty(Model.QueryString))
     {
