@@ -1,5 +1,5 @@
 {
-    "version": "0.7.0",
+    "version": "0.7",
   "dependencies": {
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",

@@ -49,7 +49,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="@Url.Action("Index", "Home")">Netmockery v. @typeof(netmockery.Program).Assembly.GetName().Version</a>
+                    <a class="navbar-brand" href="@Url.Action("Index", "Home")">Netmockery <small>v. @VersionString()</small></a>
                 </div>
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav">
@@ -99,3 +99,11 @@
     </script>
 </body>
 </html>
+
+@functions {
+    string VersionString()
+    {
+        var version = typeof(netmockery.Program).Assembly.GetName().Version;
+        return $"{version.Major}.{version.Minor}";
+    }
+}
