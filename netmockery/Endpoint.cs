@@ -21,6 +21,7 @@ namespace netmockery
         private string _name;
         private string _pathregex;
         private List<Tuple<RequestMatcher, ResponseCreator>> _responses = new List<Tuple<RequestMatcher, ResponseCreator>>();
+        private List<EndpointParameter> _parameters = new List<EndpointParameter>();
         private bool _ruleThatCatchesEveryThingHasBeenAdded = false;        
 
         public Endpoint(string name, string pathregex)
@@ -39,6 +40,8 @@ namespace netmockery
             _pathregex = pathregex;
         }
 
+        public IEnumerable<EndpointParameter> Parameters => _parameters;
+
         public string Directory { get; set; }
 
         public string Name => _name;
@@ -49,6 +52,18 @@ namespace netmockery
         public bool Matches(string path)
         {
             return Regex.IsMatch(path, _pathregex);
+        }
+
+        public void AddParameter(EndpointParameter parameter)
+        {
+            Debug.Assert(parameter != null);
+
+            if (_parameters.Select(p => p.Name).Contains(parameter.Name))
+            {
+                throw new ArgumentException($"Duplicate parameter name '{parameter.Name}'");
+            }
+
+            _parameters.Add(parameter);
         }
 
         public void Add(RequestMatcher requestMatcher, ResponseCreator responseCreator)

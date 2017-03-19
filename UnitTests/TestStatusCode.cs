@@ -13,14 +13,14 @@ namespace UnitTests
         [Fact]
         public void DefaultIs200()
         {            
-            var responseCreator = CreateJsonResponse().Validated().CreateResponseCreator(".") as SimpleResponseCreator;
+            var responseCreator = CreateJsonResponse().Validated().CreateResponseCreator(new Endpoint("foo", "bar")) as SimpleResponseCreator;
             Assert.Equal(200, responseCreator.StatusCode);
         }
 
         [Fact]
         public void CanSetStatusCode()
         {
-            var responseCreator = CreateJsonResponse(404).Validated().CreateResponseCreator(".") as SimpleResponseCreator;
+            var responseCreator = CreateJsonResponse(404).Validated().CreateResponseCreator(new Endpoint("foo", "bar")) as SimpleResponseCreator;
             Assert.NotEqual(200, responseCreator.StatusCode);
             Assert.Equal(404, responseCreator.StatusCode);
         }
@@ -28,7 +28,7 @@ namespace UnitTests
         [Fact]
         public void CanUseCustomCodes()
         {
-            var responseCreator = CreateJsonResponse(422).Validated().CreateResponseCreator(".") as SimpleResponseCreator;
+            var responseCreator = CreateJsonResponse(422).Validated().CreateResponseCreator(new Endpoint("foo", "bar")) as SimpleResponseCreator;
             Assert.NotEqual(200, responseCreator.StatusCode);
             Assert.Equal(422, responseCreator.StatusCode);
         }
@@ -87,7 +87,7 @@ namespace UnitTests
 
             if (statuscode != -1)
             {
-                retval.statuscode = statuscode;
+                retval.statuscode = statuscode.ToString();
             }
 
             return retval;

@@ -34,6 +34,7 @@ namespace UnitTests
 }
 ";
 
+
         [Fact]
         public void SimpleEndpointAttributes()
         {
@@ -42,9 +43,11 @@ namespace UnitTests
             Assert.Equal("^/foo/$", endpoint.PathRegex);
         }
 
+        private Endpoint endpoint;
+
         private Tuple<RequestMatcher, ResponseCreator> ParseResponse(string json)
         {
-            var endpoint = JSONReader.ReadEndpoint("{'name': 'foo', 'pathregex': 'foo', 'responses': [" + json + "]}", "r:\\oot\\directory", globalDefaults: null);
+            endpoint = JSONReader.ReadEndpoint("{'name': 'foo', 'pathregex': 'foo', 'responses': [" + json + "]}", "r:\\oot\\directory", globalDefaults: null);
             var responses = endpoint.Responses.ToArray();
             Debug.Assert(responses.Length == 1);
             return responses[0];
@@ -142,5 +145,69 @@ namespace UnitTests
             Assert.Equal("text/plain", responseCreator.ContentType);
             Assert.Equal("Literal string: Hello world", responseCreator.ToString());
         }
+
+        [Fact]
+        public void DefaultDelay()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world' }");
+            Assert.Equal(0, response.Item2.Delay);
+        }
+
+        [Fact]
+        public void CanDeserializeDelayAsInt()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'delay': 2}");
+            Assert.Equal(2, response.Item2.Delay);
+        }
+
+        [Fact]
+        public void CanDeserializeDelayAsString()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'delay': '3'}");
+            Assert.Equal(3, response.Item2.Delay);
+        }
+
+        [Fact]
+        public void CanDeserializeDelayParamRef()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'delay': '$delay'}");
+            var param = new EndpointParameter { Name = "delay", DefaultValue = "123" };
+            endpoint.AddParameter(param);
+            Assert.Equal(123, response.Item2.Delay);
+            param.Value = "321";
+            Assert.Equal(321, response.Item2.Delay);
+        }
+
+        [Fact]
+        public void DefaultStatusCode()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world'}");
+            Assert.Equal(200, (response.Item2 as SimpleResponseCreator).StatusCode);
+        }
+
+        [Fact]
+        public void CanDeserializeStatusCodeAsInt()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'statuscode': 302}");
+            Assert.Equal(302, (response.Item2 as SimpleResponseCreator).StatusCode);
+        }
+
+        [Fact]
+        public void CanDeserializeStatusCodeAsString()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'statuscode': '301'}");
+            Assert.Equal(301, (response.Item2 as SimpleResponseCreator).StatusCode);
+        }
+        [Fact]
+        public void CanDeserializeStatusCodeParamRef()
+        {
+            var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'statuscode': '$s'}");
+            var param = new EndpointParameter { Name = "s", DefaultValue = "404" };
+            endpoint.AddParameter(param);
+            Assert.Equal(404, (response.Item2 as SimpleResponseCreator).StatusCode);
+            param.Value = "403";
+            Assert.Equal(403, (response.Item2 as SimpleResponseCreator).StatusCode);
+        }
+
     }
 }

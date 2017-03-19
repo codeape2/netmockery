@@ -72,3 +72,47 @@
 </table>
 
 @Html.ActionLink("Responses", "ForEndpoint", "Responses", new { endpointName = Model.Name })
+
+@if (Model.Parameters.Count() > 0)
+{
+    <h2>
+        Runtime adjustable parameters
+        @if (Model.Parameters.Any(p => !p.ValueIsDefault))
+        {
+            <small>Adjusted</small>
+        }
+    </h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Value</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @{ 
+                var paramIndex = 0;
+            }
+            @foreach (var param in Model.Parameters)
+            {
+                <tr>
+                    <td><code>@param.Name</code></td>
+                    <td>
+                        @param.Value
+                    </td>
+                    <td>
+                        <a href="@Url.Action("AdjustParam", new { name = Model.Name, index = paramIndex })">Edit</a>
+                        @if (!param.ValueIsDefault)
+                        {
+                            <a href="@Url.Action("ResetParam", new { name = Model.Name, index = paramIndex })">Reset to default</a>
+                        }
+                    </td>
+                </tr>
+                paramIndex++;
+            }
+        </tbody>
+    </table>
+}

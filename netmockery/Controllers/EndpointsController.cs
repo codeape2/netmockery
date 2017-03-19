@@ -57,6 +57,26 @@ namespace netmockery.Controllers
             return View(_endpointCollection.Get(name));
         }
 
+        [HttpGet]
+        public ActionResult AdjustParam(string name, int index)
+        {
+            ViewBag.CancelUrl = Url.Action("EndpointDetails", new { name = name });
+            return View(_endpointCollection.Get(name).Parameters.ElementAt(index));
+        }
+
+        [HttpPost]
+        public ActionResult AdjustParam(string name, int index, string value)
+        {            
+            _endpointCollection.Get(name).Parameters.ElementAt(index).Value = value;
+            return RedirectToAction("EndpointDetails", new { name = name });
+        }
+
+        public ActionResult ResetParam(string name, int index)
+        {
+            _endpointCollection.Get(name).Parameters.ElementAt(index).ResetToDefaultValue();
+            return RedirectToAction("EndpointDetails", new { name = name });
+        }
+
         public ActionResult EndpointJsonFile(string name)
         {
             var endpoint = _endpointCollection.Get(name);

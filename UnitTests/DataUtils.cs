@@ -24,5 +24,21 @@ namespace UnitTests
             };
 
         }
+
+        public static JSONEndpoint CreateScriptEndpoint(string name, string scriptFile, string pathregex = ".")
+        {
+            return new JSONEndpoint
+            {
+                name = name,
+                pathregex = pathregex,
+                responses = new[] {
+                    new JSONResponse {
+                        match = new JSONRequestMatcher(),
+                        script = scriptFile,
+                        contenttype = "text/plain"
+                    }
+                }
+            };
+        }
     }
 }

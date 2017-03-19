@@ -107,15 +107,22 @@ namespace UnitTests
 
         IEnumerable<string> UrlsForEndpoints()
         {
-            return (from endpoint in endpointCollection.Endpoints select UrlsForEndpoint(endpoint.Name)).SelectMany(u => u);
+            return (from endpoint in endpointCollection.Endpoints select UrlsForEndpoint(endpoint)).SelectMany(u => u);
         }
 
-        IEnumerable<string> UrlsForEndpoint(string endpointname)
+        IEnumerable<string> UrlsForEndpoint(Endpoint endpoint)
         {
-            var encoded = Uri.EscapeUriString(endpointname);
+            var encoded = Uri.EscapeUriString(endpoint.Name);
             yield return $"/Endpoints/EndpointDetails?name={encoded}";
             yield return $"/Endpoints/EndpointJsonFile?name={encoded}";
             yield return $"/Responses/ForEndpoint?endpointName={encoded}";
+
+            var paramIndex = 0;
+            foreach (var endpointParam in endpoint.Parameters)
+            {
+                yield return $"/Endpoints/AdjustParam?name={encoded}&amp;index={paramIndex}";
+                paramIndex++;
+            }
         }
 
 

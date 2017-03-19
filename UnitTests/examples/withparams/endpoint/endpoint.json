@@ -1,0 +1,11 @@
+﻿{
+    "name": "Endpoint",
+    "pathregex": "^/endpoint/",
+
+    "responses": [
+        {
+            "match": {},
+            "script": "script.csscript"
+        }
+    ]
+}

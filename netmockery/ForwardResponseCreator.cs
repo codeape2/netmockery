@@ -20,7 +20,7 @@ namespace netmockery
         public string ProxyUrl { get; set; }
         public string StripPath { get; set; }
 
-        public ForwardResponseCreator(string url)
+        public ForwardResponseCreator(string url, Endpoint endpoint) : base(endpoint)
         {
             Url = url;
         }
@@ -37,7 +37,7 @@ namespace netmockery
 
         string[] HEADERS_TO_SKIP = new[] { "connection", "content-length", "content-type", "accept-encoding", "expect", "host" };
 
-        public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] body, IHttpResponseWrapper response, string endpointDirectory)
+        public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] body, IHttpResponseWrapper response, Endpoint endpoint)
         {
             var requestPath = request.Path.ToString();
             if (StripPath != null)

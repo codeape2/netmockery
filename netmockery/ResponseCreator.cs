@@ -93,8 +93,13 @@ namespace netmockery
         public string RequestBody;
         public IHeaderDictionary Headers;
         public string EndpointDirectory;
+        public IEnumerable<EndpointParameter> Parameters;
 
         public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
+        public string GetParam(string name)
+        {
+            return Parameters.Single(p => p.Name == name).Value;
+        }
 
         public void SetStaticNow(DateTime now)
         {
@@ -110,13 +115,78 @@ namespace netmockery
 
     public abstract class ResponseCreator
     {
-        public int Delay { get; set; } = 0;
-        public abstract Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, string endpointDirectory);
+        private Endpoint _endpoint;
+        private string _delay;
+
+        public ResponseCreator(Endpoint endpoint)
+        {
+            Debug.Assert(endpoint != null);
+            _endpoint = endpoint;
+        }
+        public int Delay
+        {
+            get
+            {
+                if (_delay == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return int.Parse(ReplaceParameterReference(_delay));
+                }
+            }
+        }
+
+        public void SetDelayFromString(string value)
+        {
+            _delay = value;
+        }
+
+        public abstract Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, Endpoint endpoint);
+
+        public bool IsParameterReference(string value)
+        {
+            return value != null && value.StartsWith("$");
+        }
+
+        public string LookupParameter(string value)
+        {
+            Debug.Assert(IsParameterReference(value));
+
+            return _endpoint.Parameters.Single(p => p.Name == value.Substring(1)).Value;
+        }
+
+        public string ReplaceParameterReference(string value)
+        {
+            if (IsParameterReference(value))
+            {
+                return LookupParameter(value);
+            }
+            else
+            {
+                return value;
+            }
+        }
+
     }
 
     public abstract class SimpleResponseCreator : ResponseCreator
     {
-        public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, string endpointDirectory)
+        private string _contentType;
+        private string _statuscode;
+
+        public SimpleResponseCreator(Endpoint endpoint) : base(endpoint)
+        {
+
+        }
+
+        public void SetStatusCodeFromString(string value)
+        {
+            _statuscode = value;
+        }
+
+        public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, Endpoint endpoint)
         {
             var responseBody = GetBodyAndExecuteReplacements(new RequestInfo
             {
@@ -124,7 +194,8 @@ namespace netmockery
                 QueryString = request.QueryString.ToString(),
                 RequestBody = Encoding.UTF8.GetString(requestBody),                
                 Headers = request.Headers,
-                EndpointDirectory = endpointDirectory
+                EndpointDirectory = endpoint.Directory,
+                Parameters = endpoint.Parameters
             });
             if (ContentType != null)
             {
@@ -136,10 +207,27 @@ namespace netmockery
             await response.WriteAsync(responseBody, Encoding);
             return Encoding.GetBytes(responseBody);
         }
-        public string ContentType { get; set; }
+        public string ContentType {
+            get { return ReplaceParameterReference(_contentType); }
+            set { _contentType = value; }
+        }
         public abstract string GetBody(RequestInfo requestInfo);
         public Encoding Encoding { get; set; } = Encoding.UTF8;
-        public int StatusCode { get; set; } = 200;
+
+
+        public int StatusCode {
+            get
+            {
+                if (_statuscode == null)
+                {
+                    return 200;
+                }
+                else
+                {
+                    return int.Parse(ReplaceParameterReference(_statuscode));
+                }
+            }
+        }
 
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 
@@ -165,9 +253,9 @@ namespace netmockery
     {
         private string _body;
 
-        public string Body => _body;
+        public string Body => ReplaceParameterReference(_body);
 
-        public LiteralResponse(string body)
+        public LiteralResponse(string body, Endpoint endpoint) : base(endpoint)
         {
             _body = body;
         }
@@ -179,18 +267,22 @@ namespace netmockery
 
     public class FileResponse : SimpleResponseCreator, IResponseCreatorWithFilename
     {
+        private string _directory;
         private string _filename;
 
-        public FileResponse(string filename)
+        public FileResponse(string directory, string filename, Endpoint endpoint) : base(endpoint)
         {
+            Debug.Assert(directory != null);
+            Debug.Assert(filename != null);
+            _directory = directory;
             _filename = filename;
         }
 
-        public string Filename => _filename;
+        public string Filename => Path.Combine(_directory, ReplaceParameterReference(_filename));
 
-        public override string GetBody(RequestInfo requestInfo) => File.ReadAllText(_filename);
+        public override string GetBody(RequestInfo requestInfo) => File.ReadAllText(Filename);
 
-        public override string ToString() => $"File {Path.GetFileName(_filename)}";
+        public override string ToString() => $"File {Path.GetFileName(Filename)}";
     }
 
 }

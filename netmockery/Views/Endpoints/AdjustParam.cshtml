@@ -1,0 +1,26 @@
+﻿@using netmockery
+@model EndpointParameter
+
+@{
+    Layout = "Base";
+}
+
+<form method="post">
+    <div class="form-group">
+        <label>Name</label>
+        <p class="from-control-static"><code>@Model.Name</code></p>
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <p class="from-control-static">@Model.Description</p>
+    </div>
+    <div class="form-group">
+        <label>Value</label>
+        <textarea class="form-control" rows="5" name="value">@Model.Value</textarea>
+    </div>
+    <div class="form-group">
+        <label>Default value</label>
+        <p class="from-control-static">@Model.DefaultValue</p>
+    </div>
+    <button type="submit" class="btn btn-primary">OK</button> <a href="@ViewBag.CancelUrl" class="btn btn-default">Cancel</a>
+</form>

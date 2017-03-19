@@ -1,8 +1,37 @@
 ﻿@using netmockery
+@using netmockery.Controllers
 @model string
 
 @{ 
     Layout = "Base";
+
+    List<TocItem> toc = null;
+    if (ViewData.ContainsKey("toc"))
+    {
+        toc = ViewData["toc"] as List<TocItem>;
+    }
+}
+
+@if (toc != null)
+{
+    <h2>Table of Contents</h2>
+    <ul>
+        @foreach (var item in toc)
+        {
+            <li>
+                <a href="#@item.id">@item.title</a>
+                @if (item.HasChildren)
+                {
+                <ul>
+                    @foreach (var subitem in item.children)
+                    {
+                        <li><a href="#@subitem.id">@subitem.title</a></li>
+                    }
+                </ul>
+                }
+            </li>
+        }
+    </ul>
 }
 
 @Html.Raw(Model)

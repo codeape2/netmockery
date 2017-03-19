@@ -1,12 +1,4 @@
-﻿# Netmockery Documentation
-
-* [Running netmockery](#running)
-* [Configuring netmockery](#configuring)
-* [Writing tests](#tests)
-* [Misc](#misc)
-
-<a name="running"></a>
-# Running netmockery
+﻿# Running netmockery
 
 Command line:
 
@@ -37,7 +29,6 @@ To uninstall:
 
     sc delete netmockery
 
-<a name="configuring"></a>
 # Configuring netmockery
 
 ## Directory structure
@@ -140,6 +131,7 @@ Example, match regular expression, only GET requests:
         "methods": "GET"
     }
 
+
 ## Response creation
 
 Several parameters inside the ``responses`` list control how netmockery creates the response.
@@ -159,6 +151,7 @@ Inside a script, the following global variables and functions are available:
 * ``QueryString`` (string): The incoming request query string
 * ``RequestBody`` (string): The incoming request body
 * ``GetNow()`` (returns System.DateTime): The current time. See below for why you might want to use ``GetNow()`` inside your scripts instead of using ``System.DateTime.Now``.
+* ``GetParam(string paramname)`` (returns string): The value of the specified run-time parameter.
 
 TODO: More scripting documentation.
 
@@ -237,9 +230,9 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
 "HTTP Response encoding and the Content-Type header".
 
 
-### Encodings
+## Encodings
 
-#### Netmockery input file encoding
+### Netmockery input file encoding
 
 * All netmockery *input* files should be in UTF-8 encoding:
  * Json configuration files
@@ -247,7 +240,7 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
  * C# script files
  * Test expectation response files
 
-#### HTTP Response encoding and the Content-Type header
+### HTTP Response encoding and the Content-Type header
 
 * The ``charset`` parameter determines the response encoding for netmockery responses (expect for forwarded external requests).
 * If no charset parameter is specified, netmockery uses UTF-8 encoding.
@@ -261,7 +254,7 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
   2. ``Content-Type`` = ``foo/bar; charset=iso-8859-1``
 * For forwarded external requests, no encoding and content-type handling is done.
 
-#### Valid charset names (not case sensitive)
+### Valid charset names (not case sensitive)
 
     US-ASCII
     ISO_8859-1:1987
@@ -361,8 +354,108 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
     windows-1258
     TIS-620
 
+# Run-time adjustable parameters
 
-<a name="tests"></a>
+An endpoint can define run-time adjustable parameters. These values can be referenced in the ``endpoint.json`` file and can be used inside scripts.
+
+Parameter values can be changed and reset to the default value using the web UI. Adjusted values are used until the configuration is reloaded. 
+
+## The ``params.json`` file
+
+To define run-time adjustable parameters for an endpoint, create a ``params.json`` file in the endpoint directory.
+
+The following example defines three parameters. Each parameter must have name, a default value and a description (the description is only used for information purposes in the Web UI).
+
+    [
+        {
+            "name": "greeting",
+            "default": "Hello World",
+            "description": "The greeting to display"
+        },
+
+        {
+            "name": "responsestatuscode",
+            "default": "200",
+            "description": "Status code for response"
+        },
+
+        {
+            "name": "responsedelay",
+            "default": "0",
+            "description": "Delay for response"
+        }
+    ]
+
+
+## Using parameter values in endpoint.json config settings
+
+Inside the ``endpoint.json`` file, ``$parameterName`` references to the value of a run time parameter.
+
+``$parameterName`` can only be used in response creator configuration, and not for all properties. The following table lists run-time-parameter support.
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Request creator property</th>
+            <th>Supports run-time parameter</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>literal</code></td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>file</code></td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>script</code></td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>contenttype</code></td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>delay</code></td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><code>statuscode</code></td>
+            <td>Yes</td>
+        </tr>
+    </tbody>
+</table>
+
+Note that ``statuscode`` and ``delay`` are normally integer properties. But if 
+
+Example ``endpoint.json`` (using the ``params.json`` from above):
+
+    {
+        "name": "Endpoint",
+        "pathregex": "^/endpoint/",
+
+        "responses": [
+            {
+                "match": {},
+                "literal": "$greeting",
+
+                "delay": "$responsedelay",
+                "statuscode": "$responsestatuscode"
+            }
+        ]
+    }
+
+## Using parameter values in scripts
+
+Inside a script file, the function ``GetParam(parameterName)`` returns the current value of a run time parameter.
+
+## Adjusting in the web UI
+
+For endpoints that define parameters, the web ui displays the table of values on the endpoint details page, and allows a user to change values, and reset values to the default value.
+
+
 # Writing tests
 
 Within a endpoint directory, a ``tests`` directory with a ``tests.json`` file defines test cases for the endpoint directory.
@@ -395,7 +488,7 @@ Specifying the request:
 * ``name``: display name for test (required)
 * ``requestpath``: request path (required)
 * ``method``: HTTP method, default GET
-* ``querystring``: request query string
+* ``querystring``: request query string (must include leading ?)
 * ``requestbody``: request body
 
 Specifying the expectations:
@@ -432,7 +525,6 @@ Command line:
   in ``yyyy-MM-dd HH:mm:ss`` format.
 * Using ``GetNow()`` / ``now.txt`` you can create stable test cases, even if your scripted service simulators return dynamic data based on current time.
 
-<a name="misc"></a>
 # Misc
 
 TODO: delay parameter

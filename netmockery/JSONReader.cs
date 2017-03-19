@@ -18,6 +18,13 @@ namespace netmockery
         }
     }
 
+    public class JSONParam
+    {
+        public string name;
+        public string @default;
+        public string description;
+    }
+
     public class JSONTest
     {
         public string name;
@@ -97,9 +104,9 @@ namespace netmockery
         //TODO: contenttype should be renamed to mediatype
         public string contenttype;
         public string charset;
-        public int? statuscode;
+        public string statuscode;
         public JSONReplacement[] replacements;
-        public int delay;
+        public string delay;
 
         public JSONResponse Validated()
         {
@@ -123,39 +130,40 @@ namespace netmockery
             return this;
         }
 
-        public ResponseCreator CreateResponseCreator(string rootDir)
+        public ResponseCreator CreateResponseCreator(Endpoint endpoint)
         {
             ResponseCreator responseCreator = null;
             if (literal != null)
             {
-                responseCreator = new LiteralResponse(literal);
+                responseCreator = new LiteralResponse(literal, endpoint);
             }
             else if (file != null)
             {
-                responseCreator = new FileResponse(Path.Combine(rootDir, file)); ;
+                responseCreator = new FileResponse(endpoint.Directory, file, endpoint); // Path.Combine(rootDir, file)); ;
             }
             else if (script != null)
             {
-                responseCreator = new FileDynamicResponseCreator(Path.Combine(rootDir, script));
+                responseCreator = new FileDynamicResponseCreator(endpoint.Directory, script, endpoint);
             }
             else if (assembly != null)
             {
-                responseCreator = new AssemblyResponseCreator
+                responseCreator = new AssemblyResponseCreator(endpoint)
                 {
-                    AssemblyFilename = Path.Combine(rootDir, assembly),
+                    AssemblyFilename = Path.Combine(endpoint.Directory, assembly),
                     ClassName = @class,
                     MethodName = method,
                 };
             }
             else if (forward != null)
             {
-                responseCreator = new ForwardResponseCreator(forward) { ProxyUrl = proxy, StripPath = strippath };
+                responseCreator = new ForwardResponseCreator(forward, endpoint) { ProxyUrl = proxy, StripPath = strippath };
             }
             else
             {
                 throw new NotImplementedException();
             }
-            responseCreator.Delay = delay;
+            //TODO: Change
+            responseCreator.SetDelayFromString(delay);
 
             var simpleResponseCreator = responseCreator as SimpleResponseCreator;
             if (simpleResponseCreator != null)
@@ -178,10 +186,7 @@ namespace netmockery
                 {
                     simpleResponseCreator.Encoding = Encoding.GetEncoding(charset);
                 }
-                if (statuscode != null)
-                {
-                    simpleResponseCreator.StatusCode = statuscode.Value;
-                }
+                simpleResponseCreator.SetStatusCodeFromString(statuscode);
             }
 
             return responseCreator;
@@ -249,6 +254,7 @@ namespace netmockery
         public Endpoint CreateEndpoint(string rootDir, JSONDefaults globalDefaults)
         {
             var endpoint = new Endpoint(name, pathregex);
+            endpoint.Directory = rootDir;
 
             var endpointDefaultsFile = Path.Combine(rootDir, "defaults.json");
             var endpointDefaults =
@@ -270,9 +276,25 @@ namespace netmockery
                     applyDefaults(globalDefaults, jsonResponse);
                 }
                 var validatedJsonResponse = jsonResponse.Validated();
-                endpoint.Add(validatedJsonResponse.match.CreateRequestMatcher(), validatedJsonResponse.CreateResponseCreator(rootDir));
+                endpoint.Add(validatedJsonResponse.match.CreateRequestMatcher(), validatedJsonResponse.CreateResponseCreator(endpoint));
             }
-            endpoint.Directory = rootDir;
+
+            var paramsFile = Path.Combine(rootDir, "params.json");
+            if (File.Exists(paramsFile))
+            {
+                var jsonParams = JsonConvert.DeserializeObject<JSONParam[]>(File.ReadAllText(paramsFile));
+                foreach (var jsonParam in jsonParams)
+                {
+                    endpoint.AddParameter(new EndpointParameter
+                    {
+                        Name = jsonParam.name,
+                        DefaultValue = jsonParam.@default,
+                        Value = jsonParam.@default,
+                        Description = jsonParam.description
+                    });
+                }
+            }
+
             return endpoint;
         }
 

@@ -12,7 +12,7 @@ namespace UnitTests
         [Fact]
         public void ReplacementsAreExecuted()
         {
-            var responseCreator = new LiteralResponse("abc def");
+            var responseCreator = new LiteralResponse("abc def", new Endpoint("foo", "bar"));
             responseCreator.Replacements = new[]
             {
                 new BodyReplacement { SearchTerm = "abc", ReplacementTerm = "ABC" },

@@ -1,0 +1,13 @@
+﻿[
+    {
+        "name": "greeting",
+        "default": "Hello",
+        "description": "The greeting to display"
+    },
+
+    {
+        "name": "subject",
+        "default": "World",
+        "description": "Recipient of greeting"
+    }
+]

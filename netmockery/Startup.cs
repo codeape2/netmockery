@@ -100,7 +100,7 @@ namespace netmockery
                         context.Response.Headers["X-Netmockery-ResponseCreator"] = matcher_and_creator.ResponseCreator.ToString();
                     }
 
-                    var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint.Directory);
+                    var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint);
                     
                     responseRegistryItem.ResponseBody = Encoding.UTF8.GetString(responseBytes);
                 }

@@ -13,7 +13,7 @@ namespace UnitTests
         [Fact]
         public void WorksGivenAssemblyObject()
         {
-            var responseCreator = new AssemblyResponseCreator {
+            var responseCreator = new AssemblyResponseCreator(new Endpoint("a", "b")) {
                 Assembly = this.GetType().Assembly,
                 ClassName = "UnitTests.MyResponseCreator",
                 MethodName = "GenerateIt"
@@ -24,7 +24,7 @@ namespace UnitTests
         [Fact]
         public void WorksGivenAssemblyName()
         {
-            var responseCreator = new AssemblyResponseCreator
+            var responseCreator = new AssemblyResponseCreator(new Endpoint("a", "b"))
             {
                 AssemblyFilename = this.GetType().Assembly.Location,
                 ClassName = "UnitTests.MyResponseCreator",

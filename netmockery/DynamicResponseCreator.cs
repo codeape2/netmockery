@@ -19,6 +19,8 @@ namespace netmockery
         private Assembly _compiledAssembly;
         private Type _compiledType;
 
+        public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
+
         public virtual string FileSystemDirectory { get { return null; } }
 
         public string Evaluate(RequestInfo requestInfo)
@@ -107,7 +109,7 @@ namespace netmockery
     {
         private string _sourceCode;
 
-        public LiteralDynamicResponseCreator(string sourceCode)
+        public LiteralDynamicResponseCreator(string sourceCode, Endpoint endpoint) : base(endpoint)
         {
             _sourceCode = sourceCode;
         }
@@ -117,16 +119,18 @@ namespace netmockery
 
     public class FileDynamicResponseCreator : DynamicResponseCreatorBase, IResponseCreatorWithFilename
     {
+        private string _directory;
         private string _filename;
 
-        public FileDynamicResponseCreator(string filename)
+        public FileDynamicResponseCreator(string directory, string filename, Endpoint endpoint) : base(endpoint)
         {
+            _directory = directory;
             _filename = filename;
         }
 
-        public string Filename => _filename;
+        public string Filename => Path.Combine(_directory, ReplaceParameterReference(_filename));
 
-        public override string SourceCode => File.ReadAllText(_filename);
+        public override string SourceCode => File.ReadAllText(Filename);
 
         public override string FileSystemDirectory => Path.GetDirectoryName(Filename);
 
@@ -135,6 +139,7 @@ namespace netmockery
 
     public class AssemblyResponseCreator : SimpleResponseCreator
     {
+        public AssemblyResponseCreator(Endpoint endpoint) : base(endpoint) { }
         public string AssemblyFilename { get; set; }
         public Assembly Assembly { get; set; }
         public string ClassName { get; set; }

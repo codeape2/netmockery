@@ -21,7 +21,7 @@ namespace UnitTests
             {
                 requestInfo.SetStaticNow(now.Value);
             }
-            return new LiteralDynamicResponseCreator(code).GetBody(requestInfo);
+            return new LiteralDynamicResponseCreator(code, new Endpoint("a", "b")).GetBody(requestInfo);
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace UnitTests
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator(Path.Combine(dc.DirectoryName, "a\\main.csscript"));
+            var drc = new FileDynamicResponseCreator(dc.DirectoryName, "a\\main.csscript", new Endpoint("a", "b"));
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }
@@ -162,7 +162,7 @@ namespace UnitTests
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator(Path.Combine(dc.DirectoryName, "a\\main.csscript"));
+            var drc = new FileDynamicResponseCreator(dc.DirectoryName, "a\\main.csscript", new Endpoint("a", "b"));
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }

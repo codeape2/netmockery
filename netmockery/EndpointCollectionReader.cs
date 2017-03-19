@@ -23,7 +23,7 @@ namespace netmockery
 
             foreach (var subdirectory in Directory.GetDirectories(directoryName))
             {
-                var endpointFile = Path.Combine(subdirectory, "endpoint.json");
+                var endpointFile = Path.Combine(subdirectory, "endpoint.json");                
                 if (File.Exists(endpointFile))
                 {
                     retval.Add(JSONReader.ReadEndpoint(File.ReadAllText(endpointFile), subdirectory, globalDefaults));

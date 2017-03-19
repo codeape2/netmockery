@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using IO = System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using HeyRed.MarkdownSharp;
+using Markdig;
 
 
 namespace netmockery.Controllers
@@ -23,7 +23,7 @@ namespace netmockery.Controllers
             var indexFile = IO.Path.Combine(_endpointCollection.SourceDirectory, "index.md");
             if (IO.File.Exists(indexFile))
             {
-                return View("DisplayMarkdown", new Markdown().Transform(IO.File.ReadAllText(indexFile)));
+                return View("DisplayMarkdown", Markdown.ToHtml(IO.File.ReadAllText(indexFile)));
             }
             else
             {
