@@ -8,8 +8,8 @@
     {
         "name": "All expectations",
         "requestpath": "/foobar",
-        "method": "GET",
-        "querystring": "abc=def",
+        "querystring": "?abc=def",
+        "method": "POST",
         "requestbody": "foobar",
 
         "expectedresponsebody": "Hello world",

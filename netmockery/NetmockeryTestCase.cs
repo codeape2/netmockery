@@ -172,15 +172,13 @@ namespace netmockery
             {
                 requestUrl += QueryString;
             }
-            HttpResponseMessage responseMessage;
+
+            var requestMessage = new HttpRequestMessage(new HttpMethod(Method), requestUrl);
             if (RequestBody != null)
             {
-                responseMessage = await client.PostAsync(requestUrl, new ByteArrayContent(Encoding.UTF8.GetBytes(RequestBody)));
+                requestMessage.Content = new ByteArrayContent(Encoding.UTF8.GetBytes(RequestBody));
             }
-            else
-            {
-                responseMessage = await client.GetAsync(requestUrl);
-            }
+            var responseMessage = await client.SendAsync(requestMessage);
             var body = await responseMessage.Content.ReadAsStringAsync();
 
             string message;
