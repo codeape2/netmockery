@@ -1,0 +1,19 @@
+﻿[
+    {
+        "name": "greeting",
+        "default": "Hello World",
+        "description": "The greeting to display"
+    },
+
+    {
+        "name": "responsestatuscode",
+        "default": "200",
+        "description": "Status code for response"
+    },
+
+    {
+        "name": "responsedelay",
+        "default": "0",
+        "description": "Delay for response"
+    }
+]

@@ -1,0 +1,14 @@
+﻿{
+    "name": "Endpoint",
+    "pathregex": "^/endpoint/",
+
+    "responses": [
+        {
+            "match": {},
+            "literal": "$greeting",
+
+            "delay": "$responsedelay",
+            "statuscode": "$responsestatuscode"
+        }
+    ]
+}
