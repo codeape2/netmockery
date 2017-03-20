@@ -73,6 +73,11 @@ namespace netmockery
             switch (parsedArguments.Command)
             {
                 case CommandLineParser.COMMAND_NORMAL:
+                    if (endpointCollection.Endpoints.Count() == 0)
+                    {
+                        Error.WriteLine("No endpoints found");
+                        return;
+                    }
                     WriteLine("Admin interface available on /__netmockery");
                     Startup.TestMode = parsedArguments.TestMode;
                     CreateWebHost(parsedArguments.EndpointCollectionDirectory, Directory.GetCurrentDirectory(), parsedArguments.Url).Run();
