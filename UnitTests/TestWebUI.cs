@@ -117,11 +117,9 @@ namespace UnitTests
             yield return $"/Endpoints/EndpointJsonFile?name={encoded}";
             yield return $"/Responses/ForEndpoint?endpointName={encoded}";
 
-            var paramIndex = 0;
-            foreach (var endpointParam in endpoint.Parameters)
+            for (var paramIndex = 0; paramIndex < endpoint.ParameterCount; paramIndex ++)
             {
                 yield return $"/Endpoints/AdjustParam?name={encoded}&amp;index={paramIndex}";
-                paramIndex++;
             }
         }
 

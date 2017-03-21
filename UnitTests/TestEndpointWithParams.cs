@@ -188,8 +188,8 @@ namespace UnitTests
             Assert.Equal(1, ecr.Endpoints.Count());
 
             var endpoint = ecr.Endpoints.First();
-            Assert.Equal(2, endpoint.Parameters.Count());
-            Assert.Equal("greeting", endpoint.Parameters.ElementAt(0).Name);
+            Assert.Equal(2, endpoint.ParameterCount);
+            Assert.Equal("greeting", endpoint.GetParameter(0).Name);
         }
 
         [Fact]
@@ -215,8 +215,8 @@ namespace UnitTests
             var ecr = CreateEndpointWithScript();
             var endpoint = ecr.Endpoints.Single();
 
-            endpoint.Parameters.Single(p => p.Name == "greeting").Value = "Goodbye";
-            endpoint.Parameters.Single(p => p.Name == "subject").Value = "Cruel World";
+            endpoint.GetParameter("greeting").Value = "Goodbye";
+            endpoint.GetParameter("subject").Value = "Cruel World";
 
             var responseCreator = endpoint.Responses.Single().Item2;
             var response = new TestableHttpResponse();

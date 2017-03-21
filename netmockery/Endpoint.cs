@@ -40,7 +40,7 @@ namespace netmockery
             _pathregex = pathregex;
         }
 
-        public IEnumerable<EndpointParameter> Parameters => _parameters;
+        //public IEnumerable<EndpointParameter> Parameters => _parameters;
 
         public string Directory { get; set; }
 
@@ -65,6 +65,34 @@ namespace netmockery
 
             _parameters.Add(parameter);
         }
+
+        public EndpointParameter GetParameter(string name)
+        {
+            Debug.Assert(_parameters != null);
+            var retval = _parameters.SingleOrDefault(p => p.Name == name);
+            if (retval == null)
+            {
+                throw new ArgumentException($"Endpoint parameter '{name}' not found");
+            }
+            return retval;
+        }
+
+        public EndpointParameter GetParameter(int parameterIndex)
+        {
+            Debug.Assert(_parameters != null);
+            if (parameterIndex < ParameterCount && parameterIndex >= 0)
+            {
+                return _parameters.ElementAt(parameterIndex);
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid parameter index {parameterIndex}");
+            }
+        }
+
+        public bool HasAdjustedParams => _parameters.Any(p => !p.ValueIsDefault);
+
+        public int ParameterCount => _parameters.Count;
 
         public void Add(RequestMatcher requestMatcher, ResponseCreator responseCreator)
         {

@@ -61,19 +61,19 @@ namespace netmockery.Controllers
         public ActionResult AdjustParam(string name, int index)
         {
             ViewBag.CancelUrl = Url.Action("EndpointDetails", new { name = name });
-            return View(_endpointCollection.Get(name).Parameters.ElementAt(index));
+            return View(_endpointCollection.Get(name).GetParameter(index));
         }
 
         [HttpPost]
         public ActionResult AdjustParam(string name, int index, string value)
         {            
-            _endpointCollection.Get(name).Parameters.ElementAt(index).Value = value;
+            _endpointCollection.Get(name).GetParameter(index).Value = value;
             return RedirectToAction("EndpointDetails", new { name = name });
         }
 
         public ActionResult ResetParam(string name, int index)
         {
-            _endpointCollection.Get(name).Parameters.ElementAt(index).ResetToDefaultValue();
+            _endpointCollection.Get(name).GetParameter(index).ResetToDefaultValue();
             return RedirectToAction("EndpointDetails", new { name = name });
         }
 

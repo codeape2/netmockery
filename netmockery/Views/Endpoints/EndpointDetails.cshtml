@@ -73,11 +73,11 @@
 
 @Html.ActionLink("Responses", "ForEndpoint", "Responses", new { endpointName = Model.Name })
 
-@if (Model.Parameters.Count() > 0)
+@if (Model.ParameterCount > 0)
 {
     <h2>
         Runtime adjustable parameters
-        @if (Model.Parameters.Any(p => !p.ValueIsDefault))
+        @if (Model.HasAdjustedParams)
         {
             <small>Adjusted</small>
         }
@@ -93,11 +93,9 @@
         </thead>
 
         <tbody>
-            @{ 
-                var paramIndex = 0;
-            }
-            @foreach (var param in Model.Parameters)
+            @for (var paramIndex = 0; paramIndex < Model.ParameterCount; paramIndex++)
             {
+                var param = Model.GetParameter(paramIndex);
                 <tr>
                     <td><code>@param.Name</code></td>
                     <td>
@@ -111,7 +109,6 @@
                         }
                     </td>
                 </tr>
-                paramIndex++;
             }
         </tbody>
     </table>

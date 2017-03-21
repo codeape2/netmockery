@@ -92,13 +92,13 @@ namespace netmockery
         public string QueryString;
         public string RequestBody;
         public IHeaderDictionary Headers;
-        public string EndpointDirectory;
-        public IEnumerable<EndpointParameter> Parameters;
+        //public string EndpointDirectory;
+        public Endpoint Endpoint;
 
         public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
         public string GetParam(string name)
         {
-            return Parameters.Single(p => p.Name == name).Value;
+            return Endpoint.GetParameter(name).Value;
         }
 
         public void SetStaticNow(DateTime now)
@@ -157,7 +157,7 @@ namespace netmockery
         {
             Debug.Assert(IsParameterReference(value));
 
-            return _endpoint.Parameters.Single(p => p.Name == value.Substring(1)).Value;
+            return _endpoint.GetParameter(value.Substring(1)).Value;
         }
 
         public string ReplaceParameterReference(string value)
@@ -197,8 +197,7 @@ namespace netmockery
                 QueryString = request.QueryString.ToString(),
                 RequestBody = Encoding.UTF8.GetString(requestBody),                
                 Headers = request.Headers,
-                EndpointDirectory = endpoint.Directory,
-                Parameters = endpoint.Parameters
+                Endpoint = endpoint
             });
             if (ContentType != null)
             {

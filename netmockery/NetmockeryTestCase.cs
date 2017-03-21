@@ -260,7 +260,7 @@ namespace netmockery
 
                     var requestInfo = new RequestInfo
                     {
-                        EndpointDirectory = endpoint.Directory,
+                        Endpoint = endpoint,
                         Headers = null,
                         RequestPath = RequestPath,
                         QueryString = QueryString,
@@ -310,7 +310,7 @@ namespace netmockery
 
                 var requestInfo = new RequestInfo
                 {
-                    EndpointDirectory = endpoint.Directory,
+                    Endpoint= endpoint,
                     Headers = null,
                     QueryString = QueryString,
                     RequestBody = RequestBody,
