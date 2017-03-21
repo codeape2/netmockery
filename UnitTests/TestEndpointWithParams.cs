@@ -70,8 +70,6 @@ namespace UnitTests
             endpoint.AddParameter(fooParam);
             endpoint.AddParameter(delayParam);
             endpoint.AddParameter(statusCodeParam);
-
-            //TODO: Lag skikkelig feilmelding ved missing param lookup
         }
 
         public void Dispose()
@@ -86,9 +84,29 @@ namespace UnitTests
         }
 
         [Fact]
-        public void EnsureResultingFileIsInsideEndpointCollectionDirectory()
+        public void LookupOfMissingParameterGivesError()
         {
+            var ae = Assert.Throws<ArgumentException>(() => { endpoint.GetParameter("foobar"); });
+            Assert.Equal("Endpoint parameter 'foobar' not found", ae.Message);
+        }
 
+        [Fact]
+        public void GetParameterByWrongIndexGivesError()
+        {
+            var ae = Assert.Throws<ArgumentException>(() => { endpoint.GetParameter(-1); });
+            Assert.Equal("Invalid parameter index -1", ae.Message);
+
+            ae = Assert.Throws<ArgumentException>(() => { endpoint.GetParameter(endpoint.ParameterCount); });
+            Assert.Equal("Invalid parameter index 5", ae.Message);
+        }
+        
+        [Fact]
+        public void LookupsWorkAsExpected()
+        {
+            Assert.Equal("filename", endpoint.GetParameter("filename").Name);
+            Assert.Equal("filename", endpoint.GetParameter(0).Name);
+
+            Assert.Equal("statuscode", endpoint.GetParameter(endpoint.ParameterCount - 1).Name);
         }
 
         [Fact]
