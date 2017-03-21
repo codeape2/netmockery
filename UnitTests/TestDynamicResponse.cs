@@ -138,7 +138,7 @@ namespace UnitTests
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator(dc.DirectoryName, "a\\main.csscript", new Endpoint("a", "b"));
+            var drc = new FileDynamicResponseCreator("a\\main.csscript", new Endpoint("a", "b") { Directory = Path.Combine(dc.DirectoryName) });
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }
@@ -162,7 +162,7 @@ namespace UnitTests
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator(dc.DirectoryName, "a\\main.csscript", new Endpoint("a", "b"));
+            var drc = new FileDynamicResponseCreator("a\\main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }

@@ -97,7 +97,7 @@ namespace UnitTests
             dc.AddFile("file.txt", "CONTENTS0");
             dc.AddFile("otherfile.txt", "CONTENTS1");
 
-            var responseCreator = new FileResponse(endpoint.Directory, "$filename", endpoint);
+            var responseCreator = new FileResponse("$filename", endpoint);
             Assert.Equal(Path.Combine(endpoint.Directory, "file.txt"), responseCreator.Filename);
             Assert.Equal("CONTENTS0", GetResponse(responseCreator).WrittenContent);
 
@@ -110,7 +110,7 @@ namespace UnitTests
         public void CanUseParamForContenttype()
         {
             dc.AddFile("file.txt", "Heisann");
-            var responseCreator = new FileResponse(endpoint.Directory, "file.txt", endpoint);
+            var responseCreator = new FileResponse("file.txt", endpoint);
             responseCreator.ContentType = "$contenttype";
 
             Assert.Equal("text/plain", responseCreator.ContentType);
@@ -145,7 +145,7 @@ namespace UnitTests
             dc.AddFile("file.txt", "return \"I am file.txt: \" + GetParam(\"filename\");");
             dc.AddFile("another.txt", "return \"I am another.txt: \" + GetParam(\"filename\");");
 
-            var responseCreator = new FileDynamicResponseCreator(endpoint.Directory, "$filename", endpoint);
+            var responseCreator = new FileDynamicResponseCreator("$filename", endpoint);
             Assert.Equal(Path.Combine(endpoint.Directory, "file.txt"), responseCreator.Filename);
             Assert.Equal("I am file.txt: file.txt", GetResponse(responseCreator).WrittenContent);
 
@@ -157,7 +157,7 @@ namespace UnitTests
         [Fact]
         public void CanUseParamForDelay()
         {
-            var responseCreator = new FileDynamicResponseCreator(".", "file.txt", endpoint);
+            var responseCreator = new FileDynamicResponseCreator("file.txt", endpoint);
             responseCreator.SetDelayFromString("$delay");
 
             Assert.Equal(0, responseCreator.Delay);

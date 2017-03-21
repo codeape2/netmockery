@@ -119,22 +119,20 @@ namespace netmockery
 
     public class FileDynamicResponseCreator : DynamicResponseCreatorBase, IResponseCreatorWithFilename
     {
-        private string _directory;
         private string _filename;
 
-        public FileDynamicResponseCreator(string directory, string filename, Endpoint endpoint) : base(endpoint)
+        public FileDynamicResponseCreator(string filename, Endpoint endpoint) : base(endpoint)
         {
-            _directory = directory;
             _filename = filename;
         }
 
-        public string Filename => Path.Combine(_directory, ReplaceParameterReference(_filename));
+        public string Filename => Path.Combine(Endpoint.Directory, ReplaceParameterReference(_filename));
 
         public override string SourceCode => File.ReadAllText(Filename);
 
         public override string FileSystemDirectory => Path.GetDirectoryName(Filename);
 
-        public override string ToString() => $"Execute script {Path.GetFileName(_filename)}";
+        public override string ToString() => $"Execute script {ReplaceParameterReference(_filename)}";
     }
 
     public class AssemblyResponseCreator : SimpleResponseCreator

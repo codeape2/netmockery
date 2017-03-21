@@ -139,11 +139,11 @@ namespace netmockery
             }
             else if (file != null)
             {
-                responseCreator = new FileResponse(endpoint.Directory, file, endpoint); // Path.Combine(rootDir, file)); ;
+                responseCreator = new FileResponse(file, endpoint); // Path.Combine(rootDir, file)); ;
             }
             else if (script != null)
             {
-                responseCreator = new FileDynamicResponseCreator(endpoint.Directory, script, endpoint);
+                responseCreator = new FileDynamicResponseCreator(script, endpoint);
             }
             else if (assembly != null)
             {

@@ -123,6 +123,9 @@ namespace netmockery
             Debug.Assert(endpoint != null);
             _endpoint = endpoint;
         }
+
+        public Endpoint Endpoint => _endpoint;
+
         public int Delay
         {
             get
@@ -272,15 +275,13 @@ namespace netmockery
         private string _directory;
         private string _filename;
 
-        public FileResponse(string directory, string filename, Endpoint endpoint) : base(endpoint)
+        public FileResponse(string filename, Endpoint endpoint) : base(endpoint)
         {
-            Debug.Assert(directory != null);
             Debug.Assert(filename != null);
-            _directory = directory;
             _filename = filename;
         }
 
-        public string Filename => Path.Combine(_directory, ReplaceParameterReference(_filename));
+        public string Filename => Path.Combine(Endpoint.Directory, ReplaceParameterReference(_filename));
 
         public override string GetBody(RequestInfo requestInfo) => File.ReadAllText(Filename);
 
