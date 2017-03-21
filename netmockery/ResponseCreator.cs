@@ -268,11 +268,8 @@ namespace netmockery
         public override string ToString() => $"Literal string: {Body}";
     }
 
-    //TODO: For all responsecreators that need directory, use endpoint.Directory
-
     public class FileResponse : SimpleResponseCreator, IResponseCreatorWithFilename
     {
-        private string _directory;
         private string _filename;
 
         public FileResponse(string filename, Endpoint endpoint) : base(endpoint)

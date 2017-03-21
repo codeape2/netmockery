@@ -133,7 +133,7 @@ namespace UnitTests
 
         TestableHttpResponse GetResponse(ResponseCreator responseCreator)
         {
-            var request = new TestableHttpRequest();
+            var request = new TestableHttpRequest(null, null);
             var retval = new TestableHttpResponse();
             var bytesWritten = responseCreator.CreateResponseAsync(request, new byte[0], retval, endpoint).Result;
             return retval;
@@ -201,7 +201,7 @@ namespace UnitTests
             Assert.NotNull(responseCreator);
             var response = new TestableHttpResponse();
             var responseBytes = await responseCreator.CreateResponseAsync(
-                new TestableHttpRequest { PathAsString = "/" }, 
+                new TestableHttpRequest("/", null),
                 new byte[0], 
                 response, 
                 endpoint
@@ -221,7 +221,7 @@ namespace UnitTests
             var responseCreator = endpoint.Responses.Single().Item2;
             var response = new TestableHttpResponse();
             var responseBytes = await responseCreator.CreateResponseAsync(
-                new TestableHttpRequest { PathAsString = "/" },
+                new TestableHttpRequest("/", null),
                 new byte[0],
                 response,
                 endpoint
@@ -271,13 +271,21 @@ namespace UnitTests
 
     public class TestableHttpRequest : IHttpRequestWrapper
     {
-        //TODO: Fix horrible names
+        private string path;
+        private string queryString;
+
+        public TestableHttpRequest(string path, string queryString)
+        {
+            this.path = path;
+            this.queryString = queryString;
+        }
+
         public string PathAsString { get; set; }
         public string QueryStringAsString { get; set; }
         public IHeaderDictionary Headers => null;
 
-        public PathString Path => new PathString(PathAsString);
+        public PathString Path => new PathString(path);
 
-        public QueryString QueryString => new QueryString(QueryStringAsString);
+        public QueryString QueryString => new QueryString(queryString);
     }
 }
