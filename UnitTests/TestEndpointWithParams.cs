@@ -26,7 +26,7 @@ namespace UnitTests
             Assert.False(ep.ValueIsDefault);
         }
     }
-    public class FileResponseCreatorCanUseParamForFilename
+    public class FileResponseCreatorCanUseParamForFilename : IDisposable
     {
         private Endpoint endpoint;
         private EndpointParameter filenameParam;
@@ -34,10 +34,12 @@ namespace UnitTests
         private EndpointParameter fooParam;
         private EndpointParameter delayParam;
         private EndpointParameter statusCodeParam;
+        private DirectoryCreator dc = new DirectoryCreator();
 
         public FileResponseCreatorCanUseParamForFilename()
         {
             endpoint = new Endpoint("foo", "bar");
+            endpoint.Directory = dc.DirectoryName;
             filenameParam = new EndpointParameter
             {
                 Name = "filename",
@@ -72,6 +74,11 @@ namespace UnitTests
             //TODO: Lag skikkelig feilmelding ved missing param lookup
         }
 
+        public void Dispose()
+        {
+            dc.Dispose();
+        }
+
         [Fact]
         public void ParamNamesMustBeUnique()
         {
@@ -87,41 +94,64 @@ namespace UnitTests
         [Fact]
         public void CanUseParamForFilename()
         {
-            var responseCreator = new FileResponse(".", "$filename", endpoint);
-            Assert.Equal(".\\file.txt", responseCreator.Filename);
+            dc.AddFile("file.txt", "CONTENTS0");
+            dc.AddFile("otherfile.txt", "CONTENTS1");
+
+            var responseCreator = new FileResponse(endpoint.Directory, "$filename", endpoint);
+            Assert.Equal(Path.Combine(endpoint.Directory, "file.txt"), responseCreator.Filename);
+            Assert.Equal("CONTENTS0", GetResponse(responseCreator).WrittenContent);
 
             filenameParam.Value = "otherfile.txt";
-            Assert.Equal(".\\otherfile.txt", responseCreator.Filename);
+            Assert.Equal(Path.Combine(endpoint.Directory, "otherfile.txt"), responseCreator.Filename);
+            Assert.Equal("CONTENTS1", GetResponse(responseCreator).WrittenContent);
         }
 
         [Fact]
         public void CanUseParamForContenttype()
         {
-            var responseCreator = new FileResponse(".", "file.txt", endpoint);
+            dc.AddFile("file.txt", "Heisann");
+            var responseCreator = new FileResponse(endpoint.Directory, "file.txt", endpoint);
             responseCreator.ContentType = "$contenttype";
 
             Assert.Equal("text/plain", responseCreator.ContentType);
+            Assert.Equal("text/plain; charset=utf-8", GetResponse(responseCreator).ContentType);
+
+            contenttypeParam.Value = "application/xml";
+            Assert.Equal("application/xml; charset=utf-8", GetResponse(responseCreator).ContentType);
         }
 
         [Fact]
         public void CanUseParamForLiteral()
         {
             var responseCreator = new LiteralResponse("$foo", endpoint);
-            Assert.Equal("FOO", responseCreator.Body);
+            Assert.Equal("FOO", responseCreator.GetBody(null));
 
             fooParam.Value = "BAR";
-            Assert.Equal("BAR", responseCreator.Body);
+            Assert.Equal("BAR", responseCreator.GetBody(null));
+            Assert.Equal("BAR", GetResponse(responseCreator).WrittenContent);
+        }
+
+        TestableHttpResponse GetResponse(ResponseCreator responseCreator)
+        {
+            var request = new TestableHttpRequest();
+            var retval = new TestableHttpResponse();
+            var bytesWritten = responseCreator.CreateResponseAsync(request, new byte[0], retval, endpoint).Result;
+            return retval;
         }
 
         [Fact]
         public void CanUseParamForScriptFilename()
         {
-            var responseCreator = new FileDynamicResponseCreator(".", "$filename", endpoint);
-            Assert.Equal(".\\file.txt", responseCreator.Filename);
+            dc.AddFile("file.txt", "return \"I am file.txt: \" + GetParam(\"filename\");");
+            dc.AddFile("another.txt", "return \"I am another.txt: \" + GetParam(\"filename\");");
+
+            var responseCreator = new FileDynamicResponseCreator(endpoint.Directory, "$filename", endpoint);
+            Assert.Equal(Path.Combine(endpoint.Directory, "file.txt"), responseCreator.Filename);
+            Assert.Equal("I am file.txt: file.txt", GetResponse(responseCreator).WrittenContent);
 
             filenameParam.Value = "another.txt";
-
-            Assert.Equal(".\\another.txt", responseCreator.Filename);
+            Assert.Equal(Path.Combine(endpoint.Directory, "another.txt"), responseCreator.Filename);
+            Assert.Equal("I am another.txt: another.txt", GetResponse(responseCreator).WrittenContent);
         }
 
         [Fact]
@@ -222,6 +252,11 @@ namespace UnitTests
             {
                 contentType = value;
             }
+
+            get
+            {
+                return contentType;
+            }
         }
 
         public HttpStatusCode HttpStatusCode { get; set; }
@@ -229,6 +264,7 @@ namespace UnitTests
 
         public async Task WriteAsync(string content, Encoding encoding)
         {
+            await Task.Yield(); // to supress warning
             WrittenContent = content;
         }
     }

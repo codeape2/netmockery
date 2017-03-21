@@ -25,6 +25,10 @@ namespace UnitTests
         {
             var configurationsToTest = new List<string>();
             configurationsToTest.Add("examples/example1");
+
+            configurationsToTest.Add("examples/withparams");
+            configurationsToTest.Add("examples/documentation");
+
             if (File.Exists(FILENAME))
             {
                 configurationsToTest.AddRange(from line in File.ReadAllLines(FILENAME) where !string.IsNullOrEmpty(line) && !line.StartsWith("#") select line);
@@ -52,11 +56,18 @@ namespace UnitTests
         public void CheckConfigdirectory(string directory)
         {
             Assert.True(Directory.Exists(directory), $"Directory {directory} does not exist");
-            Assert.True(TestRunner.HasTestSuite(directory), $"Directory {directory} has not test suite");
+            
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(directory);
             Assert.True(endpointCollection.Endpoints.Count() > 0, $"No endpoints defined in {directory}");
 
             output.WriteLine(directory);
+
+            if (! TestRunner.HasTestSuite(directory))
+            {
+                output.WriteLine($"No tests in {directory}");
+                return;
+            }
+
             var tests = new ConsoleTestRunner(endpointCollection);
             foreach (var test in tests.Tests)
             {
