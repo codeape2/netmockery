@@ -93,6 +93,7 @@ namespace netmockery
         public string RequestBody;
         public IHeaderDictionary Headers;
         public Endpoint Endpoint;
+        public string EndpointDirectory => Endpoint.Directory;
 
         public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
         public string GetParam(string name)
