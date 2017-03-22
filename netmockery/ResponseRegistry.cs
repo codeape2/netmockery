@@ -48,11 +48,7 @@ namespace netmockery
         }
     }
 
-    public class FailedRequestItem
-    {
-        public DateTime Timestamp;
-    }
-    
+   
     public class ResponseRegistry
     {
         private int _nextId;
@@ -62,7 +58,7 @@ namespace netmockery
 
         public IEnumerable<ResponseRegistryItem> ForEndpoint(string endpointName)
         {
-            return _items.Where(item => item?.Endpoint?.Name == endpointName);
+            return Responses.Where(item => item?.Endpoint?.Name == endpointName);
         }
 
         public ResponseRegistryItem Get(int id)
