@@ -6,7 +6,9 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Net;
+
 
 namespace netmockery
 {
@@ -23,6 +25,31 @@ namespace netmockery
         public string name;
         public string @default;
         public string description;
+
+        public JSONParam Validated()
+        {
+            if (name == null)
+            {
+                throw new ArgumentException($"Parameter missing name");
+            }
+
+            if (! Regex.IsMatch(name, "^[a-zA-Z_]+$"))
+            {
+                throw new ArgumentException($"Invalid parameter name: '{name}'");
+            }
+
+            if (@default == null)
+            {
+                throw new ArgumentException($"Missing default value for parameter '{name}'");
+            }
+
+            if (description == null)
+            {
+                throw new ArgumentException($"Missing description for parameter '{name}'");
+            }
+
+            return this;
+        }
     }
 
     public class JSONTest
@@ -282,7 +309,7 @@ namespace netmockery
             var paramsFile = Path.Combine(rootDir, "params.json");
             if (File.Exists(paramsFile))
             {
-                var jsonParams = JsonConvert.DeserializeObject<JSONParam[]>(File.ReadAllText(paramsFile));
+                var jsonParams = from item in JsonConvert.DeserializeObject<JSONParam[]>(File.ReadAllText(paramsFile)) select item.Validated();
                 foreach (var jsonParam in jsonParams)
                 {
                     endpoint.AddParameter(new EndpointParameter

@@ -29,6 +29,55 @@ namespace UnitTests
             return EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
         }
 
+        private EndpointCollection CreateEndpointWithParam(JSONParam jsonParam)
+        {
+            dc.AddFile("endpoint\\endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateScriptEndpoint("endpoint", "script.csscript")));
+            dc.AddFile("endpoint\\script.csscript", "return GetParam(\"greeting\") + \" \" + GetParam(\"subject\");");
+            dc.AddFile("endpoint\\params.json", JsonConvert.SerializeObject(new[] {
+                jsonParam
+            }));
+
+            return EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
+        }
+
+        [Fact]
+        public void MissingNameGivesError()
+        {
+            var ae = Assert.Throws<ArgumentException>(() => {
+                CreateEndpointWithParam(new JSONParam { @default = "foo", description = "bar" });
+            });
+            Assert.Equal("Parameter missing name", ae.Message);      
+        }
+
+        [Fact]
+        public void InvalidNameGivesError()
+        {
+            var ae = Assert.Throws<ArgumentException>(() => {
+                CreateEndpointWithParam(new JSONParam { name = "æøå", @default = "foo", description = "bar" });
+            });
+            Assert.Equal("Invalid parameter name: 'æøå'", ae.Message);
+        }
+
+        [Fact]
+        public void MissingDefaultGivesError()
+        {
+            var ae = Assert.Throws<ArgumentException>(() => {
+                CreateEndpointWithParam(new JSONParam { name = "abc", description = "bar" });
+            });
+
+            Assert.Equal("Missing default value for parameter 'abc'", ae.Message);
+        }
+
+        [Fact]
+        public void MissingDescriptionGivesError()
+        {
+            var ae = Assert.Throws<ArgumentException>(() => {
+                CreateEndpointWithParam(new JSONParam { name = "abc", @default="bar" });
+            });
+            Assert.Equal("Missing description for parameter 'abc'", ae.Message);
+        }
+
+
         [Fact]
         public void ValueAndDefaultWorksAsExpected()
         {
@@ -39,6 +88,11 @@ namespace UnitTests
             ep.Value = "b";
             Assert.Equal("b", ep.Value);
             Assert.False(ep.ValueIsDefault);
+        }
+
+        public void RequireNameDefaultAndDescription()
+        {
+
         }
 
         [Fact]
