@@ -97,7 +97,12 @@
             {
                 var param = Model.GetParameter(paramIndex);
                 <tr>
-                    <td><code>@param.Name</code></td>
+                    <td>
+                        <code>@param.Name</code>
+                        <p>
+                            @param.Description
+                        </p>
+                    </td>
                     <td>
                         @param.Value
                     </td>
