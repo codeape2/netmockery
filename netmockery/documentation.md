@@ -428,7 +428,7 @@ Inside the ``endpoint.json`` file, ``$parameterName`` references to the value of
     </tbody>
 </table>
 
-Note that ``statuscode`` and ``delay`` are normally integer properties. But if 
+Note that ``statuscode`` and ``delay`` are normally integer properties. Surround in quotes inside ``endpoint.json`` if the values should be supplied by run-time adjustable parameter value.
 
 Example ``endpoint.json`` (using the ``params.json`` from above):
 
@@ -453,7 +453,7 @@ Inside a script file, the function ``GetParam(parameterName)`` returns the curre
 
 ## Adjusting in the web UI
 
-For endpoints that define parameters, the web ui displays the table of values on the endpoint details page, and allows a user to change values, and reset values to the default value.
+For endpoints that define parameters, the web ui displays the table of values on the endpoint details page. The user can change values and reset values to the default value.
 
 
 # Writing tests
