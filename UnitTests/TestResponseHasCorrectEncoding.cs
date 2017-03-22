@@ -81,10 +81,5 @@ namespace UnitTests
             Assert.Equal("text/plain", response.Content.Headers.ContentType.MediaType);
             Assert.Equal("iso-8859-1", response.Content.Headers.ContentType.CharSet);
         }
-
-        //[Fact]
-        
-
-        //TODO: Implement test to check that test cases work as expected
     }
 }
