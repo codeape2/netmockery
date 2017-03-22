@@ -141,7 +141,7 @@ namespace netmockery
             }
         }
 
-        public void SetDelayFromString(string value)
+        public void SetDelayFromConfigValue(string value)
         {
             _delay = value;
         }

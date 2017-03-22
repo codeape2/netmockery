@@ -158,7 +158,7 @@ namespace UnitTests
         public void CanUseParamForDelay()
         {
             var responseCreator = new FileDynamicResponseCreator("file.txt", endpoint);
-            responseCreator.SetDelayFromString("$delay");
+            responseCreator.SetDelayFromConfigValue("$delay");
 
             Assert.Equal(0, responseCreator.Delay);
             delayParam.Value = "1000";

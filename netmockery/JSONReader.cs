@@ -189,8 +189,8 @@ namespace netmockery
             {
                 throw new NotImplementedException();
             }
-            //TODO: Change
-            responseCreator.SetDelayFromString(delay);
+
+            responseCreator.SetDelayFromConfigValue(delay);
 
             var simpleResponseCreator = responseCreator as SimpleResponseCreator;
             if (simpleResponseCreator != null)
