@@ -6,15 +6,6 @@
     var responseRegistry = ViewData["responseRegistry"] as ResponseRegistry;
 }
 
-<h2>Configuration</h2>
-<p>
-    Configuration directory: <code>@Model.SourceDirectory</code>
-</p>
-<p>
-    @Html.ActionLink("Reload Configuration", "ReloadConfig", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
-    @Html.ActionLink("View reload history", "ReloadHistory")
-</p>
-
 <h2>Endpoints</h2>
 <table class="table">
     <thead>

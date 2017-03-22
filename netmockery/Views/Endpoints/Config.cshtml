@@ -5,6 +5,13 @@
     var now = (DateTime) ViewData["Now"];
     var reloadTimestamps = (DateTime[])ViewData["ReloadTimestamps"];
 }
+<h2>Configuration</h2>
+<p>
+    Configuration directory: <code>@ViewData["SourceDirectory"]</code>
+</p>
+<p>
+    @Html.ActionLink("Reload Configuration", "ReloadConfig", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
+</p>
 
 <h2>Reload History</h2>
 <p>

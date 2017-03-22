@@ -28,6 +28,14 @@ namespace netmockery.Controllers
             return View(_endpointCollection);
         }
 
+        public ActionResult Config()
+        {
+            ViewData["Now"] = DateTime.Now;
+            ViewData["ReloadTimestamps"] = _endpointCollectionProvider.ReloadTimestamps;
+            ViewData["SourceDirectory"] = _endpointCollection.SourceDirectory;
+            return View();
+        }
+
         public ActionResult EndpointNames()
         {
             return Json(from e in _endpointCollection.Endpoints select e.Name);
@@ -39,14 +47,7 @@ namespace netmockery.Controllers
         {
             _endpointCollectionProvider.Reload();
             _responseRegistry.Clear();
-            return RedirectToAction("Index");
-        }
-
-        public ActionResult ReloadHistory()
-        {
-            ViewData["Now"] = DateTime.Now;
-            ViewData["ReloadTimestamps"] = _endpointCollectionProvider.ReloadTimestamps;
-            return View();
+            return RedirectToAction("Config");
         }
 
         public ActionResult EndpointDetails(string name, int highlight = -1)

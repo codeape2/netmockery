@@ -74,7 +74,7 @@ namespace UnitTests
             "/Tests/RunAll",
             "/Tests/RunAllStopOnFirstError",
             "/Documentation",            
-            "/Endpoints/ReloadHistory",
+            "/Endpoints/Config"
         };
 
         private string[] RELOAD_URL = new[] { "/Endpoints/ReloadConfig" };
