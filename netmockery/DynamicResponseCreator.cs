@@ -134,23 +134,4 @@ namespace netmockery
 
         public override string ToString() => $"Execute script {ReplaceParameterReference(_filename)}";
     }
-
-    public class AssemblyResponseCreator : SimpleResponseCreator
-    {
-        public AssemblyResponseCreator(Endpoint endpoint) : base(endpoint) { }
-        public string AssemblyFilename { get; set; }
-        public Assembly Assembly { get; set; }
-        public string ClassName { get; set; }
-        public string MethodName { get; set; }
-        public override string GetBody(RequestInfo requestInfo)
-        {
-            if (Assembly == null)
-            {
-                Assembly = Assembly.LoadFile(AssemblyFilename);
-            }
-            var type = Assembly.GetType(ClassName);
-            var methodInfo = type.GetMethod(MethodName, BindingFlags.Public | BindingFlags.Static);
-            return (string)methodInfo.Invoke(null, new object[] { requestInfo.RequestPath, requestInfo.RequestBody });
-        }
-    }
 }

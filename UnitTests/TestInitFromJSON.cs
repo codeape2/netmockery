@@ -103,17 +103,6 @@ namespace UnitTests
         }
 
         [Fact]
-        public void DeserializeCompiledCreator()
-        {
-            var response = ParseResponse("{'match': {'regex': 'foobar'}, 'assembly': 'foo.dll', 'class': 'Foo', 'method': 'Bar'}");
-            var responseCreator = response.Item2 as AssemblyResponseCreator;
-            Assert.NotNull(responseCreator);
-            Assert.Equal("r:\\oot\\directory\\foo.dll", responseCreator.AssemblyFilename);
-            Assert.Equal("Foo", responseCreator.ClassName);
-            Assert.Equal("Bar", responseCreator.MethodName);
-        }
-
-        [Fact]
         public void DeserializeForwardCreator()
         {
             var response = ParseResponse("{'match': {}, 'forward': 'http://foo.bar'}");

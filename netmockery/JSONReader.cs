@@ -120,10 +120,6 @@ namespace netmockery
         public string file;
         public string script;
 
-        public string assembly;
-        public string @class;
-        public string method;
-
         public string forward;
         public string proxy;
         public string strippath;
@@ -141,11 +137,11 @@ namespace netmockery
             {
                 throw new ArgumentException("match must be specified");
             }
-            var mutuallyExclusive = new[] { literal, file, script, assembly, forward };
+            var mutuallyExclusive = new[] { literal, file, script, forward };
             var mutExWithValues = from value in mutuallyExclusive where value != null select value;
             if (mutExWithValues.Count() != 1)
             {
-                throw new ArgumentException("Exactly one of file, script, assembly or forward must be set");
+                throw new ArgumentException("Exactly one of file, script or forward must be set");
             }
             //TODO: Implement related validation
             //TODO: Implement set if main not set validation (i.e. proxy set but not forward)
@@ -171,15 +167,6 @@ namespace netmockery
             else if (script != null)
             {
                 responseCreator = new FileDynamicResponseCreator(script, endpoint);
-            }
-            else if (assembly != null)
-            {
-                responseCreator = new AssemblyResponseCreator(endpoint)
-                {
-                    AssemblyFilename = Path.Combine(endpoint.Directory, assembly),
-                    ClassName = @class,
-                    MethodName = method,
-                };
             }
             else if (forward != null)
             {
