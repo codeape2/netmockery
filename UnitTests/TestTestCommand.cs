@@ -127,10 +127,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void RunTestsWithReplacement()
+        public async Task RunTestsWithReplacement()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            var result = testRunner.ExecuteTestAndOutputResult(1);
+            var result = await testRunner.ExecuteTestAndOutputResultAsync(1);
             Assert.True(result.OK, result.ResultAsString);
         }
 
@@ -154,7 +154,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public void RequestBodyCanBeUnspecified()
+        public async Task RequestBodyCanBeUnspecified()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
 
@@ -165,32 +165,32 @@ namespace UnitTests
                 ExpectedResponseBody = "Hello world"
             };
 
-            var result = test.Execute(endpointCollection, false);
+            var result = await test.ExecuteAsync(endpointCollection, false);
             Assert.True(result.OK, result.Message);
         }
 
         [Fact]
-        public void TestsHaveConstantGetNow()
+        public async Task TestsHaveConstantGetNow()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            var result = testRunner.ExecuteTestAndOutputResult(3);
+            var result = await testRunner.ExecuteTestAndOutputResultAsync(3);
             Assert.True(result.OK, result.ResultAsString);
         }
 
         [Fact]
-        public void TestsCanHaveDynamicNow()
+        public async Task TestsCanHaveDynamicNow()
         {
             dc.DeleteFile("tests/now.txt");
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            var result = testRunner.ExecuteTestAndOutputResult(3);
+            var result = await testRunner.ExecuteTestAndOutputResultAsync(3);
             Assert.True(result.Error, result.ResultAsString);
             Assert.Null(result.Exception);
         }
 
         [Fact]
-        public void SetStaticGetNow()
+        public async Task SetStaticGetNow()
         {
-            Assert.Equal("2015-06-07 08:09:10", TestDynamicResponse.Eval("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")", now: new DateTime(2015, 6, 7, 8, 9, 10)));
+            Assert.Equal("2015-06-07 08:09:10", await TestDynamicResponse.EvalAsync("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")", now: new DateTime(2015, 6, 7, 8, 9, 10)));
         }
 
 
@@ -203,10 +203,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void TestRunnerKeepsTrackOfTestCoverage()
+        public async Task TestRunnerKeepsTrackOfTestCoverage()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            testRunner.TestAll(false, true);
+            await testRunner.TestAllAsync(false, true);
 
             var coverageInfo = testRunner.GetCoverageInfo();
             Assert.NotNull(coverageInfo);
@@ -216,10 +216,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void TrackTestConverageByResponseRule()
+        public async Task TrackTestConverageByResponseRule()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            testRunner.TestAll(false, false);
+            await testRunner.TestAllAsync(false, false);
 
             var coverageInfo = testRunner.GetCoverageInfo();
             Assert.NotNull(coverageInfo);
@@ -229,10 +229,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void TestRunnerKeepsTrackOfCoverageWhenRunningSingleTest()
+        public async Task TestRunnerKeepsTrackOfCoverageWhenRunningSingleTest()
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
-            testRunner.ExecuteTestAndOutputResult(0);
+            await testRunner.ExecuteTestAndOutputResultAsync(0);
 
             var coverageInfo = testRunner.GetCoverageInfo();
             Assert.NotNull(coverageInfo);
@@ -243,30 +243,30 @@ namespace UnitTests
         }
 
         [Fact]
-        public void CanExecuteTest()
+        public async Task CanExecuteTest()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
             var testRunner = new ConsoleTestRunner(endpointCollection);
 
             var test = testRunner.Tests.ElementAt(0);
-            var result = test.Execute(endpointCollection, handleErrors: false);
+            var result = await test.ExecuteAsync(endpointCollection, handleErrors: false);
             Assert.True(result.OK);
         }
 
         [Fact]
-        public void CanReadExpectedResponseBodyFromFile()
+        public async Task CanReadExpectedResponseBodyFromFile()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
             var testRunner = new ConsoleTestRunner(endpointCollection);
 
             var test = testRunner.Tests.ElementAt(2);
 
-            var result = test.Execute(endpointCollection, handleErrors: false);
+            var result = await test.ExecuteAsync(endpointCollection, handleErrors: false);
             Assert.True(result.OK, result.Message);
         }
 
         [Fact]
-        public void CanCheckExpectedRequestMatcherError()
+        public async Task CanCheckExpectedRequestMatcherError()
         {
             var testcase = 
                 (new JSONTest { name="checksomething", requestpath = "/foo/", requestbody = "foobar", expectedrequestmatcher = "Regex 'test'" })
@@ -277,24 +277,24 @@ namespace UnitTests
             Assert.Equal("Regex 'test'", testcase.ExpectedRequestMatcher);
             Assert.Equal("foobar", testcase.RequestBody);
 
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.Error);
             Assert.Null(result.Exception);
             Assert.Equal("Expected request matcher: Regex 'test'\nActual: Any request", result.Message);
         }
 
         [Fact]
-        public void CanCheckExpectedRequestMatcherSuccess()
+        public async Task CanCheckExpectedRequestMatcherSuccess()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "this is a test", expectedrequestmatcher = "Regex 'test'" })
                 .Validated().CreateTestCase(".");
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK);
         }
 
         [Fact]
-        public void CanCheckExpectedContentTypeSuccess()
+        public async Task CanCheckExpectedContentTypeSuccess()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcontenttype = "text/xml" })
@@ -304,12 +304,12 @@ namespace UnitTests
             Assert.True(testcase.NeedsResponseBody);
             Assert.Equal("text/xml", testcase.ExpectedContentType);
 
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK);
         }
 
         [Fact]
-        public void CanCheckExpectedContentTypeError()
+        public async Task CanCheckExpectedContentTypeError()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcontenttype = "text/plain" })
@@ -317,14 +317,14 @@ namespace UnitTests
 
             Assert.Equal("text/plain", testcase.ExpectedContentType);
 
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.Null(result.Exception);
             Assert.True(result.Error);            
             Assert.Equal("Expected contenttype: 'text/plain'\nActual: 'text/xml'", result.Message);
         }
 
         [Fact]
-        public void CanCheckExpectedCharSetSuccess()
+        public async Task CanCheckExpectedCharSetSuccess()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcharset = "us-ascii" })
@@ -334,14 +334,14 @@ namespace UnitTests
             Assert.True(testcase.NeedsResponseBody);
             Assert.Equal("us-ascii", testcase.ExpectedCharSet);
 
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.Null(result.Exception);
             Assert.Equal(null, result.Message);
             Assert.True(result.OK);
         }
 
         [Fact]
-        public void CanCheckExpectedCharSetError()
+        public async Task CanCheckExpectedCharSetError()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedcharset = "utf-8" })
@@ -349,25 +349,25 @@ namespace UnitTests
 
             Assert.Equal("utf-8", testcase.ExpectedCharSet);
 
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.Null(result.Exception);
             Assert.True(result.Error);
             Assert.Equal("Expected charset: 'utf-8'\nActual: 'us-ascii'", result.Message);
         }
 
         [Fact]
-        public void CanGetResultBody()
+        public async Task CanGetResultBody()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "this is a test", expectedrequestmatcher = "Regex 'test'" })
                 .Validated().CreateTestCase(".");
-            var result = testcase.GetResponse(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName), null);
+            var result = await testcase.GetResponseAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName), null);
             Assert.Equal("FOOBARBOOBAR", result.Item1);
             Assert.Null(result.Item2);
         }
 
         [Fact]
-        public void CanCheckExpectedResponseCreatorError()
+        public async Task CanCheckExpectedResponseCreatorError()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "foobar", expectedresponsecreator = "File content.txt" })
@@ -375,19 +375,19 @@ namespace UnitTests
             Assert.True(testcase.HasExpectations);
             Assert.False(testcase.NeedsResponseBody);
             Assert.Equal("File content.txt", testcase.ExpectedResponseCreator);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.Error);
             Assert.Equal("Expected response creator: File content.txt\nActual: Execute script myscript.csscript", result.Message);
         }
 
         [Fact]
-        public void CanCheckExpectedResponseCreatorSuccess()
+        public async Task CanCheckExpectedResponseCreatorSuccess()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", requestbody = "this is a test", expectedresponsecreator = "File content.txt" })
                 .Validated().CreateTestCase(".");
             Assert.Equal("File content.txt", testcase.ExpectedResponseCreator);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK, result.Message);
             Assert.Null(result.Message);
         }
@@ -400,12 +400,12 @@ namespace UnitTests
         }
 
         [Fact]
-        public void CanExecuteWithQueryStringFailure()
+        public async Task CanExecuteWithQueryStringFailure()
         {
             var testcase =
                 (new JSONTest { name = "checksomething", requestpath = "/foo/", querystring = "?a=test", requestbody = "foobar", expectedresponsecreator = "File content.txt" })
                 .Validated().CreateTestCase(".");
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.True(result.OK, result.Message);
             Assert.Null(result.Message);
         }

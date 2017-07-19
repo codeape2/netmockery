@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
+using System.Threading.Tasks;
 
 namespace netmockery
 {
@@ -53,13 +53,13 @@ namespace netmockery
         }
 
         
-        public void TestAll(bool stopAfterFirstFailure, bool outputCoverage)
+        public async Task TestAllAsync(bool stopAfterFirstFailure, bool outputCoverage)
         {
             var errors = 0;
             var index = 0;
             foreach (var test in testcases)
             {
-                var result = ExecuteTestAndOutputResult(index++, test);
+                var result = await ExecuteTestAndOutputResultAsync(index++, test);
                 if (result.Error)
                 {
                     errors++;
@@ -105,16 +105,14 @@ namespace netmockery
             }
         }
 
-        public NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index)
-        {
-            return ExecuteTestAndOutputResult(index, testcases.ElementAt(index));
-        }
+        public Task<NetmockeryTestCaseResult> ExecuteTestAndOutputResultAsync(int index) => ExecuteTestAndOutputResultAsync(index, testcases.ElementAt(index));
 
-        public NetmockeryTestCaseResult ExecuteTestAndOutputResult(int index, NetmockeryTestCase test)
+        public async Task<NetmockeryTestCaseResult> ExecuteTestAndOutputResultAsync(int index, NetmockeryTestCase test)
         {
             WriteBeginTest(index, test);
             
-            var result = Url != null ? test.ExecuteAgainstUrlAsync(Url).Result : test.Execute(endpointCollection, now: now);
+            var resultTask = Url != null ? test.ExecuteAgainstUrlAsync(Url) : test.ExecuteAsync(endpointCollection, now: now);
+            var result = await resultTask;
             WriteResult(index, test, result);
 
             responsesCoveredByTests.Add(Tuple.Create(result.EndpointName, result.ResponseIndex));
@@ -122,10 +120,10 @@ namespace netmockery
             return result;
         }
 
-        public void ShowResponse(int index)
+        public async Task ShowResponseAsync(int index)
         {
             var testCase = testcases.ElementAt(index);
-            var response = testCase.GetResponse(endpointCollection, Now);
+            var response = await testCase.GetResponseAsync(endpointCollection, Now);
             if (response.Item2 != null)
             {
                 WriteError(response.Item2);

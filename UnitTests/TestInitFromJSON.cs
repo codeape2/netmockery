@@ -128,12 +128,12 @@ namespace UnitTests
         }
 
         [Fact]
-        public void DeserializeLiteralResponse()
+        public async Task DeserializeLiteralResponse()
         {
             var response = ParseResponse("{'match': {}, 'literal': 'Hello world', 'contenttype': 'text/plain'}");
             var responseCreator = response.Item2 as LiteralResponse;
             Assert.NotNull(responseCreator);
-            Assert.Equal("Hello world", responseCreator.GetBody(null));
+            Assert.Equal("Hello world", await responseCreator.GetBodyAsync(null));
             Assert.Equal("text/plain", responseCreator.ContentType);
             Assert.Equal("Literal string: Hello world", responseCreator.ToString());
         }

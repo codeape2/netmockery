@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -49,12 +50,23 @@ namespace netmockery
         }
 
         public static void Main(string[] args)
-        { 
+        {
+            var source = new CancellationTokenSource();
+            CancelKeyPress += (s, e) =>
+            {
+                e.Cancel = true;
+                source.Cancel();
+            };
+
+            MainAsync(args, source.Token).GetAwaiter().GetResult();
+        }
+
+        public static async Task MainAsync(string[] args, CancellationToken token)
+        {
 #if NET462
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
 #endif
-
             ParsedCommandLine parsedArguments;
             try
             {
@@ -97,7 +109,7 @@ namespace netmockery
                     break;
 
                 case CommandLineParser.COMMAND_TEST:
-                    Test(parsedArguments, endpointCollection);
+                    await TestAsync(parsedArguments, endpointCollection);
                     break;
 
                 case CommandLineParser.COMMAND_DUMP:
@@ -117,7 +129,7 @@ namespace netmockery
         }
 
 
-        public static void Test(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
+        public static async Task TestAsync(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
         {
             if (!TestRunner.HasTestSuite(endpointCollection.SourceDirectory))
             {
@@ -163,7 +175,7 @@ namespace netmockery
                             return;
                         }
 
-                        var responseTuple = testCase.GetResponse(endpointCollection, testRunner.Now);
+                        var responseTuple = await testCase.GetResponseAsync(endpointCollection, testRunner.Now);
                         if (responseTuple.Item2 != null)
                         {
                             Error.WriteLine($"ERROR: {responseTuple.Item2}");
@@ -182,11 +194,11 @@ namespace netmockery
                     {
                         if (commandArgs.ShowResponse)
                         {
-                            testRunner.ShowResponse(index);
+                            await testRunner.ShowResponseAsync(index);
                         }
                         else
                         {
-                            testRunner.ExecuteTestAndOutputResult(index);
+                            await testRunner.ExecuteTestAndOutputResultAsync(index);
                         }
                     }
                 }
@@ -197,7 +209,7 @@ namespace netmockery
             }
             else
             {
-                testRunner.TestAll(commandArgs.Stop, true);
+                await testRunner.TestAllAsync(commandArgs.Stop, true);
             }                
         }
 

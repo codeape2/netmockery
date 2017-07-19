@@ -9,11 +9,12 @@ using Xunit;
 
 namespace UnitTests
 {
+    using Microsoft.CodeAnalysis.Scripting;
     using static TestUtils;
 
     public class TestDynamicResponse 
     {
-        static public string Eval(string code, RequestInfo requestInfo = null, DateTime? now = null)
+        static public async Task<string> EvalAsync(string code, RequestInfo requestInfo = null, DateTime? now = null)
         {
             if (requestInfo == null)
             {
@@ -23,74 +24,73 @@ namespace UnitTests
             {
                 requestInfo.SetStaticNow(now.Value);
             }
-            return new LiteralDynamicResponseCreator(code, new Endpoint("a", "b")).GetBody(requestInfo);
+            return await new LiteralDynamicResponseCreator(code, new Endpoint("a", "b")).GetBodyAsync(requestInfo);
         }
 
         [Fact]
-        public void CanExecuteCode()
+        public async Task CanExecuteCode()
         {
-            Assert.Equal("42", Eval("(40+2).ToString()"));
+            Assert.Equal("42", await EvalAsync("(40+2).ToString()"));
         }
 
         [Fact]
-        public void GetNowWorks()
+        public async Task GetNowWorks()
         {
-            Assert.Equal("System.DateTime", Eval("GetNow().GetType().ToString()"));
+            Assert.Equal("System.DateTime", await EvalAsync("GetNow().GetType().ToString()"));
         }
 
         [Fact]
-        public void CompilationErrorsAreThrown()
+        public async Task CompilationErrorsAreThrown()
         {
-            var e = Assert.ThrowsAny<AggregateException>(
-                () => Eval("dlkj d")
+            var e = await Assert.ThrowsAnyAsync<CompilationErrorException>(
+                () => EvalAsync("dlkj d")
             );
 
-            Assert.Contains("; expected", e.InnerException.ToString());
+            Assert.Contains("; expected", e.ToString());
         }
 
         [Fact]
-        public void CanAccessGlobalVariables()
+        public async Task CanAccessGlobalVariables()
         {
-            Assert.Equal("foobar", Eval("RequestBody + RequestPath", new RequestInfo { RequestBody = "foo", RequestPath = "bar" }));
+            Assert.Equal("foobar", await EvalAsync("RequestBody + RequestPath", new RequestInfo { RequestBody = "foo", RequestPath = "bar" }));
         }
 
         [Fact]
-        public void CanAccessQueryString()
+        public async Task CanAccessQueryString()
         {
-            Assert.Equal("foobar?ama", Eval("RequestBody + RequestPath + QueryString", new RequestInfo { RequestBody = "foo", RequestPath = "bar", QueryString = "?ama" }));
+            Assert.Equal("foobar?ama", await EvalAsync("RequestBody + RequestPath + QueryString", new RequestInfo { RequestBody = "foo", RequestPath = "bar", QueryString = "?ama" }));
         }
 
         [Fact]
-        public void MultilineScript()
+        public async Task MultilineScript()
         {
             var code = @"var a = 2; var b = 3; (a + b).ToString()";
-            Assert.Equal("5", Eval(code));
+            Assert.Equal("5", await EvalAsync(code));
         }
 
         [Fact]
-        public void MultilineScriptWithReturnStatement()
+        public async Task MultilineScriptWithReturnStatement()
         {
             var code = @"var a = 2; var b = 3; return (a + b).ToString();";
-            Assert.Equal("5", Eval(code));
+            Assert.Equal("5", await EvalAsync(code));
         }
 
 
         [Fact]
-        public void RuntimeErrorsAreThrown()
+        public async Task RuntimeErrorsAreThrown()
         {
-            var ex = Assert.Throws<AggregateException>(
-                () => Eval("var i = 0; (4 / i).ToString()")
+            var ex = await Assert.ThrowsAsync<DivideByZeroException>(
+                () => EvalAsync("var i = 0; (4 / i).ToString()")
             );
-            Assert.Equal(1, ex.InnerExceptions.Count);
-            Assert.IsType<DivideByZeroException>(ex.InnerExceptions[0]);
+            Assert.NotNull(ex);
         }
 
 
         [Fact(Skip = "Does not work on DotNetCore")]
-        public void RuntimeErrorsIncludeLineNumber()
+        public async Task RuntimeErrorsIncludeLineNumber()
         {
-            var ex = Assert.Throws<AggregateException>(
-                () => Eval("var i = 0; (4 / i).ToString()")
+            var ex = await Assert.ThrowsAsync<AggregateException>(
+                () => EvalAsync("var i = 0; (4 / i).ToString()")
             );
             Assert.Equal(1, ex.InnerExceptions.Count);
             Assert.IsType<DivideByZeroException>(ex.InnerExceptions[0]);
@@ -98,27 +98,27 @@ namespace UnitTests
         }
 
         [Fact]
-        public void UsingSystemLinq()
+        public async Task UsingSystemLinq()
         {
-            Assert.Equal("0123", Eval("using System.Linq; string.Join(\"\", Enumerable.Range(0, 4))"));
+            Assert.Equal("0123", await EvalAsync("using System.Linq; string.Join(\"\", Enumerable.Range(0, 4))"));
         }
 
         [Fact]
-        public void UsingSystemIO()
+        public async Task UsingSystemIO()
         {
-            Assert.Equal("File", Eval("typeof(System.IO.File).Name"));
+            Assert.Equal("File", await EvalAsync("typeof(System.IO.File).Name"));
         }
 
         [Fact]
-        public void UsingSystemXmlLinq()
+        public async Task UsingSystemXmlLinq()
         {
-            Assert.Equal("OK", Eval("using System.Xml.Linq; return \"OK\";"));
+            Assert.Equal("OK", await EvalAsync("using System.Xml.Linq; return \"OK\";"));
         }
 
         [Fact]
-        public void UsingSystemDiagnosticsDebug()
+        public async Task UsingSystemDiagnosticsDebug()
         {
-            Assert.Equal("OK", Eval("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
+            Assert.Equal("OK", await EvalAsync("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
         }
     }
 
@@ -169,10 +169,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ScriptCanLoadAnotherScript()
+        public async Task ScriptCanLoadAnotherScript()
         {
             var drc = new FileDynamicResponseCreator("a/main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
-            var body = drc.GetBody(new RequestInfo());
+            var body = await drc.GetBodyAsync(new RequestInfo());
             Assert.Equal("foo", body);
         }
 
@@ -193,10 +193,10 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ScriptCanLoadAnotherScript()
+        public async Task ScriptCanLoadAnotherScript()
         {
             var drc = new FileDynamicResponseCreator("a/main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
-            var body = drc.GetBody(new RequestInfo());
+            var body = await drc.GetBodyAsync(new RequestInfo());
             Assert.Equal("foo", body);
         }
 

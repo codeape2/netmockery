@@ -74,7 +74,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public void Foo()
+        public async Task Foo()
         {
             var endpoint = (new JSONEndpoint
             {
@@ -90,10 +90,10 @@ namespace UnitTests
             Assert.Equal(2, endpoint.Responses.Count());
 
             var getTestCase = new NetmockeryTestCase { Method = "GET", RequestPath = "/", ExpectedResponseBody = "Response from GET" };
-            Assert.True(getTestCase.Execute(EndpointCollection.WithEndpoints(endpoint)).OK);
+            Assert.True((await getTestCase.ExecuteAsync(EndpointCollection.WithEndpoints(endpoint))).OK);
 
             var postTestCase = new NetmockeryTestCase { Method = "POST", RequestPath = "/", ExpectedResponseBody = "Response from POST" };
-            Assert.True(postTestCase.Execute(EndpointCollection.WithEndpoints(endpoint)).OK);
+            Assert.True((await postTestCase.ExecuteAsync(EndpointCollection.WithEndpoints(endpoint))).OK);
         }
     }
 }

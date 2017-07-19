@@ -47,7 +47,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public void FailingTestCase()
+        public async Task FailingTestCase()
         {
             Assert.False(new NetmockeryTestCase().HasExpectations);
 
@@ -58,13 +58,13 @@ namespace UnitTests
             };
 
             Assert.True(testcase.HasExpectations);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
             Assert.False(result.OK);
             Assert.Equal("Expected http status code: 404\nActual: 200", result.Message);
         }
 
         [Fact]
-        public void PassingTestCase()
+        public async Task PassingTestCase()
         {
             var testcase = new NetmockeryTestCase
             {
@@ -73,7 +73,7 @@ namespace UnitTests
             };
 
             Assert.True(testcase.HasExpectations);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
+            var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
             Assert.True(result.OK);
         }
 

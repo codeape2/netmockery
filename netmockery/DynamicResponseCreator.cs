@@ -22,11 +22,6 @@ namespace netmockery
 
         public virtual string FileSystemDirectory { get { return null; } }
 
-        public string Evaluate(RequestInfo requestInfo)
-        {
-            return Task.Run(async () => await EvaluateAsync(requestInfo)).Result;
-        }
-
         public async Task<string> EvaluateAsync(RequestInfo requestInfo)
         {
             //TODO: Only create script object if source has changed
@@ -79,7 +74,7 @@ namespace netmockery
 
         }
 
-        public override string GetBody(RequestInfo requestInfo) => Evaluate(requestInfo);
+        public override Task<string> GetBodyAsync(RequestInfo requestInfo) => EvaluateAsync(requestInfo);
 
         public abstract string SourceCode { get; }
     }

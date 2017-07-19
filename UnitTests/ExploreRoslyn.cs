@@ -83,16 +83,16 @@ stringList.Add(msg);
         }
 
         [Fact]
-        public void ExploreCompileTimeError()
+        public async Task ExploreCompileTimeError()
         {
-            var exception = Assert.Throws<CompilationErrorException>(() => { CompileAndRun(SOURCE_WITH_COMPILATION_ERROR); });
+            var exception = await Assert.ThrowsAsync<CompilationErrorException>(() => CompileAndRunAsync(SOURCE_WITH_COMPILATION_ERROR) );
             Assert.StartsWith("(4,9): error CS0117: 'Console' does not contain", exception.Message);
         }
 
         [Fact]
-        public void ExploreRunTimeError()
+        public async Task ExploreRunTimeError()
         {
-            var exception = Assert.ThrowsAny<Exception>(() => { CompileAndRun(SOURCE_WITH_RUNTIME_ERROR); });
+            var exception = await Assert.ThrowsAnyAsync<Exception>(() => CompileAndRunAsync(SOURCE_WITH_RUNTIME_ERROR));
             Assert.IsType(typeof(NullReferenceException), exception);
 
             
@@ -101,25 +101,17 @@ stringList.Add(msg);
         }
 
         [Fact]
-        public void NoError()
+        public async Task NoError()
         {
-            CompileAndRun(SOURCE_WITHOUT_ERROR);
+            await CompileAndRunAsync(SOURCE_WITHOUT_ERROR);
             Assert.Equal(1, stringList.Count);
             Assert.Equal("no errors", stringList[0]);
         }
 
-        private void CompileAndRun(string sourceCode)
+        private Task CompileAndRunAsync(string sourceCode)
         {
             Assert.Equal(0, stringList.Count);
-            ScriptState<object> scriptState = null;
-            try
-            {
-                scriptState = Task.Run(async () => await CSharpScript.RunAsync(sourceCode, globals: this)).Result;
-            }
-            catch (AggregateException ae)
-            {
-                throw ae.InnerException;
-            }           
+            return CSharpScript.RunAsync(sourceCode, globals: this);
         }
     }
 }

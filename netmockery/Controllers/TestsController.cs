@@ -109,28 +109,28 @@ namespace netmockery.Controllers
             return Json(Startup.TestMode);
         }
 
-        public ActionResult RunAll()
+        public async Task<ActionResult> RunAll()
         {
-            testRunner.TestAll(false, true);
+            await testRunner.TestAllAsync(false, true);
             return Content(testRunner.ToString());
         }
 
-        public ActionResult RunAllStopOnFirstError()
+        public async Task<ActionResult> RunAllStopOnFirstError()
         {
-            testRunner.TestAll(true, false);
+            await testRunner.TestAllAsync(true, false);
             return Content(testRunner.ToString());
         }
 
 
-        public ActionResult Run(int index)
+        public async Task<ActionResult> Run(int index)
         {
-            testRunner.ExecuteTestAndOutputResult(index);
+            await testRunner.ExecuteTestAndOutputResultAsync(index);
             return Content(testRunner.ToString());
         }
 
-        public ActionResult ViewResponse(int index)
+        public async Task<ActionResult> ViewResponse(int index)
         {
-            testRunner.ShowResponse(index);
+            await testRunner.ShowResponseAsync(index);
             return Content(testRunner.ToString());
         }
 

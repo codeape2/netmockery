@@ -21,7 +21,7 @@ namespace UnitTests
         private const string FILENAME = "configurations_to_test.txt";
 
         [Fact]
-        public void KnownConfigurationsTestOK()
+        public async Task KnownConfigurationsTestOK()
         {
             var configurationsToTest = new List<string>();
             configurationsToTest.Add("examples/example1");
@@ -43,17 +43,17 @@ namespace UnitTests
 
             foreach (var directory in configurationsToTest)
             {
-                CheckConfigdirectory(directory);
+                await CheckConfigdirectoryAsync(directory);
             }
         }
 
         [Fact]
-        public void ShowResponseWorksAsExpected()
+        public async Task ShowResponseWorksAsExpected()
         {
-            CheckOutput("examples/example1", 0);
+            await CheckOutputAsync("examples/example1", 0);
         }
         
-        public void CheckConfigdirectory(string directory)
+        public async Task CheckConfigdirectoryAsync(string directory)
         {
             Assert.True(Directory.Exists(directory), $"Directory {directory} does not exist");
             
@@ -72,16 +72,16 @@ namespace UnitTests
             foreach (var test in tests.Tests)
             {
                 output.WriteLine(test.Name);
-                var result = test.Execute(endpointCollection, now: tests.Now);
+                var result = await test.ExecuteAsync(endpointCollection, now: tests.Now);
                 output.WriteLine(result.ResultAsString);
                 Assert.True(result.OK, $"Test case {result.TestCase.Name}, message '{result.Message}'");
             }
         }
 
-        public void CheckOutput(string directory, int index)
+        public async Task CheckOutputAsync(string directory, int index)
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(directory));
-            testRunner.ShowResponse(index);
+            await testRunner.ShowResponseAsync(index);
         }
     }
 }

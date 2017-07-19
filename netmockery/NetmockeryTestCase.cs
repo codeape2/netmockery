@@ -221,7 +221,7 @@ namespace netmockery
         private const string ERROR_ENDPOINT_HAS_NO_MATCH = "Endpoint has no match for request";
 
 
-        public NetmockeryTestCaseResult Execute(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
+        public async Task<NetmockeryTestCaseResult> ExecuteAsync(EndpointCollection endpointCollection, bool handleErrors=true, DateTime? now=null)
         {
             Debug.Assert(endpointCollection != null);
 
@@ -270,7 +270,7 @@ namespace netmockery
                     {
                         requestInfo.SetStaticNow(now.Value);
                     }
-                    responseBody = simpleResponseCreator.GetBodyAndExecuteReplacements(requestInfo);
+                    responseBody = await simpleResponseCreator.GetBodyAndExecuteReplacementsAsync(requestInfo);
                     contenttype = simpleResponseCreator.ContentType ?? "";
                     charset = simpleResponseCreator.Encoding.WebName;
                     statusCode = simpleResponseCreator.StatusCode;
@@ -292,7 +292,7 @@ namespace netmockery
             }
         }
 
-        public Tuple<string, string> GetResponse(EndpointCollection endpointCollection, DateTime? now)
+        public async Task<Tuple<string, string>> GetResponseAsync(EndpointCollection endpointCollection, DateTime? now)
         {
             var endpoint = endpointCollection.Resolve(RequestPath);
             if (endpoint == null)
@@ -320,7 +320,7 @@ namespace netmockery
                 {
                     requestInfo.SetStaticNow(now.Value);
                 }
-                var responseBody = responseCreator.GetBodyAndExecuteReplacements(requestInfo);
+                var responseBody = await responseCreator.GetBodyAndExecuteReplacementsAsync(requestInfo);
                 return Tuple.Create(responseBody, (string)null);
             }
             else

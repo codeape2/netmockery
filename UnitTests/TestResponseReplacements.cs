@@ -10,7 +10,7 @@ namespace UnitTests
     public class TestResponseReplacements
     {
         [Fact]
-        public void ReplacementsAreExecuted()
+        public async Task ReplacementsAreExecuted()
         {
             var responseCreator = new LiteralResponse("abc def", new Endpoint("foo", "bar"));
             responseCreator.Replacements = new[]
@@ -19,7 +19,7 @@ namespace UnitTests
                 new BodyReplacement { SearchTerm = "def", ReplacementTerm = "DEF" }
             };
 
-            var body = responseCreator.GetBodyAndExecuteReplacements(null);
+            var body = await responseCreator.GetBodyAndExecuteReplacementsAsync(null);
             Assert.Equal("ABC DEF", body);
         }
     }

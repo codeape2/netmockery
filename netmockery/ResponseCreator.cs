@@ -191,7 +191,7 @@ namespace netmockery
 
         public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, Endpoint endpoint)
         {
-            var responseBody = GetBodyAndExecuteReplacements(new RequestInfo
+            var responseBody = await GetBodyAndExecuteReplacementsAsync(new RequestInfo
             {
                 RequestPath = request.Path.ToString(),
                 QueryString = request.QueryString.ToString(),
@@ -213,7 +213,7 @@ namespace netmockery
             get { return ReplaceParameterReference(_contentType); }
             set { _contentType = value; }
         }
-        public abstract string GetBody(RequestInfo requestInfo);
+        public abstract Task<string> GetBodyAsync(RequestInfo requestInfo);
         public Encoding Encoding { get; set; } = Encoding.UTF8;
 
 
@@ -233,9 +233,9 @@ namespace netmockery
 
         public BodyReplacement[] Replacements = new BodyReplacement[0];
 
-        public string GetBodyAndExecuteReplacements(RequestInfo requestInfo)
+        public async Task<string> GetBodyAndExecuteReplacementsAsync(RequestInfo requestInfo)
         {
-            var retval = GetBody(requestInfo);
+            var retval = await GetBodyAsync(requestInfo);
 
             Debug.Assert(Replacements != null);
             if (Replacements.Length > 0)
@@ -262,7 +262,7 @@ namespace netmockery
             _body = body;
         }
 
-        public override string GetBody(RequestInfo requestInfo) => Body;
+        public override Task<string> GetBodyAsync(RequestInfo requestInfo) => Task.FromResult(Body);
 
         public override string ToString() => $"Literal string: {Body}";
     }
@@ -279,7 +279,13 @@ namespace netmockery
 
         public string Filename => Path.Combine(Endpoint.Directory, ReplaceParameterReference(_filename));
 
-        public override string GetBody(RequestInfo requestInfo) => File.ReadAllText(Filename);
+        public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
+        {
+            using (var reader = File.OpenText(Filename))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
 
         public override string ToString() => $"File {Path.GetFileName(Filename)}";
     }
