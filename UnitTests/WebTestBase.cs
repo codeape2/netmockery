@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using netmockery;
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,6 @@ namespace UnitTests
             // thanks to https://github.com/aspnet/Hosting/issues/954
             webhostBuilder = webhostBuilder
                 .UseContentRoot("../../../../netmockery")
-                .ConfigureLogging(factory => { factory.AddConsole();  })
                 .UseStartup<Startup>()
                 .ConfigureServices(services => 
                 {
