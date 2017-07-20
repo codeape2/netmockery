@@ -79,7 +79,7 @@ namespace UnitTests
 
         private string[] RELOAD_URL = new[] { "/Endpoints/ReloadConfig" };
 
-        [Fact(Skip = "Does not work on DetNetCore")]
+        [Fact]
         public async Task CheckAllUrlsNoRequestsMade()
         {
             AssertSetEquals(
@@ -160,7 +160,7 @@ namespace UnitTests
         }
 
 
-        [Fact(Skip = "Does not work on DetNetCore")]
+        [Fact]
         public async Task CheckAllUrlsAfterTestRequestsMade()
         {
             Assert.Equal(0, GetResponseRegistry().Responses.Count());
@@ -216,7 +216,7 @@ namespace UnitTests
             return server.Host.Services.GetService<ResponseRegistry>();
         }
 
-        [Fact(Skip = "Does not work on DetNetCore")]
+        [Fact]
         public async Task CheckAllUrlsAfterFailingRequests()
         {
             Assert.Equal(0, GetResponseRegistry().Responses.Count());
@@ -241,7 +241,7 @@ namespace UnitTests
             );
         }
 
-        [Fact(Skip = "Does not work on DetNetCore")]
+        [Fact]
         public async Task CheckAllUrlsAfterNoMatchInEndpoint()
         {
             Assert.Equal(0, GetResponseRegistry().Responses.Count());
@@ -268,7 +268,7 @@ namespace UnitTests
             );
         }
 
-        [Fact(Skip = "Does not work on DetNetCore")]
+        [Fact]
         public async Task EndpointsListed()
         {
             var response = await client.GetAsync("/__netmockery");
