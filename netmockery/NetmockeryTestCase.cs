@@ -181,7 +181,6 @@ namespace netmockery
             var responseMessage = await client.SendAsync(requestMessage);
             var body = await responseMessage.Content.ReadAsStringAsync();
 
-            string message;
             var requestMatcher = "";
             if (responseMessage.Headers.Contains("X-Netmockery-RequestMatcher"))
             {
@@ -200,7 +199,7 @@ namespace netmockery
                 charset = responseMessage.Content.Headers.ContentType.CharSet;
             }
 
-            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, (int)responseMessage.StatusCode, out message))
+            if (Evaluate(requestMatcher, responseCreator, body, contentType, charset, (int)responseMessage.StatusCode, out string message))
             {
                 retval.SetSuccess();
             }
@@ -275,8 +274,7 @@ namespace netmockery
                     charset = simpleResponseCreator.Encoding.WebName;
                     statusCode = simpleResponseCreator.StatusCode;
                 }
-                string message;
-                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out message))
+                if (Evaluate(matcher_and_creator.RequestMatcher.ToString(), matcher_and_creator.ResponseCreator.ToString(), responseBody, contenttype, charset, statusCode, out string message))
                 {
                     return testResult.SetSuccess();
                 }

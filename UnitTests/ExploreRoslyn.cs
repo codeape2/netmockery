@@ -93,7 +93,7 @@ stringList.Add(msg);
         public async Task ExploreRunTimeError()
         {
             var exception = await Assert.ThrowsAnyAsync<Exception>(() => CompileAndRunAsync(SOURCE_WITH_RUNTIME_ERROR));
-            Assert.IsType(typeof(NullReferenceException), exception);
+            Assert.IsType<NullReferenceException>(exception);
 
             
             Assert.Equal(2, stringList.Count);

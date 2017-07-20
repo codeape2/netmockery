@@ -336,7 +336,7 @@ namespace UnitTests
 
             var result = await testcase.ExecuteAsync(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             Assert.Null(result.Exception);
-            Assert.Equal(null, result.Message);
+            Assert.Null(result.Message);
             Assert.True(result.OK);
         }
 

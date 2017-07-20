@@ -63,7 +63,7 @@ namespace UnitTests
             }
         }
         
-        public void AssertIsValidEncodingName(string name)
+        private void AssertIsValidEncodingName(string name)
         {
             Assert.True(IsValidEncodingName(name), $"Encoding {name} is not valid");
         }
@@ -82,7 +82,7 @@ namespace UnitTests
 
         }
 
-        public void AssertIsNotValidEncodingName(string name)
+        private void AssertIsNotValidEncodingName(string name)
         {
             Assert.False(IsValidEncodingName(name), $"Encoding {name} is valid, this is unexpected");
         }

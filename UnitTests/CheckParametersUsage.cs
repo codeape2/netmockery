@@ -20,8 +20,10 @@ namespace UnitTests
 
         public CheckParametersUsage()
         {
-            endpoint = new Endpoint("foo", "bar");
-            endpoint.Directory = dc.DirectoryName;
+            endpoint = new Endpoint("foo", "bar")
+            {
+                Directory = dc.DirectoryName
+            };
             filenameParam = new EndpointParameter
             {
                 Name = "filename",
@@ -110,9 +112,10 @@ namespace UnitTests
         public async Task CanUseParamForContenttype()
         {
             dc.AddFile("file.txt", "Heisann");
-            var responseCreator = new FileResponse("file.txt", endpoint);
-            responseCreator.ContentType = "$contenttype";
-
+            var responseCreator = new FileResponse("file.txt", endpoint)
+            {
+                ContentType = "$contenttype"
+            };
             Assert.Equal("text/plain", responseCreator.ContentType);
             Assert.Equal("text/plain; charset=utf-8", (await GetResponseAsync(responseCreator)).ContentType);
 

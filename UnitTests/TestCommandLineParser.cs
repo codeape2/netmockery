@@ -20,7 +20,7 @@ namespace UnitTests
 
             Assert.Equal(COMMAND_NORMAL, result.Command);
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal(null, result.Url);
+            Assert.Null(result.Url);
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace UnitTests
         {
             var result = ParseArguments(new[] { "c:\\dir\\foo", "test", "--stop" });
             Assert.Equal(COMMAND_TEST, result.Command);
-            Assert.Equal(null, result.Only);
+            Assert.Null(result.Only);
             Assert.False(result.ShowResponse);
             Assert.True(result.Stop);
         }
@@ -148,7 +148,7 @@ namespace UnitTests
             AssertGivesException("'--only' is not a valid argument for the 'service' command", new[] { "c:\\foo\\bar", "service", "--only", "2" });
         }
 
-        public void AssertGivesException(string expectedMessage, string[] args)
+        private void AssertGivesException(string expectedMessage, string[] args)
         {
             var tx = Assert.Throws<CommandLineParsingException>(() => ParseArguments(args));
             Assert.Equal(expectedMessage, tx.Message);

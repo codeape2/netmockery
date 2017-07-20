@@ -26,7 +26,7 @@ namespace UnitTests
 
             var firstmatch = endpoint.Resolve("GET", new Microsoft.AspNetCore.Http.PathString(""), new Microsoft.AspNetCore.Http.QueryString(""), "foo", null);
             Assert.False(firstmatch.SingleMatch);
-            Assert.IsType(typeof(RegexMatcher), firstmatch.RequestMatcher);
+            Assert.IsType<RegexMatcher>(firstmatch.RequestMatcher);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace UnitTests
 
             var firstmatch = endpoint.Resolve("GET", new Microsoft.AspNetCore.Http.PathString(""), new Microsoft.AspNetCore.Http.QueryString(), "bar", null);
             Assert.True(firstmatch.SingleMatch);
-            Assert.IsType(typeof(AnyMatcher), firstmatch.RequestMatcher);
+            Assert.IsType<AnyMatcher>(firstmatch.RequestMatcher);
 
         }
 

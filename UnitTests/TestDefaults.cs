@@ -14,7 +14,7 @@ namespace UnitTests
         DirectoryCreator directoryCreator = new DirectoryCreator();
         EndpointCollection endpointCollection;
 
-        public void InitializeEndpointCollectionWithoutDefaults()
+        private void InitializeEndpointCollectionWithoutDefaults()
         {
             var jsonEndpoint1 = new JSONEndpoint
             {
@@ -33,7 +33,7 @@ namespace UnitTests
             endpointCollection = EndpointCollectionReader.ReadFromDirectory(directoryCreator.DirectoryName);
         }
 
-        public void InitializeEndpointCollectionWithGlobalDefaultsOnly()
+        private void InitializeEndpointCollectionWithGlobalDefaultsOnly()
         {
             var jsonEndpoint1 = new JSONEndpoint
             {
@@ -83,7 +83,7 @@ namespace UnitTests
             endpointCollection = EndpointCollectionReader.ReadFromDirectory(directoryCreator.DirectoryName);
         }
 
-        public void InitializeEndpointCollectionWithGlobalAndEndpointDefaults()
+        private void InitializeEndpointCollectionWithGlobalAndEndpointDefaults()
         {
             var jsonEndpoint1 = new JSONEndpoint
             {

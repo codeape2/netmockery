@@ -12,13 +12,14 @@ namespace UnitTests
         [Fact]
         public async Task ReplacementsAreExecuted()
         {
-            var responseCreator = new LiteralResponse("abc def", new Endpoint("foo", "bar"));
-            responseCreator.Replacements = new[]
+            var responseCreator = new LiteralResponse("abc def", new Endpoint("foo", "bar"))
             {
-                new BodyReplacement { SearchTerm = "abc", ReplacementTerm = "ABC" },
-                new BodyReplacement { SearchTerm = "def", ReplacementTerm = "DEF" }
+                Replacements = new[]
+                {
+                    new BodyReplacement { SearchTerm = "abc", ReplacementTerm = "ABC" },
+                    new BodyReplacement { SearchTerm = "def", ReplacementTerm = "DEF" }
+                }
             };
-
             var body = await responseCreator.GetBodyAndExecuteReplacementsAsync(null);
             Assert.Equal("ABC DEF", body);
         }

@@ -23,12 +23,13 @@ namespace UnitTests
         [Fact]
         public async Task KnownConfigurationsTestOK()
         {
-            var configurationsToTest = new List<string>();
-            configurationsToTest.Add("examples/example1");
+            var configurationsToTest = new List<string>
+            {
+                "examples/example1",
 
-            configurationsToTest.Add("examples/withparams");
-            configurationsToTest.Add("examples/documentation");
-
+                "examples/withparams",
+                "examples/documentation"
+            };
             if (File.Exists(FILENAME))
             {
                 configurationsToTest.AddRange(from line in File.ReadAllLines(FILENAME) where !string.IsNullOrEmpty(line) && !line.StartsWith("#") select line);
@@ -53,7 +54,7 @@ namespace UnitTests
             await CheckOutputAsync("examples/example1", 0);
         }
         
-        public async Task CheckConfigdirectoryAsync(string directory)
+        private async Task CheckConfigdirectoryAsync(string directory)
         {
             Assert.True(Directory.Exists(directory), $"Directory {directory} does not exist");
             
@@ -78,7 +79,7 @@ namespace UnitTests
             }
         }
 
-        public async Task CheckOutputAsync(string directory, int index)
+        private async Task CheckOutputAsync(string directory, int index)
         {
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(directory));
             await testRunner.ShowResponseAsync(index);
