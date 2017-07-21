@@ -1,31 +1,45 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "netmockery", "netmockery\netmockery.xproj", "{3416FD6A-7658-4BEC-8467-13196D5FD2CA}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.16
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "netmockery", "netmockery\netmockery.csproj", "{57BE418A-54F5-48DD-9978-84307D333025}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "UnitTests", "UnitTests\UnitTests.xproj", "{10629440-1E0F-4677-8461-831C5251E96D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E789D0E5-31C6-4B48-A2F2-144D8336EAB3}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3416FD6A-7658-4BEC-8467-13196D5FD2CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3416FD6A-7658-4BEC-8467-13196D5FD2CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3416FD6A-7658-4BEC-8467-13196D5FD2CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3416FD6A-7658-4BEC-8467-13196D5FD2CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10629440-1E0F-4677-8461-831C5251E96D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10629440-1E0F-4677-8461-831C5251E96D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10629440-1E0F-4677-8461-831C5251E96D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10629440-1E0F-4677-8461-831C5251E96D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|x64.Build.0 = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Debug|x86.Build.0 = Debug|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|x64.ActiveCfg = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|x64.Build.0 = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|x86.ActiveCfg = Release|Any CPU
+		{57BE418A-54F5-48DD-9978-84307D333025}.Release|x86.Build.0 = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|x64.Build.0 = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|x64.ActiveCfg = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|x64.Build.0 = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{C51EA2BA-040F-49D5-A121-6DA7CCBA7AAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
