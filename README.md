@@ -19,5 +19,5 @@ dotnet test -f netcoreapp1.1
 ```
 cd UnitTests
 dotnet restore -r net462
-dotnet test -f netcoreapp1.1
+dotnet test -f net462
 ```
