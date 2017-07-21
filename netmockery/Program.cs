@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+#if NET40
 using Microsoft.AspNetCore.Hosting.WindowsServices;
+#endif
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -47,9 +49,11 @@ namespace netmockery
         }
 
         public static void Main(string[] args)
-        {
+        { 
+#if NET40
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
+#endif
 
             ParsedCommandLine parsedArguments;
             try
@@ -62,7 +66,12 @@ namespace netmockery
                 return;
             }            
 
-            Debug.Assert(Directory.Exists(parsedArguments.EndpointCollectionDirectory));
+            if (!Directory.Exists(parsedArguments.EndpointCollectionDirectory))
+            {
+                Error.WriteLine("Directory not found");
+                return;
+            }
+            
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.EndpointCollectionDirectory);
 
             if (parsedArguments.Command != CommandLineParser.COMMAND_SERVICE)
@@ -100,7 +109,11 @@ namespace netmockery
 
         static public void RunAsService(ParsedCommandLine commandArgs)
         {
+#if NET40
             CreateWebHost(commandArgs.EndpointCollectionDirectory, AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
+#else
+            Error.WriteLine("ERROR: Service mode not supported for .NET Core");
+#endif
         }
 
 

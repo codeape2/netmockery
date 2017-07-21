@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -15,10 +16,6 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
-        private string _sourceAtCompilationTime;
-        private Assembly _compiledAssembly;
-        private Type _compiledType;
-
         public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
 
         public virtual string FileSystemDirectory { get { return null; } }
@@ -31,49 +28,22 @@ namespace netmockery
         public async Task<string> EvaluateAsync(RequestInfo requestInfo)
         {
             Debug.Assert(requestInfo != null);
-            var sourceCode = SourceCode;
+            var scriptOptions = ScriptOptions.Default;
 
-            if (_compiledType == null || _sourceAtCompilationTime != sourceCode)
-            {
-                var scriptOptions = ScriptOptions.Default
-                    .WithReferences(
-                        typeof(Enumerable).Assembly, // System.Core
-                        typeof(System.Xml.Linq.XElement).Assembly // System.Xml.Linq
-                    );
-
-                var script = CSharpScript.Create<string>(
-                    FileSystemDirectory != null 
-                        ?
-                        ExecuteIncludes(
-                            CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
-                            FileSystemDirectory
-                        )                        
-                        : 
-                        sourceCode,
-                    scriptOptions,
-                    globalsType: typeof(RequestInfo)
-                );
-                var compilation = script.GetCompilation();
-                var diagnostics = compilation.GetDiagnostics();
-                if (diagnostics.Count() > 0)
-                {
-                    var first = diagnostics[0];
-                    throw new Exception($"{first.Location.GetLineSpan()}: {first.GetMessage()}");
-                }
-                
-                var ilstream = new MemoryStream();
-                var pdbstream = new MemoryStream();
-                compilation.Emit(ilstream, pdbstream);
-                _compiledAssembly = Assembly.Load(ilstream.GetBuffer(), pdbstream.GetBuffer());
-                _compiledType = _compiledAssembly.GetType("Submission#0");
-                _sourceAtCompilationTime = sourceCode;
-            }
-            Debug.Assert(_compiledType != null);
-            var factory = _compiledType.GetMethod("<Factory>");
-            var submissionArray = new object[2];
-            submissionArray[0] = requestInfo;
-            Task<string> task = (Task<string>)factory.Invoke(null, new object[] { submissionArray });
-            return await task;
+            var script = CSharpScript.Create<string>(
+                FileSystemDirectory != null 
+                    ?
+                    ExecuteIncludes(
+                        CreateCorrectPathsInLoadStatements(SourceCode, FileSystemDirectory),
+                        FileSystemDirectory
+                    )                        
+                    : 
+                    SourceCode,
+                scriptOptions,
+                globalsType: typeof(RequestInfo)
+            );
+            var result = await script.RunAsync(globals: requestInfo);
+            return result.ReturnValue;
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)

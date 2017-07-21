@@ -124,6 +124,7 @@ namespace netmockery
                     template: "__netmockery/{controller=Endpoints}/{action=Index}"
                 )
             );
+
             app.UseStaticFiles();
             
             app.Run(async (context) =>

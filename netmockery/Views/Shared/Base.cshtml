@@ -100,11 +100,12 @@
     </script>
 </body>
 </html>
+@using System.Reflection
 
 @functions {
     string VersionString()
     {
-        var version = typeof(netmockery.Program).Assembly.GetName().Version;
+        var version = typeof(netmockery.Program).GetTypeInfo().Assembly.GetName().Version;
         return $"{version.Major}.{version.Minor}";
     }
 }

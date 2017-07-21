@@ -53,6 +53,7 @@ namespace netmockery
     {
         private int _nextId;
         private Queue<ResponseRegistryItem> _items = new Queue<ResponseRegistryItem>();
+        private object _lock = new object();
 
         public int Capacity { get; set; } = 1000;
 
@@ -73,16 +74,18 @@ namespace netmockery
 
         public IEnumerable<ResponseRegistryItem> Responses => _items.Reverse<ResponseRegistryItem>();
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public ResponseRegistryItem Add(ResponseRegistryItem responseRegistryItem)
         {
             Debug.Assert(responseRegistryItem.Id == 0);
-            responseRegistryItem.Id = ++_nextId;
-            if (_items.Count >= Capacity)
+            lock (_lock)
             {
-                _items.Dequeue();
+                responseRegistryItem.Id = ++_nextId;
+                if (_items.Count >= Capacity)
+                {
+                    _items.Dequeue();
+                }
+                _items.Enqueue(responseRegistryItem);
             }
-            _items.Enqueue(responseRegistryItem);
             return responseRegistryItem;
         }
     }

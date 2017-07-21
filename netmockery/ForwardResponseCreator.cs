@@ -14,6 +14,26 @@ using System.Diagnostics;
 
 namespace netmockery
 {
+    /* netcoreapp1.1 for some reason does not implement WebProxy */
+    public class NetApp11WebProxy : IWebProxy
+    {
+        private Uri _uri;
+        public NetApp11WebProxy(Uri uri)
+        {
+            Debug.Assert(uri != null);
+            _uri = uri;
+        }
+
+        public ICredentials Credentials { get; set; }
+
+        public Uri GetProxy(Uri destination)
+        {
+            return _uri;
+        }
+
+        public bool IsBypassed(Uri host) => false;
+    }
+
     public class ForwardResponseCreator : ResponseCreator
     {
         public string Url { get; set; }
@@ -63,7 +83,7 @@ namespace netmockery
             var httpClient = 
                 ProxyUrl == null ? 
                 new HttpClient() : 
-                new HttpClient(new HttpClientHandler { UseProxy = true, Proxy = new WebProxy(ProxyUrl, false) });
+                new HttpClient(new HttpClientHandler { UseProxy = true, Proxy = new NetApp11WebProxy(new Uri(ProxyUrl)) });
 
             var responseMessage = await httpClient.SendAsync(httpMsg);
 
