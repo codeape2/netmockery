@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-#if NET40
+#if NET462
 using Microsoft.AspNetCore.Hosting.WindowsServices;
 #endif
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +50,7 @@ namespace netmockery
 
         public static void Main(string[] args)
         { 
-#if NET40
+#if NET462
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
 #endif
@@ -109,7 +109,7 @@ namespace netmockery
 
         static public void RunAsService(ParsedCommandLine commandArgs)
         {
-#if NET40
+#if NET462
             CreateWebHost(commandArgs.EndpointCollectionDirectory, AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
 #else
             Error.WriteLine("ERROR: Service mode not supported for .NET Core");

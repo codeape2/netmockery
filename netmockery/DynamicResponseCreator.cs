@@ -8,7 +8,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if !NET462
 using System.Runtime.Loader;
+#endif
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
