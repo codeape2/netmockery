@@ -14,7 +14,6 @@ namespace UnitTests
         [Fact(Skip = "Interactive")]        
         public void LetsTry()
         {
-            // see https://github.com/aspnet/Hosting/issues/954
             CreateWebHostBuilder().UseKestrel().Build().Run();
         }
     }

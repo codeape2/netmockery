@@ -59,7 +59,11 @@ namespace UnitTests
                             assemblies.Add(MetadataReferenceForTypesAssembly(typeof(System.Text.Encodings.Web.HtmlEncoder)));
                             
                             assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("mscorlib")).Location));
+#if NET462
+                            assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location));
+#else
                             assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Private.Corelib")).Location));
+#endif
                             assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.AspNetCore.Razor")).Location));
 
                             context.Compilation = context.Compilation.AddReferences(assemblies);
@@ -68,6 +72,7 @@ namespace UnitTests
                 });
             return webhostBuilder;
         }
+        
 
         public void InitialServiceConfiguration(IServiceCollection serviceCollection)
         {
