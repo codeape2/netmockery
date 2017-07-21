@@ -1,8 +1,12 @@
 ﻿# Running netmockery
 
-Command line:
+Command line (.NET Framework version):
 
     netmockery.exe p:\ath\to\endpoint\directory
+
+Command line (.NET Core version):
+
+    dotnet netmockery.dll p:\ath\to\endpoint\directory
 
 Netmockery starts and listens on ``localhost`` port ``5000``.
 
@@ -11,6 +15,8 @@ To bind to another address/port, use the ``--url`` command line parameter. The c
     netmockery.exe p:\ath\to\endpoint\directory --url http://*:9876
 
 ## Installing as windows service
+
+(.NET Framework version only, not supported in .NET Core version)
 
 To install:
 
@@ -256,8 +262,24 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
 
 ### Valid charset names (not case sensitive)
 
+    .NET Framework and .NET Core
+
     US-ASCII
     ISO_8859-1:1987
+    UNICODE-1-1-UTF-7
+    UTF-8
+    ISO-10646-UCS-2
+    UTF-7
+    UTF-16BE
+    UTF-16LE
+    UTF-16
+    UTF-32
+    UTF-32BE
+    UTF-32LE
+
+
+    .NET Framework only
+
     ISO_8859-2:1987
     ISO_8859-3:1988
     ISO_8859-4:1988
@@ -276,20 +298,10 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
     EUC-KR
     ISO-2022-JP
     GB_2312-80
-    UNICODE-1-1-UTF-7
-    UTF-8
     ISO-8859-13
     ISO-8859-15
     GBK
     GB18030
-    ISO-10646-UCS-2
-    UTF-7
-    UTF-16BE
-    UTF-16LE
-    UTF-16
-    UTF-32
-    UTF-32BE
-    UTF-32LE
     IBM850
     IBM862
     IBM-Thai
@@ -353,6 +365,7 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
     windows-1257
     windows-1258
     TIS-620
+
 
 # Run-time adjustable parameters
 
