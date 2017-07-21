@@ -81,7 +81,7 @@ namespace UnitTests
         public TestTestCommandWithoutTestsuite()
         {
             dc = new DirectoryCreator();
-            dc.AddFile("endpoint1\\endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
+            dc.AddFile("endpoint1/endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
         }
 
         public void Dispose()
@@ -98,7 +98,7 @@ namespace UnitTests
         [Fact]
         public void WorksIfEndpointNamedTest()
         {
-            dc.AddFile("tests\\endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
+            dc.AddFile("tests/endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
             Assert.False(TestRunner.HasTestSuite(dc.DirectoryName));
         }
     }
@@ -110,15 +110,15 @@ namespace UnitTests
         public TestTestCommand()
         {
             dc = new DirectoryCreator();
-            dc.AddFile("endpoint1\\endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
-            dc.AddFile("endpoint1\\myscript.csscript", "return \"Hello world\";");
-            dc.AddFile("endpoint1\\content.txt", "FOOBARBOOBAR");
-            dc.AddFile("tests\\tests.json", TESTCOMMAND_CONSTANTS.TESTS);
-            dc.AddFile("tests\\example.txt", "FOOBARBOOBAR");
-            dc.AddFile("tests\\response.txt", "Hello world");
-            dc.AddFile("tests\\now.txt", "2015-01-01 12:01:31");
-            dc.AddFile("getnow\\endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'script':'getnow.csscript'}]}");
-            dc.AddFile("getnow\\getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
+            dc.AddFile("endpoint1/endpoint.json", TESTCOMMAND_CONSTANTS.ENDPOINTJSON);
+            dc.AddFile("endpoint1/myscript.csscript", "return \"Hello world\";");
+            dc.AddFile("endpoint1/content.txt", "FOOBARBOOBAR");
+            dc.AddFile("tests/tests.json", TESTCOMMAND_CONSTANTS.TESTS);
+            dc.AddFile("tests/example.txt", "FOOBARBOOBAR");
+            dc.AddFile("tests/response.txt", "Hello world");
+            dc.AddFile("tests/now.txt", "2015-01-01 12:01:31");
+            dc.AddFile("getnow/endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'script':'getnow.csscript'}]}");
+            dc.AddFile("getnow/getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
         }
 
         public void Dispose()
@@ -180,7 +180,7 @@ namespace UnitTests
         [Fact]
         public void TestsCanHaveDynamicNow()
         {
-            dc.DeleteFile("tests\\now.txt");
+            dc.DeleteFile("tests/now.txt");
             var testRunner = new ConsoleTestRunner(EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName));
             var result = testRunner.ExecuteTestAndOutputResult(3);
             Assert.True(result.Error, result.ResultAsString);

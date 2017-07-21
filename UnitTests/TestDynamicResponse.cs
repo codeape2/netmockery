@@ -9,6 +9,8 @@ using Xunit;
 
 namespace UnitTests
 {
+    using static TestUtils;
+
     public class TestDynamicResponse 
     {
         static public string Eval(string code, RequestInfo requestInfo = null, DateTime? now = null)
@@ -81,6 +83,17 @@ namespace UnitTests
             );
             Assert.Equal(1, ex.InnerExceptions.Count);
             Assert.IsType<DivideByZeroException>(ex.InnerExceptions[0]);
+        }
+
+
+        [Fact(Skip = "Does not work on DotNetCore")]
+        public void RuntimeErrorsIncludeLineNumber()
+        {
+            var ex = Assert.Throws<AggregateException>(
+                () => Eval("var i = 0; (4 / i).ToString()")
+            );
+            Assert.Equal(1, ex.InnerExceptions.Count);
+            Assert.IsType<DivideByZeroException>(ex.InnerExceptions[0]);
             Assert.Contains("in :line 1", ex.InnerException.StackTrace);
         }
 
@@ -91,9 +104,21 @@ namespace UnitTests
         }
 
         [Fact]
+        public void UsingSystemIO()
+        {
+            Assert.Equal("File", Eval("typeof(System.IO.File).Name"));
+        }
+
+        [Fact]
         public void UsingSystemXmlLinq()
         {
             Assert.Equal("OK", Eval("using System.Xml.Linq; return \"OK\";"));
+        }
+
+        [Fact]
+        public void UsingSystemDiagnosticsDebug()
+        {
+            Assert.Equal("OK", Eval("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
         }
     }
 
@@ -113,8 +138,16 @@ namespace UnitTests
         [Fact]
         public void ReplacementWorks()
         {
-            var code = DynamicResponseCreatorBase.CreateCorrectPathsInLoadStatements("#load \"foo.csscript\"", "C:\\dev");
-            Assert.Equal("#load \"C:\\dev\\foo.csscript\"", code);
+            var rootedPath = RootedPath("d", "foobar");
+            var code = DynamicResponseCreatorBase.CreateCorrectPathsInLoadStatements("#load \"foo.csscript\"", rootedPath);
+            if (IsWindows)
+            {
+                Assert.Equal($"#load \"d:\\foobar\\foo.csscript\"", code);
+            }
+            else
+            {
+                Assert.Equal($"#load \"/d/foobar/foo.csscript\"", code);
+            }            
         }
 
         [Fact]
@@ -131,14 +164,14 @@ namespace UnitTests
 
         public TestLoadScript()
         {
-            dc.AddFile("a\\main.csscript", "#load \"..\\b\\lib.csscript\"\nreturn f;");
-            dc.AddFile("b\\lib.csscript", "var f = \"foo\";");
+            dc.AddFile("a/main.csscript", "#load \"../b/lib.csscript\"\nreturn f;");
+            dc.AddFile("b/lib.csscript", "var f = \"foo\";");
         }
 
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator("a\\main.csscript", new Endpoint("a", "b") { Directory = Path.Combine(dc.DirectoryName) });
+            var drc = new FileDynamicResponseCreator("a/main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }
@@ -155,14 +188,14 @@ namespace UnitTests
 
         public TestLoadScriptRelativePath()
         {
-            dc.AddFile("a\\main.csscript", "#load \"..\\b\\lib.csscript\"\nreturn f;");
-            dc.AddFile("b\\lib.csscript", "var f = \"foo\";");
+            dc.AddFile("a/main.csscript", "#load \"../b/lib.csscript\"\nreturn f;");
+            dc.AddFile("b/lib.csscript", "var f = \"foo\";");
         }
 
         [Fact]
         public void ScriptCanLoadAnotherScript()
         {
-            var drc = new FileDynamicResponseCreator("a\\main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
+            var drc = new FileDynamicResponseCreator("a/main.csscript", new Endpoint("a", "b") { Directory = dc.DirectoryName });
             var body = drc.GetBody(new RequestInfo());
             Assert.Equal("foo", body);
         }

@@ -30,7 +30,11 @@ namespace netmockery
         public async Task<string> EvaluateAsync(RequestInfo requestInfo)
         {
             Debug.Assert(requestInfo != null);
-            var scriptOptions = ScriptOptions.Default;
+            
+            var scriptOptions = ScriptOptions.Default.WithReferences(
+                MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location), // System.Linq
+                MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location) // System.Xml.Linq
+            );
 
             var script = CSharpScript.Create<string>(
                 FileSystemDirectory != null 

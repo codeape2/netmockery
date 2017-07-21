@@ -19,9 +19,9 @@ namespace UnitTests
 
         private EndpointCollection CreateEndpointWithScript()
         {
-            dc.AddFile("endpoint\\endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateScriptEndpoint("endpoint", "script.csscript")));
-            dc.AddFile("endpoint\\script.csscript", "return GetParam(\"greeting\") + \" \" + GetParam(\"subject\");");
-            dc.AddFile("endpoint\\params.json", JsonConvert.SerializeObject(new[] {
+            dc.AddFile("endpoint/endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateScriptEndpoint("endpoint", "script.csscript")));
+            dc.AddFile("endpoint/script.csscript", "return GetParam(\"greeting\") + \" \" + GetParam(\"subject\");");
+            dc.AddFile("endpoint/params.json", JsonConvert.SerializeObject(new[] {
                 new JSONParam { name = "greeting", @default = "Hello", description = "foo" },
                 new JSONParam { name = "subject", @default = "World", description = "foo" },
             }));
@@ -31,9 +31,9 @@ namespace UnitTests
 
         private EndpointCollection CreateEndpointWithParam(JSONParam jsonParam)
         {
-            dc.AddFile("endpoint\\endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateScriptEndpoint("endpoint", "script.csscript")));
-            dc.AddFile("endpoint\\script.csscript", "return GetParam(\"greeting\") + \" \" + GetParam(\"subject\");");
-            dc.AddFile("endpoint\\params.json", JsonConvert.SerializeObject(new[] {
+            dc.AddFile("endpoint/endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateScriptEndpoint("endpoint", "script.csscript")));
+            dc.AddFile("endpoint/script.csscript", "return GetParam(\"greeting\") + \" \" + GetParam(\"subject\");");
+            dc.AddFile("endpoint/params.json", JsonConvert.SerializeObject(new[] {
                 jsonParam
             }));
 
@@ -88,11 +88,6 @@ namespace UnitTests
             ep.Value = "b";
             Assert.Equal("b", ep.Value);
             Assert.False(ep.ValueIsDefault);
-        }
-
-        public void RequireNameDefaultAndDescription()
-        {
-
         }
 
         [Fact]

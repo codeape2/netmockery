@@ -43,16 +43,16 @@ namespace UnitTests
         public void AddContentInDirectories()
         {
             dc.AddFile("test.txt", "");
-            dc.AddFile("foo\\test.txt", "");
-            dc.AddFile("foo\\test2.txt", "");
-            dc.AddFile("bar\\test.txt", "");
+            dc.AddFile("foo/test.txt", "");
+            dc.AddFile("foo/test2.txt", "");
+            dc.AddFile("bar/test.txt", "");
 
             var allFiles = GetFilesFromDir(dc.DirectoryName).ToArray();
             Assert.Equal(4, allFiles.Length);
 
             Assert.Equal(
-                new[] { "test.txt", "bar\\test.txt", "foo\\test.txt", "foo\\test2.txt" }, 
-                from f in allFiles select f.Substring(dc.DirectoryName.Length + 1)
+                new[] { $"bar{Path.DirectorySeparatorChar}test.txt", $"foo{Path.DirectorySeparatorChar}test.txt", $"foo{Path.DirectorySeparatorChar}test2.txt", "test.txt" },
+                (from f in allFiles orderby f select f.Substring(dc.DirectoryName.Length + 1)).ToArray()
             );
         }
 

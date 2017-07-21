@@ -28,7 +28,7 @@ namespace UnitTests
                 }
             };
 
-            directoryCreator.AddFile("endpoint1\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
+            directoryCreator.AddFile("endpoint1/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
 
             endpointCollection = EndpointCollectionReader.ReadFromDirectory(directoryCreator.DirectoryName);
         }
@@ -76,9 +76,9 @@ namespace UnitTests
             };
 
             directoryCreator.AddFile("defaults.json", JsonConvert.SerializeObject(new JSONDefaults { charset = "ascii", contenttype = "application/xml" }));
-            directoryCreator.AddFile("endpoint1\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
-            directoryCreator.AddFile("endpoint2\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint2));
-            directoryCreator.AddFile("endpoint3\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint3));
+            directoryCreator.AddFile("endpoint1/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
+            directoryCreator.AddFile("endpoint2/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint2));
+            directoryCreator.AddFile("endpoint3/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint3));
 
             endpointCollection = EndpointCollectionReader.ReadFromDirectory(directoryCreator.DirectoryName);
         }
@@ -112,9 +112,9 @@ namespace UnitTests
             var endpointDefaults = new JSONDefaults { charset = "UTF-7", contenttype = "text/plain" };
 
             directoryCreator.AddFile("defaults.json", JsonConvert.SerializeObject(globalDefaults));
-            directoryCreator.AddFile("endpoint1\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
-            directoryCreator.AddFile("endpoint2\\endpoint.json", JsonConvert.SerializeObject(jsonEndpoint2));
-            directoryCreator.AddFile("endpoint2\\defaults.json", JsonConvert.SerializeObject(endpointDefaults));
+            directoryCreator.AddFile("endpoint1/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
+            directoryCreator.AddFile("endpoint2/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint2));
+            directoryCreator.AddFile("endpoint2/defaults.json", JsonConvert.SerializeObject(endpointDefaults));
 
             endpointCollection = EndpointCollectionReader.ReadFromDirectory(directoryCreator.DirectoryName);
 

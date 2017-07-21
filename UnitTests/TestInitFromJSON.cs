@@ -6,8 +6,11 @@ using Xunit;
 using netmockery;
 using System.Diagnostics;
 
+
 namespace UnitTests
 {
+    using static TestUtils;
+
     public class TestInitFromJSON
     {
         public const string ENDPOINTJSON = @"
@@ -56,7 +59,7 @@ namespace UnitTests
         [Fact]
         public void Responses()
         {
-            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory", globalDefaults: null);
+            var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, P("p:/ath/to/endpoint/directory"), globalDefaults: null);
             var responses = endpoint.Responses.ToArray();
             Assert.Equal(2, responses.Length);
 
@@ -66,7 +69,7 @@ namespace UnitTests
             Assert.NotNull(rm0);
             Assert.NotNull(rc0);
 
-            Assert.Equal("p:\\ath\\to\\endpoint\\directory\\content.txt", rc0.Filename);
+            Assert.Equal(P("p:/ath/to/endpoint/directory/content.txt"), rc0.Filename);
             Assert.Equal("text/plain", rc0.ContentType);
             Assert.Equal(10, rc0.Delay);
             Assert.Equal(0, rc0.Replacements.Length);
@@ -76,7 +79,7 @@ namespace UnitTests
 
             Assert.NotNull(rm1);
             Assert.NotNull(rc1);
-            Assert.Equal("p:\\ath\\to\\endpoint\\directory\\myscript.csscript", rc1.Filename);
+            Assert.Equal(P("p:/ath/to/endpoint/directory/myscript.csscript"), rc1.Filename);
             Assert.Equal("text/xml", rc1.ContentType);
             Assert.Equal(0, rc1.Delay);
             Assert.Equal(2, rc1.Replacements.Length);

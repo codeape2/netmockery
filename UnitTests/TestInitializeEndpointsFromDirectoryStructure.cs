@@ -14,8 +14,8 @@ namespace UnitTests
 
         public TestInitializeEndpointsFromDirectoryStructure()
         {
-            dc.AddFile("endpoint1\\endpoint.json", "{'name': 'Endpoint1', pathregex: '^/ep1/', responses: []}");
-            dc.AddFile("endpoint2\\endpoint.json", TestInitFromJSON.ENDPOINTJSON);
+            dc.AddFile("endpoint1/endpoint.json", "{'name': 'Endpoint1', pathregex: '^/ep1/', responses: []}");
+            dc.AddFile("endpoint2/endpoint.json", TestInitFromJSON.ENDPOINTJSON);
         }
 
         [Fact]
@@ -46,8 +46,8 @@ namespace UnitTests
 
         public TestInitializeEndpointsWithNonEndpointDirectory()
         {
-            dc.AddFile("endpoint1\\endpoint.json", "{'name': 'Endpoint1', pathregex: '^/ep1/', responses: []}");
-            dc.AddFile("kith\\file.txt", "Ignore me!");
+            dc.AddFile("endpoint1/endpoint.json", "{'name': 'Endpoint1', pathregex: '^/ep1/', responses: []}");
+            dc.AddFile("kith/file.txt", "Ignore me!");
         }
 
         [Fact]

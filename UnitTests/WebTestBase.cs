@@ -17,11 +17,16 @@ namespace UnitTests
 
         public void CreateServerAndClient()
         {
+            server = new TestServer(CreateWebHostBuilder());
+            client = server.CreateClient();
+        }
+
+        public IWebHostBuilder CreateWebHostBuilder()
+        {
             IWebHostBuilder webhostBuilder = new WebHostBuilder();
             webhostBuilder.ConfigureServices(InitialServiceConfiguration);
-            webhostBuilder = webhostBuilder.UseContentRoot("..\\..\\..\\..\\..\\netmockery").UseStartup<Startup>();
-            server = new TestServer(webhostBuilder);
-            client = server.CreateClient();
+            webhostBuilder = webhostBuilder.UseContentRoot("../../../../netmockery").UseStartup<Startup>();
+            return webhostBuilder;
         }
 
         public void InitialServiceConfiguration(IServiceCollection serviceCollection)

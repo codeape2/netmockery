@@ -33,8 +33,28 @@ namespace UnitTests
         }
 
         [Fact]
-        public void AllIANAEncodingNamesAreValid()
+        public void AllExpectedEncodingNamesAreInvalid()
         {
+            foreach (var name in InvalidNames)
+            {
+                AssertIsNotValidEncodingName(name);
+                AssertIsNotValidEncodingName(name.ToUpper());
+                AssertIsNotValidEncodingName(name.ToLower());
+            }
+        }
+
+        [Fact]
+        public void AllExpectedEncodingNamesAreValid()
+        {
+            var invalidNames = new List<string>();
+            foreach (var name in ValidNames)
+            {
+                if (!IsValidEncodingName(name))
+                {
+                    invalidNames.Add(name);
+                }
+            }
+            Assert.True(invalidNames.Count == 0, string.Join(", ", invalidNames.Take(10)));
             foreach (var name in ValidNames)
             {
                 AssertIsValidEncodingName(name);
@@ -45,7 +65,7 @@ namespace UnitTests
         
         public void AssertIsValidEncodingName(string name)
         {
-            Assert.True(IsValidEncodingName(name));
+            Assert.True(IsValidEncodingName(name), $"Encoding {name} is not valid");
         }
 
         public bool IsValidEncodingName(string name)
@@ -64,14 +84,10 @@ namespace UnitTests
 
         public void AssertIsNotValidEncodingName(string name)
         {
-            Assert.False(IsValidEncodingName(name));
+            Assert.False(IsValidEncodingName(name), $"Encoding {name} is valid, this is unexpected");
         }
 
-        // this list should reflect the list in documentation.md
-        public static string[] ValidNames = new string[]
-        {
-            "US-ASCII",
-            "ISO_8859-1:1987",
+        public static string[] InvalidNames = new[] {
             "ISO_8859-2:1987",
             "ISO_8859-3:1988",
             "ISO_8859-4:1988",
@@ -90,20 +106,10 @@ namespace UnitTests
             "EUC-KR",
             "ISO-2022-JP",
             "GB_2312-80",
-            "UNICODE-1-1-UTF-7",
-            "UTF-8",
             "ISO-8859-13",
             "ISO-8859-15",
             "GBK",
             "GB18030",
-            "ISO-10646-UCS-2",
-            "UTF-7",
-            "UTF-16BE",
-            "UTF-16LE",
-            "UTF-16",
-            "UTF-32",
-            "UTF-32BE",
-            "UTF-32LE",
             "IBM850",
             "IBM862",
             "IBM-Thai",
@@ -167,6 +173,23 @@ namespace UnitTests
             "windows-1257",
             "windows-1258",
             "TIS-620"
+        };
+
+        // this list should reflect the list in documentation.md
+        public static string[] ValidNames = new string[]
+        {
+            "US-ASCII",
+            "ISO_8859-1:1987",
+            "UNICODE-1-1-UTF-7",
+            "UTF-8",
+            "ISO-10646-UCS-2",
+            "UTF-7",
+            "UTF-16BE",
+            "UTF-16LE",
+            "UTF-16",
+            "UTF-32",
+            "UTF-32BE",
+            "UTF-32LE",
         };
 
     }

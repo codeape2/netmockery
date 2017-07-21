@@ -36,7 +36,7 @@ namespace UnitTests
         [Fact]
         public void ReadsFromEndpointJson()
         {
-            var endpointCollection = EndpointCollectionReader.ReadFromDirectory("examples\\example1");
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory("examples/example1");
 
             var endpoint3 = endpointCollection.Resolve("/statuscode");
             Assert.Equal("StatusCodes", endpoint3.Name);
@@ -58,7 +58,7 @@ namespace UnitTests
             };
 
             Assert.True(testcase.HasExpectations);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples\\example1"), handleErrors: false);
+            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
             Assert.False(result.OK);
             Assert.Equal("Expected http status code: 404\nActual: 200", result.Message);
         }
@@ -73,7 +73,7 @@ namespace UnitTests
             };
 
             Assert.True(testcase.HasExpectations);
-            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples\\example1"), handleErrors: false);
+            var result = testcase.Execute(EndpointCollectionReader.ReadFromDirectory("examples/example1"), handleErrors: false);
             Assert.True(result.OK);
         }
 

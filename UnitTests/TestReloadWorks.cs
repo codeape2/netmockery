@@ -17,10 +17,10 @@ namespace UnitTests
         {
             dc = new DirectoryCreator();
             dc.AddFile(
-                "endpoint1\\endpoint.json", 
+                "endpoint1/endpoint.json", 
                 JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("foobar", "myfile.txt"))
             );
-            dc.AddFile("endpoint1\\myfile.txt", "Hello world");
+            dc.AddFile("endpoint1/myfile.txt", "Hello world");
             ecp = new EndpointCollectionProvider(dc.DirectoryName);
             CreateServerAndClient();
         }
@@ -44,24 +44,24 @@ namespace UnitTests
             Assert.Equal(new[] { "foobar" }, await GetEndpointNames());
 
             dc.AddFile(
-                "endpoint2\\endpoint.json",
+                "endpoint2/endpoint.json",
                 JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("baz", "myfile.txt"))
             );
-            dc.AddFile("endpoint2\\myfile.txt", "Hello world");
+            dc.AddFile("endpoint2/myfile.txt", "Hello world");
 
             Assert.Equal(new[] { "foobar" }, await GetEndpointNames());
 
             var response = await client.GetAsync("/__netmockery/endpoints/reloadconfig");
             Assert.Equal(System.Net.HttpStatusCode.Redirect, response.StatusCode);
 
-            Assert.Equal(new[] { "foobar", "baz" }, await GetEndpointNames());
+            Assert.Equal(new[] { "baz", "foobar" }, await GetEndpointNames());
         }
 
         private async Task<string[]> GetEndpointNames()
         {
             var response = await client.GetAsync("/__netmockery/endpoints/endpointnames");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsAsync<string[]>();
+            return (from arrayitem in JsonConvert.DeserializeObject<string[]>(await response.Content.ReadAsStringAsync()) orderby arrayitem select arrayitem).ToArray();
         }
     }
 }

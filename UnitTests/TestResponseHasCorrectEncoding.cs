@@ -16,17 +16,17 @@ namespace UnitTests
         public TestResponseHasCorrectEncoding()
         {
             dc = new DirectoryCreator();
-            dc.AddFile("endpoint1\\endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("endpoint1", "myfile.txt", "/endpoint1")));
-            dc.AddFile("endpoint1\\myfile.txt", "æøå");
+            dc.AddFile("endpoint1/endpoint.json", JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("endpoint1", "myfile.txt", "/endpoint1")));
+            dc.AddFile("endpoint1/myfile.txt", "æøå");
 
             var endpoint2 = DataUtils.CreateSimpleEndpoint("endpoint2", "myfile.txt", "/endpoint2");
             endpoint2.responses[0].charset = "latin1";
-            dc.AddFile("endpoint2\\endpoint.json", JsonConvert.SerializeObject(endpoint2));
-            dc.AddFile("endpoint2\\myfile.txt", "æøå");
+            dc.AddFile("endpoint2/endpoint.json", JsonConvert.SerializeObject(endpoint2));
+            dc.AddFile("endpoint2/myfile.txt", "æøå");
             var tests = new List<JSONTest>(new[] {
                 new JSONTest { name = "Test endpoint1", requestpath = "/endpoint1", expectedresponsebody = "æøå" }
             });
-            dc.AddFile("tests\\tests.json", JsonConvert.SerializeObject(tests));
+            dc.AddFile("tests/tests.json", JsonConvert.SerializeObject(tests));
 
             ecp = new EndpointCollectionProvider(dc.DirectoryName);
             CreateServerAndClient();

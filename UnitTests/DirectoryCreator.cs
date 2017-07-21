@@ -22,7 +22,7 @@ namespace UnitTests
                 _directoryName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             }
             
-            Debug.Assert(!Directory.Exists(_directoryName));
+            Debug.Assert(!Directory.Exists(_directoryName), $"Directory {_directoryName} already exists");
             Directory.CreateDirectory(_directoryName);
         }
 
