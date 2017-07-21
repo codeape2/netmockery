@@ -263,13 +263,14 @@ namespace netmockery
         public static void WriteBanner()
         {
             var version = typeof(netmockery.Program).GetTypeInfo().Assembly.GetName().Version;
-            var versionString = $"{version.Major}.{version.Minor}";
-            WriteLine($"Netmockery v {versionString}");
+            var versionString = $"{version.Major}.{version.Minor}.{version.MinorRevision}";
 #if NET462
-            WriteLine("Full .NET framework version");
+            var framework = ".NET Framework";
 #else
-            WriteLine("DotNetCore version");
+            var framework = ".NET Core";
 #endif
+
+            WriteLine($"Netmockery v {versionString} ({framework})");
         }
     }
 }
