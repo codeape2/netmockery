@@ -29,11 +29,14 @@ namespace netmockery
 
         public async Task<string> EvaluateAsync(RequestInfo requestInfo)
         {
+            //TODO: Only create script object if source has changed
             Debug.Assert(requestInfo != null);
             
             var scriptOptions = ScriptOptions.Default.WithReferences(
                 MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location), // System.Linq
-                MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location) // System.Xml.Linq
+                MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location), // System.Xml.Linq
+                MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location)
             );
 
             var script = CSharpScript.Create<string>(
