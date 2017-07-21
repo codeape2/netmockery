@@ -63,6 +63,8 @@ namespace netmockery
 
         public static async Task MainAsync(string[] args, CancellationToken token)
         {
+            WriteBanner();
+
 #if NET462
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
                 ((sender, certificate, chain, sslPolicyErrors) => true);
@@ -256,6 +258,18 @@ namespace netmockery
                     WriteLine($"    {response.Item1} -> {response.Item2}");
                 }
             }
+        }
+
+        public static void WriteBanner()
+        {
+            var version = typeof(netmockery.Program).GetTypeInfo().Assembly.GetName().Version;
+            var versionString = $"{version.Major}.{version.Minor}";
+            WriteLine($"Netmockery v {versionString}");
+#if NET462
+            WriteLine("Full .NET framework version");
+#else
+            WriteLine("DotNetCore version");
+#endif
         }
     }
 }
