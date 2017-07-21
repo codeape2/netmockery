@@ -76,7 +76,7 @@ namespace UnitTests
             var result = ParseArguments(new[] { "c:\\dir\\foo", "service" });
             Assert.Equal(COMMAND_SERVICE, result.Command);
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal(null, result.Url);
+            Assert.Null(result.Url);
         }
 
 
