@@ -179,8 +179,7 @@ namespace netmockery
 
             responseCreator.SetDelayFromConfigValue(delay);
 
-            var simpleResponseCreator = responseCreator as SimpleResponseCreator;
-            if (simpleResponseCreator != null)
+            if (responseCreator is SimpleResponseCreator simpleResponseCreator)
             {
                 simpleResponseCreator.ContentType = contenttype;
                 if (replacements != null)
