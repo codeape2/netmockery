@@ -29,7 +29,7 @@ namespace netmockery
         public virtual string FileSystemDirectory { get { return null; } }
 
 #if NET462
-        public async Task<string> EvaluateAsync(RequestInfo requestInfo)
+        public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
             Debug.Assert(requestInfo != null);
             var sourceCode = SourceCode;
@@ -77,7 +77,7 @@ namespace netmockery
             return await task;
         }
 #else
-        public async Task<string> EvaluateAsync(RequestInfo requestInfo)
+        public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
              //TODO: Only create script object if source has changed
              Debug.Assert(requestInfo != null);
@@ -129,8 +129,6 @@ namespace netmockery
             );
 
         }
-
-        public override Task<string> GetBodyAsync(RequestInfo requestInfo) => EvaluateAsync(requestInfo);
 
         public abstract string SourceCode { get; }
     }
