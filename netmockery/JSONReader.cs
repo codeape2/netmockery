@@ -267,8 +267,10 @@ namespace netmockery
 
         public Endpoint CreateEndpoint(string rootDir, JSONDefaults globalDefaults)
         {
-            var endpoint = new Endpoint(name, pathregex);
-            endpoint.Directory = rootDir;
+            var endpoint = new Endpoint(name, pathregex)
+            {
+                Directory = rootDir
+            };
 
             var endpointDefaultsFile = Path.Combine(rootDir, "defaults.json");
             var endpointDefaults =
