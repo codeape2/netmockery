@@ -292,6 +292,7 @@ namespace netmockery
     {
         public string name;
         public string pathregex;
+        public bool record = true;
         public JSONResponse[] responses;
 
 
@@ -300,7 +301,8 @@ namespace netmockery
             ThrowExceptionIfAdditionalData();
             var endpoint = new Endpoint(name, pathregex)
             {
-                Directory = rootDir
+                Directory = rootDir,
+                RecordRequests = record
             };
 
             var endpointDefaultsFile = Path.Combine(rootDir, "defaults.json");

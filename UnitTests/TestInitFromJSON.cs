@@ -44,6 +44,14 @@ namespace UnitTests
             var endpoint = JSONReader.ReadEndpoint(ENDPOINTJSON, "p:\\ath\\to\\endpoint\\directory", globalDefaults: null);
             Assert.Equal("foo", endpoint.Name);
             Assert.Equal("^/foo/$", endpoint.PathRegex);
+            Assert.True(endpoint.RecordRequests);
+        }
+
+        [Fact]
+        public void DoNotRecordRequestsAttribute()
+        {
+            var endpoint = JSONReader.ReadEndpoint("{'name': 'foo', 'pathregex': 'bar', 'responses': [], 'record': false}", "p:\\ath\\to\\endpoint\\directory", globalDefaults: null);
+            Assert.False(endpoint.RecordRequests);
         }
 
         private Endpoint endpoint;

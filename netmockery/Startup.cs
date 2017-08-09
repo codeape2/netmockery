@@ -46,15 +46,15 @@ namespace netmockery
         public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
             Debug.Assert(context != null);
-            var responseRegistryItem = _responseRegistry.Add(new ResponseRegistryItem
+            var responseRegistryItem = new ResponseRegistryItem
             {
                 Timestamp = DateTime.Now,
                 RequestBody = requestBody,
                 Method = context.Request.Method,
                 RequestPath = context.Request.Path.ToString(),
                 QueryString = context.Request.QueryString.ToString()
-            });
-            responseRegistryItem.WriteIncomingInfoToConsole();
+            };
+            Debug.Assert(responseRegistryItem.Id == 0);
 
             try
             {
@@ -64,10 +64,17 @@ namespace netmockery
             {
                 Debug.WriteLine(e);
                 responseRegistryItem.Error = e.ToString();
+                if (! responseRegistryItem.HasBeenAddedToRegistry)
+                {
+                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                }
             }
             finally
             {
-                responseRegistryItem.WriteResolvedInfoToConsole();                
+                if (responseRegistryItem.HasBeenAddedToRegistry)
+                {
+                    responseRegistryItem.WriteResolvedInfoToConsole();
+                }
             }
 
         }
@@ -75,14 +82,17 @@ namespace netmockery
         public async Task HandleRequestInner(ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
             Debug.Assert(_endpointCollectionProvider != null);
+            Debug.Assert(responseRegistryItem != null);
             var endpointCollection = _endpointCollectionProvider.EndpointCollection;
             var endpoint = endpointCollection.Resolve(context.Request.Path.ToString());
             responseRegistryItem.Endpoint = endpoint;
             if (endpoint != null)
-            {
+            {                
                 var matcher_and_creator = endpoint.Resolve(context.Request.Method, context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers);
                 if (matcher_and_creator != null)
                 {
+                    //TODO: Only if configured
+                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                     var responseCreator = matcher_and_creator.ResponseCreator;
 
                     responseRegistryItem.RequestMatcher = matcher_and_creator.RequestMatcher;
@@ -106,11 +116,13 @@ namespace netmockery
                 }
                 else
                 {
+                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                     responseRegistryItem.Error = "Endpoint has no match for request";
                 }
             }
             else
             {
+                _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                 responseRegistryItem.Error = "No endpoint matches request path";
             }
         }

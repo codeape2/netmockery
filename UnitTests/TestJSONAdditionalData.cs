@@ -39,6 +39,7 @@ namespace UnitTests
             Assert.Equal("nmae", endpoint.AdditionalData.Keys.Single());
 
             var exception = Assert.Throws<ArgumentException>(() => endpoint.ThrowExceptionIfAdditionalData());
+            Assert.Equal("Unknown JSON attributes: 'nmae'", exception.Message);
         }
 
 
@@ -49,7 +50,7 @@ namespace UnitTests
             Assert.Null(endpoint.AdditionalData);
 
             var as_str = JsonConvert.SerializeObject(endpoint);
-            Assert.Equal("{\"name\":\"foobar\",\"pathregex\":null,\"responses\":null}", as_str);
+            Assert.Equal("{\"name\":\"foobar\",\"pathregex\":null,\"record\":true,\"responses\":null}", as_str);
         }
     }
 }

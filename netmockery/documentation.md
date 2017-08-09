@@ -59,6 +59,7 @@ Example directory structure:
 * ``name``: The endpoint's name. The name is for display in the web UI only.
 * ``pathregex``: A request path reqular expression, used in the first step of the incoming request handling.
 * ``responses``: A list of request matching rules and response creation steps for the endpoint.
+* TODO: Document ``record`` property
 
 Example ``endpoint.json``:
 

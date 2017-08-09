@@ -22,13 +22,17 @@ namespace netmockery
         public string Error;
         public bool SingleMatch;
 
+        public bool HasBeenAddedToRegistry => Id != 0;
+
         public void WriteIncomingInfoToConsole()
         {
+            Debug.Assert(HasBeenAddedToRegistry);
             Console.WriteLine($"[{Id}] {Timestamp.ToString("HH:mm:ss.fff")} {Method} {RequestPath}");
         }
 
         public void WriteResolvedInfoToConsole()
         {
+            Debug.Assert(HasBeenAddedToRegistry);
             if (Endpoint != null)
             {
                 Console.WriteLine($"[{Id}] Endpoint: {Endpoint.Name}");
@@ -87,6 +91,12 @@ namespace netmockery
                 _items.Enqueue(responseRegistryItem);
             }
             return responseRegistryItem;
+        }
+
+        public void AddAndWriteIncomingInfoToConsole(ResponseRegistryItem responseRegistryItem)
+        {
+            Add(responseRegistryItem);
+            responseRegistryItem.WriteIncomingInfoToConsole();
         }
     }
 }

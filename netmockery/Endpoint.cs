@@ -43,6 +43,7 @@ namespace netmockery
         //public IEnumerable<EndpointParameter> Parameters => _parameters;
 
         public string Directory { get; set; }
+        public bool RecordRequests { get; set; }
 
         public string Name => _name;
         public string PathRegex => _pathregex;
