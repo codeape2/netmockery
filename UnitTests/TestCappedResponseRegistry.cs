@@ -12,8 +12,10 @@ namespace UnitTests
         [Fact]
         public void CanOnlyAddToCapacity()
         {
-            var responseRegistry = new ResponseRegistry();
-            responseRegistry.Capacity = 100;
+            var responseRegistry = new ResponseRegistry
+            {
+                Capacity = 100
+            };
             for (int i = 0; i < 1000; i++)
             {
                 responseRegistry.Add(new ResponseRegistryItem());
@@ -24,8 +26,10 @@ namespace UnitTests
         [Fact]
         public void OnlyLastAddedAreAvailable()
         {
-            var responseRegistry = new ResponseRegistry();
-            responseRegistry.Capacity = 100;
+            var responseRegistry = new ResponseRegistry
+            {
+                Capacity = 100
+            };
             for (int i = 0; i < 1000; i++)
             {
                 responseRegistry.Add(new ResponseRegistryItem());
