@@ -20,6 +20,10 @@ namespace netmockery
                 JsonConvert.DeserializeObject<JSONDefaults>(File.ReadAllText(globalDefaultsFile)) 
                 : 
                 null;
+            if (globalDefaults != null)
+            {
+                globalDefaults.ThrowExceptionIfAdditionalData();
+            }
 
             foreach (var subdirectory in Directory.GetDirectories(directoryName))
             {

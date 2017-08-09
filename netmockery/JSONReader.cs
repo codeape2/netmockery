@@ -8,7 +8,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net;
-
+using Newtonsoft.Json.Linq;
 
 namespace netmockery
 {
@@ -20,7 +20,7 @@ namespace netmockery
         }
     }
 
-    public class JSONParam
+    public class JSONParam : JSONObjectWithAdditionalData
     {
         public string name;
         public string @default;
@@ -28,6 +28,8 @@ namespace netmockery
 
         public JSONParam Validated()
         {
+            ThrowExceptionIfAdditionalData();
+
             if (name == null)
             {
                 throw new ArgumentException($"Parameter missing name");
@@ -52,7 +54,7 @@ namespace netmockery
         }
     }
 
-    public class JSONTest
+    public class JSONTest : JSONObjectWithAdditionalData
     {
         public string name;
         public string method;
@@ -69,6 +71,8 @@ namespace netmockery
 
         public JSONTest Validated()
         {
+            ThrowExceptionIfAdditionalData();
+
             if (requestpath == null)
             {
                 throw new ArgumentNullException(nameof(requestpath));
@@ -111,7 +115,7 @@ namespace netmockery
         }
     }
 
-    public class JSONResponse
+    public class JSONResponse : JSONObjectWithAdditionalData
     {
         public JSONRequestMatcher match;
 
@@ -133,10 +137,20 @@ namespace netmockery
 
         public JSONResponse Validated()
         {
+            ThrowExceptionIfAdditionalData();
             if (match == null)
             {
                 throw new ArgumentException("match must be specified");
             }
+
+            if (replacements != null)
+            {
+                foreach (var replacement in replacements)
+                {
+                    replacement.ThrowExceptionIfAdditionalData();
+                }
+            }
+
             var mutuallyExclusive = new[] { literal, file, script, forward };
             var mutExWithValues = from value in mutuallyExclusive where value != null select value;
             if (mutExWithValues.Count() != 1)
@@ -207,7 +221,7 @@ namespace netmockery
 
     }
 
-    public class JSONRequestMatcher
+    public class JSONRequestMatcher : JSONObjectWithAdditionalData
     {
         public string methods;
         public string xpath;
@@ -216,6 +230,8 @@ namespace netmockery
 
         public RequestMatcher CreateRequestMatcher()
         {
+            ThrowExceptionIfAdditionalData();
+
             RequestMatcher retval;
             if (xpath != null)
             {
@@ -224,6 +240,7 @@ namespace netmockery
                 {
                     foreach (var jsonNs in namespaces)
                     {
+                        jsonNs.ThrowExceptionIfAdditionalData();
                         xpathMatcher.AddNamespace(jsonNs.prefix, jsonNs.ns);
                     }
                 }
@@ -245,19 +262,33 @@ namespace netmockery
         }
     }
 
-    public class JSONXPathNamespace
+    public class JSONXPathNamespace : JSONObjectWithAdditionalData
     {
         public string prefix;
         public string ns;
     }
 
-    public class JSONReplacement
+    public class JSONReplacement : JSONObjectWithAdditionalData
     {
         public string search;
         public string replace;
     }
 
-    public class JSONEndpoint
+    public class JSONObjectWithAdditionalData
+    {
+        [JsonExtensionData]
+        public IDictionary<string, JToken> AdditionalData;
+
+        public void ThrowExceptionIfAdditionalData()
+        {
+            if (AdditionalData != null)
+            {
+                throw new ArgumentException($"Unknown JSON attributes: " + string.Join(", ", from key in AdditionalData.Keys select $"'{key}'"));
+            }
+        }
+    }
+
+    public class JSONEndpoint : JSONObjectWithAdditionalData
     {
         public string name;
         public string pathregex;
@@ -266,6 +297,7 @@ namespace netmockery
 
         public Endpoint CreateEndpoint(string rootDir, JSONDefaults globalDefaults)
         {
+            ThrowExceptionIfAdditionalData();
             var endpoint = new Endpoint(name, pathregex)
             {
                 Directory = rootDir
@@ -278,6 +310,10 @@ namespace netmockery
                 JsonConvert.DeserializeObject<JSONDefaults>(File.ReadAllText(endpointDefaultsFile))
                 :
                 null;
+            if (endpointDefaults != null)
+            {
+                endpointDefaults.ThrowExceptionIfAdditionalData();
+            }
 
             foreach (var jsonResponse in responses)
             {
@@ -330,7 +366,7 @@ namespace netmockery
         }
     }
 
-    public class JSONDefaults
+    public class JSONDefaults : JSONObjectWithAdditionalData
     {
         public string contenttype;
         public string charset;
