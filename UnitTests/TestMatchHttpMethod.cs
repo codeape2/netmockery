@@ -60,6 +60,37 @@ namespace UnitTests
         }
 
         [Fact]
+        public void RegexToStringWithHttpMethods()
+        {
+            var matcher = new RegexMatcher("foobar");
+            matcher.SetMatchingHttpMethods("get post");
+
+            Assert.Equal("Regex 'foobar' (GET,POST)", matcher.ToString());
+        }
+
+        [Fact]
+        public void RegexToStringWithoutHttpMethods()
+        {
+            var matcher = new RegexMatcher("foobar");
+            Assert.Equal("Regex 'foobar'", matcher.ToString());
+        }
+
+        [Fact]
+        public void XPathToStringWithoutHttpMethods()
+        {
+            var matcher = new XPathMatcher("/x/path/");
+            Assert.Equal("XPath '/x/path/'", matcher.ToString());
+        }
+
+        [Fact]
+        public void XPathToStringWithHttpMethods()
+        {
+            var matcher = new XPathMatcher("/x/path/");
+            matcher.SetMatchingHttpMethods("get post");
+            Assert.Equal("XPath '/x/path/' (GET,POST)", matcher.ToString());
+        }
+
+        [Fact]
         public void TestCaseDefaultMethodIsGet()
         {
             var testCase = (new JSONTest { requestpath = "/foo/bar" }).CreateTestCase(".");

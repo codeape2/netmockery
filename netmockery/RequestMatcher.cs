@@ -41,6 +41,19 @@ namespace netmockery
                 return _matchingHttpMethods;
             }
         }
+
+        protected string AddMatchingMethodsToString(string baseString)
+        {
+            Debug.Assert(baseString != null);
+            if (MatchingHttpMethods != null)
+            {
+                return baseString + " (" + string.Join(",", MatchingHttpMethods) + ")";
+            }
+            else
+            {
+                return baseString;
+            }
+        }
     }
 
     public class AnyMatcher : RequestMatcher
@@ -72,10 +85,7 @@ namespace netmockery
             return Regex.IsMatch(path.ToString(), _regex) || Regex.IsMatch(queryString.ToString(), _regex) || Regex.IsMatch(body, _regex);
         }
 
-        public override string ToString()
-        {
-            return $"Regex '{_regex}'";
-        }
+        public override string ToString() => AddMatchingMethodsToString($"Regex '{_regex}'");
     }
 
     public class XPathMatcher : RequestMatcher
@@ -112,5 +122,7 @@ namespace netmockery
             }
             return (bool) root.XPathEvaluate(_xpath, namespaceManager);
         }
+
+        public override string ToString() => AddMatchingMethodsToString($"XPath '{_xpath}'");
     }
 }
