@@ -73,6 +73,11 @@
 
 @Html.ActionLink("Responses", "ForEndpoint", "Responses", new { endpointName = Model.Name })
 
+@if (! Model.RecordRequests)
+{
+    <text>(only errors are recorded for @Model.Name endpoint)</text>
+}
+
 @if (Model.ParameterCount > 0)
 {
     <h2>
