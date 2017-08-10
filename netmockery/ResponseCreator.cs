@@ -86,6 +86,8 @@ namespace netmockery
 
     public class RequestInfo
     {
+        private static object _locker = new object();
+
         private DateTime _now = DateTime.MinValue;
 
         public string RequestPath;
@@ -100,6 +102,16 @@ namespace netmockery
         {
             return Endpoint.GetParameter(name).Value;
         }
+
+        public void SetParam(string name, string value)
+        {
+            lock (_locker)
+            {
+                Endpoint.GetParameter(name).Value = value;
+            }            
+        }
+
+        public object GetScriptObject(string name, Func<object> objectCreator) => Endpoint.GetScriptObject(name, objectCreator);
 
         public void SetStaticNow(DateTime now)
         {

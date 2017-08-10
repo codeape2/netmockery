@@ -126,6 +126,40 @@ namespace UnitTests
         {
             Assert.Equal("OK", await EvalAsync("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
         }
+
+        [Fact]
+        public async Task ScriptsCanSetParams()
+        {
+            var endpoint = new Endpoint("foo", "bar");
+            endpoint.AddParameter(new EndpointParameter { Name = "param", Value = "abc" });
+
+            Assert.Equal("abc", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
+
+            await EvalAsync("SetParam(\"param\", \"def\"); return \"\";", new RequestInfo { Endpoint = endpoint });
+
+            Assert.Equal("def", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
+        }
+
+        [Fact]
+        public async Task ScriptsCanHandleEndpointObjects()
+        {
+            var endpoint = new Endpoint("foo", "bar");
+
+            var obj = (Dictionary <string, string>) endpoint.GetScriptObject("obj", () => new Dictionary<string, string>());
+
+            obj["a"] = "b";
+            Assert.Equal(
+                "b", 
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)GetScriptObject(\"obj\", null))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+            );
+
+            obj["a"] = "c";
+            Assert.Equal(
+                "c",
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)GetScriptObject(\"obj\", null))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+            );
+
+        }
     }
 
     public class TestCheckScriptModifications : IDisposable

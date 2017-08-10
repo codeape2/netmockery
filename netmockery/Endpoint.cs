@@ -22,6 +22,7 @@ namespace netmockery
         private string _pathregex;
         private List<Tuple<RequestMatcher, ResponseCreator>> _responses = new List<Tuple<RequestMatcher, ResponseCreator>>();
         private List<EndpointParameter> _parameters = new List<EndpointParameter>();
+        private Dictionary<string, object> _scriptObjects = new Dictionary<string, object>();
         private bool _ruleThatCatchesEveryThingHasBeenAdded = false;        
 
         public Endpoint(string name, string pathregex)
@@ -94,6 +95,16 @@ namespace netmockery
         public bool HasAdjustedParams => _parameters.Any(p => !p.ValueIsDefault);
 
         public int ParameterCount => _parameters.Count;
+
+        public object GetScriptObject(string name, Func<object> objectCreator)
+        {
+            if (!_scriptObjects.ContainsKey(name))
+            {
+                _scriptObjects[name] = objectCreator();
+            }
+            return _scriptObjects[name];
+
+        }
 
         public void Add(RequestMatcher requestMatcher, ResponseCreator responseCreator)
         {
