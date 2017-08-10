@@ -160,7 +160,9 @@ Inside a script, the following global variables and functions are available:
 * ``GetNow()`` (returns System.DateTime): The current time. See below for why you might want to use ``GetNow()`` inside your scripts instead of using ``System.DateTime.Now``.
 * ``GetParam(string paramname)`` (returns string): The value of the specified run-time parameter.
 
-TODO: More scripting documentation.
+Source files can be included in scripts using the following syntax:
+
+	#include "relativefilen.ame"
 
 ### Forwarding requests
 

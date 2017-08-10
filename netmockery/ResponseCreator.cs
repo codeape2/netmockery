@@ -111,8 +111,6 @@ namespace netmockery
             }            
         }
 
-        public object GetScriptObject(string name, Func<object> objectCreator) => Endpoint.GetScriptObject(name, objectCreator);
-
         public void SetStaticNow(DateTime now)
         {
             _now = now;

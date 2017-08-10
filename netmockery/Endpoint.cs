@@ -96,15 +96,11 @@ namespace netmockery
 
         public int ParameterCount => _parameters.Count;
 
-        public object GetScriptObject(string name, Func<object> objectCreator)
-        {
-            if (!_scriptObjects.ContainsKey(name))
-            {
-                _scriptObjects[name] = objectCreator();
-            }
-            return _scriptObjects[name];
+        public object GetScriptObject(string name) => _scriptObjects[name];
 
-        }
+        public bool HasScriptObject(string name) => _scriptObjects.ContainsKey(name);
+
+        public void SetScriptObject(string name, object value) => _scriptObjects[name] = value;
 
         public void Add(RequestMatcher requestMatcher, ResponseCreator responseCreator)
         {
