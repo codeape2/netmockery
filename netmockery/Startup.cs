@@ -91,8 +91,10 @@ namespace netmockery
                 var matcher_and_creator = endpoint.Resolve(context.Request.Method, context.Request.Path, context.Request.QueryString, requestBody, context.Request.Headers);
                 if (matcher_and_creator != null)
                 {
-                    //TODO: Only if configured
-                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                    if (endpoint.RecordRequests)
+                    {
+                        _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                    }                    
                     var responseCreator = matcher_and_creator.ResponseCreator;
 
                     responseRegistryItem.RequestMatcher = matcher_and_creator.RequestMatcher;
