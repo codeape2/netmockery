@@ -135,15 +135,18 @@ namespace netmockery
 
         public abstract string SourceCode { get; }
 
-        protected override void AfterResponseWritten(RequestInfo requestInfo, IHttpResponseWrapper response)
+        protected override void SetStatusCode(RequestInfo requestInfo, IHttpResponseWrapper response)
         {
             Debug.Assert(requestInfo != null);
             Debug.Assert(response != null);
-
             if (requestInfo.StatusCode != RequestInfo.USE_CONFIGURED_STATUS_CODE)
             {
-                response.HttpStatusCode = (HttpStatusCode) requestInfo.StatusCode;
+                response.HttpStatusCode = (HttpStatusCode)requestInfo.StatusCode;
             }
+            else
+            {
+                base.SetStatusCode(requestInfo, response);
+            }                           
         }
     }
 

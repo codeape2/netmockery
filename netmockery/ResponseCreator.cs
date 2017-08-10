@@ -219,18 +219,18 @@ namespace netmockery
                 contenttype += $"; charset={Encoding.WebName}";
                 response.ContentType = contenttype;
             }
-            response.HttpStatusCode = (HttpStatusCode) StatusCode;
+
+            SetStatusCode(requestInfo, response);
             await response.WriteAsync(responseBody, Encoding);
-
-            AfterResponseWritten(requestInfo, response);
-
             return Encoding.GetBytes(responseBody);
         }
 
-        protected virtual void AfterResponseWritten(RequestInfo requestInfo, IHttpResponseWrapper response)
+        protected virtual void SetStatusCode(RequestInfo requestInfo, IHttpResponseWrapper response)
         {
             // extension point, override to add logic in inheritors.
             // currently used by DynamicResponseCreator in order to let script code override status code
+
+            response.HttpStatusCode = (HttpStatusCode)StatusCode;
         }
 
         public string ContentType {
