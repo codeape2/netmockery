@@ -116,6 +116,12 @@ namespace UnitTests
         }
 
         [Fact]
+        public async Task UsingRegex()
+        {
+            Assert.Equal("OK", await EvalAsync("using System.Text.RegularExpressions; return \"OK\";"));
+        }
+
+        [Fact]
         public async Task UsingSystemDiagnosticsDebug()
         {
             Assert.Equal("OK", await EvalAsync("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
