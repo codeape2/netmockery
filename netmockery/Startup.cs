@@ -68,6 +68,9 @@ namespace netmockery
                 {
                     _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                 }
+                context.Response.StatusCode = 500;
+                await context.Response.WriteAsync( "*********************\n");
+                await context.Response.WriteAsync($"NETMOCKERY EXCEPTION:\n\n{e}");
             }
             finally
             {
@@ -112,8 +115,7 @@ namespace netmockery
                         context.Response.Headers["X-Netmockery-ResponseCreator"] = matcher_and_creator.ResponseCreator.ToString();
                     }
 
-                    var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint);
-                    
+                    var responseBytes = await responseCreator.CreateResponseAsync(new HttpRequestWrapper(context.Request), requestBodyBytes, new HttpResponseWrapper(context.Response), endpoint);                    
                     responseRegistryItem.ResponseBody = Encoding.UTF8.GetString(responseBytes);
                 }
                 else
