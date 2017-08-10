@@ -86,6 +86,8 @@ namespace netmockery
 
     public class RequestInfo
     {
+        public const int USE_CONFIGURED_STATUS_CODE = -1;
+
         private static object _locker = new object();
 
         private DateTime _now = DateTime.MinValue;
@@ -93,6 +95,7 @@ namespace netmockery
         public string RequestPath;
         public string QueryString;
         public string RequestBody;
+        public int StatusCode = USE_CONFIGURED_STATUS_CODE;
         public IHeaderDictionary Headers;
         public Endpoint Endpoint;
         public string EndpointDirectory => Endpoint.Directory;
@@ -201,14 +204,15 @@ namespace netmockery
 
         public override async Task<byte[]> CreateResponseAsync(IHttpRequestWrapper request, byte[] requestBody, IHttpResponseWrapper response, Endpoint endpoint)
         {
-            var responseBody = await GetBodyAndExecuteReplacementsAsync(new RequestInfo
+            var requestInfo = new RequestInfo
             {
                 RequestPath = request.Path.ToString(),
                 QueryString = request.QueryString.ToString(),
-                RequestBody = Encoding.UTF8.GetString(requestBody),                
+                RequestBody = Encoding.UTF8.GetString(requestBody),
                 Headers = request.Headers,
                 Endpoint = endpoint
-            });
+            };
+            var responseBody = await GetBodyAndExecuteReplacementsAsync(requestInfo);
             if (ContentType != null)
             {
                 var contenttype = ContentType;
@@ -217,8 +221,18 @@ namespace netmockery
             }
             response.HttpStatusCode = (HttpStatusCode) StatusCode;
             await response.WriteAsync(responseBody, Encoding);
+
+            AfterResponseWritten(requestInfo, response);
+
             return Encoding.GetBytes(responseBody);
         }
+
+        protected virtual void AfterResponseWritten(RequestInfo requestInfo, IHttpResponseWrapper response)
+        {
+            // extension point, override to add logic in inheritors.
+            // currently used by DynamicResponseCreator in order to let script code override status code
+        }
+
         public string ContentType {
             get { return ReplaceParameterReference(_contentType); }
             set { _contentType = value; }

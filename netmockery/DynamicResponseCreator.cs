@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 #if !NET462
 using System.Runtime.Loader;
@@ -133,6 +134,17 @@ namespace netmockery
         }
 
         public abstract string SourceCode { get; }
+
+        protected override void AfterResponseWritten(RequestInfo requestInfo, IHttpResponseWrapper response)
+        {
+            Debug.Assert(requestInfo != null);
+            Debug.Assert(response != null);
+
+            if (requestInfo.StatusCode != RequestInfo.USE_CONFIGURED_STATUS_CODE)
+            {
+                response.HttpStatusCode = (HttpStatusCode) requestInfo.StatusCode;
+            }
+        }
     }
 
     public class LiteralDynamicResponseCreator : DynamicResponseCreatorBase

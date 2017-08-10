@@ -145,20 +145,31 @@ namespace UnitTests
         {
             var endpoint = new Endpoint("foo", "bar");
 
-            var obj = (Dictionary <string, string>) endpoint.GetScriptObject("obj", () => new Dictionary<string, string>());
+            endpoint.SetScriptObject("obj", new Dictionary<string, string>());
+            var obj = (Dictionary <string, string>) endpoint.GetScriptObject("obj");
 
             obj["a"] = "b";
             Assert.Equal(
                 "b", 
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)GetScriptObject(\"obj\", null))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.GetScriptObject(\"obj\"))[\"a\"];", new RequestInfo { Endpoint = endpoint })
             );
 
             obj["a"] = "c";
             Assert.Equal(
                 "c",
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)GetScriptObject(\"obj\", null))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.GetScriptObject(\"obj\"))[\"a\"];", new RequestInfo { Endpoint = endpoint })
             );
+        }
 
+        [Fact]
+        public async Task ScriptsCanSetResponseStatusCode()
+        {
+            var endpoint = new Endpoint("foo", "bar");
+            var responseCreator = new LiteralDynamicResponseCreator("StatusCode = 102; return \"\";", endpoint);
+            var response = new TestableHttpResponse();
+            await responseCreator.CreateResponseAsync(new TestableHttpRequest("/", null), new byte[0], response, endpoint);
+
+            Assert.Equal(102, (int) response.HttpStatusCode);
         }
     }
 
