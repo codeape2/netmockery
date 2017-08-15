@@ -41,7 +41,8 @@ namespace netmockery
                     MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location), // System.Linq
                     MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location), // System.Xml.Linq
                     MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location)
+                    MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location)
                 );
 
                 var script = CSharpScript.Create<string>(
@@ -89,7 +90,8 @@ namespace netmockery
                  MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location), // System.Xml.Linq
                  MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
                  MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location)
+                 MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location),
+                 MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location)
              );
  
              var script = CSharpScript.Create<string>(

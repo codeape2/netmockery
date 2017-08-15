@@ -112,19 +112,30 @@ namespace UnitTests
         [Fact]
         public async Task UsingSystemXmlLinq()
         {
-            Assert.Equal("OK", await EvalAsync("using System.Xml.Linq; return \"OK\";"));
+            await AssertScriptCanIncludeUsingStatementAsync("System.Xml.Linq");
         }
 
         [Fact]
         public async Task UsingRegex()
         {
-            Assert.Equal("OK", await EvalAsync("using System.Text.RegularExpressions; return \"OK\";"));
+            await AssertScriptCanIncludeUsingStatementAsync("System.Text.RegularExpressions");
         }
 
         [Fact]
         public async Task UsingSystemDiagnosticsDebug()
         {
-            Assert.Equal("OK", await EvalAsync("using System.Diagnostics; Debug.Assert(true); return \"OK\";"));
+            await AssertScriptCanIncludeUsingStatementAsync("System.Diagnostics");
+        }
+
+        [Fact]
+        public async Task UsingNewtonsoftJson()
+        {
+            await AssertScriptCanIncludeUsingStatementAsync("Newtonsoft.Json");
+        }
+
+        private async Task AssertScriptCanIncludeUsingStatementAsync(string namespaceName)
+        {
+            Assert.Equal("OK", await EvalAsync($"using {namespaceName}; return \"OK\";"));
         }
 
         [Fact]
