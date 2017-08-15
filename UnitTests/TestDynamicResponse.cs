@@ -104,6 +104,12 @@ namespace UnitTests
         }
 
         [Fact]
+        public async Task ScriptCanUseTuples()
+        {
+            await EvalAsync("using System; var t = Tuple.Create(1, 2); return t.ToString();");
+        }
+
+        [Fact]
         public async Task UsingSystemIO()
         {
             Assert.Equal("File", await EvalAsync("typeof(System.IO.File).Name"));
@@ -156,19 +162,19 @@ namespace UnitTests
         {
             var endpoint = new Endpoint("foo", "bar");
 
-            endpoint.SetScriptObject("obj", new Dictionary<string, string>());
-            var obj = (Dictionary <string, string>) endpoint.GetScriptObject("obj");
+            endpoint.ScriptObjects["obj"] = new Dictionary<string, string>();
+            var obj = (Dictionary <string, string>) endpoint.ScriptObjects["obj"];
 
             obj["a"] = "b";
             Assert.Equal(
                 "b", 
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.GetScriptObject(\"obj\"))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
             );
 
             obj["a"] = "c";
             Assert.Equal(
                 "c",
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.GetScriptObject(\"obj\"))[\"a\"];", new RequestInfo { Endpoint = endpoint })
+                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
             );
         }
 

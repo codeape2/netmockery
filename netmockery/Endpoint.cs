@@ -41,8 +41,6 @@ namespace netmockery
             _pathregex = pathregex;
         }
 
-        //public IEnumerable<EndpointParameter> Parameters => _parameters;
-
         public string Directory { get; set; }
         public bool RecordRequests { get; set; }
 
@@ -96,11 +94,7 @@ namespace netmockery
 
         public int ParameterCount => _parameters.Count;
 
-        public object GetScriptObject(string name) => _scriptObjects[name];
-
-        public bool HasScriptObject(string name) => _scriptObjects.ContainsKey(name);
-
-        public void SetScriptObject(string name, object value) => _scriptObjects[name] = value;
+        public IDictionary<string, object> ScriptObjects => _scriptObjects;
 
         public void Add(RequestMatcher requestMatcher, ResponseCreator responseCreator)
         {
