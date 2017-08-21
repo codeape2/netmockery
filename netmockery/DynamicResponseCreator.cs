@@ -91,7 +91,8 @@ namespace netmockery
                  MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
                  MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location),
                  MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location)
+                 MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location),
+                 MetadataReference.CreateFromFile(typeof(Queue<>).GetTypeInfo().Assembly.Location)
              );
  
              var script = CSharpScript.Create<string>(
