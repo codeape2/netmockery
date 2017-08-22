@@ -87,6 +87,7 @@ namespace netmockery
     public class RequestInfo
     {
         public const int USE_CONFIGURED_STATUS_CODE = -1;
+        public const string USE_CONFIGURED_CONTENT_TYPE = null;
 
         private static object _locker = new object();
 
@@ -96,6 +97,7 @@ namespace netmockery
         public string QueryString;
         public string RequestBody;
         public int StatusCode = USE_CONFIGURED_STATUS_CODE;
+        public string ContentType = USE_CONFIGURED_CONTENT_TYPE;
         public IHeaderDictionary Headers;
         public Endpoint Endpoint;
         public string EndpointDirectory => Endpoint.Directory;
@@ -213,16 +215,25 @@ namespace netmockery
                 Endpoint = endpoint
             };
             var responseBody = await GetBodyAndExecuteReplacementsAsync(requestInfo);
+
+            SetContentType(requestInfo, response);
+            SetStatusCode(requestInfo, response);
+
+            await response.WriteAsync(responseBody, Encoding);
+            return Encoding.GetBytes(responseBody);
+        }
+
+        protected virtual void SetContentType(RequestInfo requestInfo, IHttpResponseWrapper response)
+        {
+            // extension point, override to add logic in inheritors.
+            // currently used by DynamicResponseCreator in order to let script code override content type
+
             if (ContentType != null)
             {
                 var contenttype = ContentType;
                 contenttype += $"; charset={Encoding.WebName}";
                 response.ContentType = contenttype;
             }
-
-            SetStatusCode(requestInfo, response);
-            await response.WriteAsync(responseBody, Encoding);
-            return Encoding.GetBytes(responseBody);
         }
 
         protected virtual void SetStatusCode(RequestInfo requestInfo, IHttpResponseWrapper response)

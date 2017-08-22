@@ -188,6 +188,29 @@ namespace UnitTests
 
             Assert.Equal(102, (int) response.HttpStatusCode);
         }
+
+        [Fact]
+        public async Task ScriptsCanSetContentType()
+        {
+            var endpoint = new Endpoint("foo", "bar");
+            var responseCreator = new LiteralDynamicResponseCreator("ContentType = \"image/png\"; return \"\";", endpoint);
+            var response = new TestableHttpResponse();
+            await responseCreator.CreateResponseAsync(new TestableHttpRequest("/", null), new byte[0], response, endpoint);
+
+            Assert.Equal("image/png", response.ContentType);
+        }
+
+        [Fact]
+        public async Task ScriptWithoutReturnValueThrowsException()
+        {   
+            var endpoint = new Endpoint("foo", "bar");
+            var responseCreator = new LiteralDynamicResponseCreator("ContentType = \"image/png\";", endpoint);
+            var response = new TestableHttpResponse();
+            await Assert.ThrowsAsync(
+                typeof(ArgumentNullException),
+                async () => await responseCreator.CreateResponseAsync(new TestableHttpRequest("/", null), new byte[0], response, endpoint)
+            );
+        }
     }
 
     public class TestCheckScriptModifications : IDisposable

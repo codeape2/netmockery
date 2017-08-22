@@ -151,6 +151,20 @@ namespace netmockery
                 base.SetStatusCode(requestInfo, response);
             }                           
         }
+
+        protected override void SetContentType(RequestInfo requestInfo, IHttpResponseWrapper response)
+        {
+            Debug.Assert(requestInfo != null);
+            Debug.Assert(response != null);
+            if (requestInfo.ContentType != RequestInfo.USE_CONFIGURED_CONTENT_TYPE)
+            {
+                response.ContentType = requestInfo.ContentType;
+            }
+            else
+            {
+                base.SetContentType(requestInfo, response);
+            }            
+        }
     }
 
     public class LiteralDynamicResponseCreator : DynamicResponseCreatorBase
