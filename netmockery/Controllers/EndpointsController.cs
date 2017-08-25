@@ -91,10 +91,14 @@ namespace netmockery.Controllers
         public ActionResult ViewRequestCreatorFile(string name, int requestCreatorId)
         {
             var endpoint = _endpointCollection.Get(name);
-            var requestCreator = endpoint.Responses.ElementAt(requestCreatorId).Item2 as IResponseCreatorWithFilename;
-            if (requestCreator != null)
+            var requestCreator = endpoint.Responses.ElementAt(requestCreatorId).Item2;
+            if (requestCreator is FileDynamicResponseCreator fileDynamicResponseCreator)
             {
-                return File(System.IO.File.OpenRead(requestCreator.Filename), "text/plain");
+                return Content(fileDynamicResponseCreator.GetSourceCodeWithIncludesExecuted(), "text/plain");
+            }
+            else if (requestCreator is IResponseCreatorWithFilename requestCreatorWithFilename)
+            {
+                return File(System.IO.File.OpenRead(requestCreatorWithFilename.Filename), "text/plain");
             }
             else
             {

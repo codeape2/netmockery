@@ -29,6 +29,21 @@ namespace netmockery
 
         public virtual string FileSystemDirectory { get { return null; } }
 
+        public string GetSourceCodeWithIncludesExecuted()
+        {
+            var sourceCode = SourceCode;
+
+            return 
+                FileSystemDirectory != null
+                        ?
+                        ExecuteIncludes(
+                            CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
+                            FileSystemDirectory
+                        )
+                        :
+                        sourceCode;
+        }
+
 #if NET462
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
@@ -46,14 +61,7 @@ namespace netmockery
                 );
 
                 var script = CSharpScript.Create<string>(
-                    FileSystemDirectory != null 
-                        ?
-                        ExecuteIncludes(
-                            CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
-                            FileSystemDirectory
-                        )                        
-                        : 
-                        sourceCode,
+                    GetSourceCodeWithIncludesExecuted(),
                     scriptOptions,
                     globalsType: typeof(RequestInfo)
                 );
@@ -96,14 +104,7 @@ namespace netmockery
              );
  
              var script = CSharpScript.Create<string>(
-                 FileSystemDirectory != null
-                     ?
-                     ExecuteIncludes(
-                         CreateCorrectPathsInLoadStatements(SourceCode, FileSystemDirectory),
-                         FileSystemDirectory
-                     )
-                     :
-                     SourceCode,
+                 GetSourceCodeWithIncludesExecuted(),
                  scriptOptions,
                  globalsType: typeof(RequestInfo)
              );
