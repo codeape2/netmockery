@@ -21,3 +21,11 @@ cd UnitTests
 dotnet restore -r net462
 dotnet test -f net462
 ```
+
+DEPLOYMENT PACKAGES
+===================
+
+```
+dotnet publish -f netcoreapp1.1
+dotnet publish -f net462
+```
