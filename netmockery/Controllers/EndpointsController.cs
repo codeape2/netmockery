@@ -45,8 +45,12 @@ namespace netmockery.Controllers
 
         public ActionResult ReloadConfig()
         {
+            Console.Error.WriteLine("Reloading config");
+
             _endpointCollectionProvider.Reload();
             _responseRegistry.Clear();
+
+            Console.Error.WriteLine("Config reloaded");
             return RedirectToAction("Config");
         }
 
