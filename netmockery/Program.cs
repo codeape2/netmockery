@@ -63,7 +63,7 @@ namespace netmockery
 
         public static async Task MainAsync(string[] args, CancellationToken token)
         {
-            WriteBanner();
+            WriteLine($"Netmockery v {NetmockeryVersion} ({FrameworkVersion})");
 
 #if NET462
             System.Net.ServicePointManager.ServerCertificateValidationCallback =
@@ -116,6 +116,13 @@ namespace netmockery
 
                 case CommandLineParser.COMMAND_DUMP:
                     Dump(endpointCollection);
+                    break;
+
+                case CommandLineParser.COMMAND_DUMPREFS:
+                    foreach (var metadataReference in DynamicResponseCreatorBase.GetDefaultMetadataReferences())
+                    {
+                        Console.WriteLine(metadataReference.Display);
+                    }
                     break;
 
               }
@@ -260,17 +267,25 @@ namespace netmockery
             }
         }
 
-        public static void WriteBanner()
+        public static string FrameworkVersion
         {
-            var version = typeof(netmockery.Program).GetTypeInfo().Assembly.GetName().Version;
-            var versionString = $"{version.Major}.{version.Minor}.{version.MinorRevision}";
+            get
+            {
 #if NET462
-            var framework = ".NET Framework";
+                return "Full .NET Framework";
 #else
-            var framework = ".NET Core";
+                return ".NET Core";
 #endif
+            }
+        }
 
-            WriteLine($"Netmockery v {versionString} ({framework})");
+        public static string NetmockeryVersion
+        {
+            get
+            {
+                var version = typeof(netmockery.Program).GetTypeInfo().Assembly.GetName().Version;
+                return $"{version.Major}.{version.Minor}.{version.MinorRevision}";
+            }
         }
     }
 }
