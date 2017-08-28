@@ -133,6 +133,8 @@ namespace netmockery
         private Endpoint _endpoint;
         private string _delay;
 
+        public int Index = -1;
+
         public ResponseCreator(Endpoint endpoint)
         {
             Debug.Assert(endpoint != null);

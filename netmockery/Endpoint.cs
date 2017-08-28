@@ -101,6 +101,7 @@ namespace netmockery
             Debug.Assert(requestMatcher != null);
             Debug.Assert(responseCreator != null);
             Debug.Assert(requestMatcher.Index == -1);
+            Debug.Assert(responseCreator.Index == -1);
 
             if (_ruleThatCatchesEveryThingHasBeenAdded)
             {
@@ -108,6 +109,7 @@ namespace netmockery
             }
 
             requestMatcher.Index = _responses.Count;
+            responseCreator.Index = _responses.Count;
             _responses.Add(Tuple.Create(requestMatcher, responseCreator));
             if (requestMatcher is AnyMatcher && requestMatcher.MatchesAnyHttpMethod)
             {

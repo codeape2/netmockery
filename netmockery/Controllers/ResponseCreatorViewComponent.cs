@@ -8,9 +8,9 @@ namespace netmockery.Controllers
 {
     public class ResponseCreatorViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(Endpoint endpoint, ResponseCreator responseCreator, int index)
+        public IViewComponentResult Invoke(Endpoint endpoint, ResponseCreator responseCreator)
         {
-            ViewData["index"] = index;
+            ViewData["index"] = responseCreator.Index;
             ViewData["endpointName"] = endpoint.Name;
 
             if (responseCreator is FileResponse)
