@@ -33,6 +33,13 @@ namespace netmockery.Controllers
             ViewData["Now"] = DateTime.Now;
             ViewData["ReloadTimestamps"] = _endpointCollectionProvider.ReloadTimestamps;
             ViewData["SourceDirectory"] = _endpointCollection.SourceDirectory;
+            ViewData["FrameworkVersion"] = Program.FrameworkVersion;
+            ViewData["NetmockeryVersion"] = Program.NetmockeryVersion;
+            ViewData["DefaultScriptReferences"] = 
+                    from 
+                        metadatareference in DynamicResponseCreatorBase.GetDefaultMetadataReferences()
+                    select 
+                        metadatareference.Display;
             return View();
         }
 

@@ -4,6 +4,10 @@
     Layout = "Base";
     var now = (DateTime) ViewData["Now"];
     var reloadTimestamps = (DateTime[])ViewData["ReloadTimestamps"];
+
+    var netmockeryVersion = (string)ViewData["NetmockeryVersion"];
+    var frameworkVersion = (string)ViewData["FrameworkVersion"];
+    var defaultScriptReferences = (IEnumerable<string>)ViewData["DefaultScriptReferences"];
 }
 <h2>Configuration</h2>
 <p>
@@ -23,3 +27,18 @@
         <li>Current time: @now</li>
     </ul>
 </p>
+
+<h2>Version</h2>
+
+<p>
+    Netmockery @netmockeryVersion (@frameworkVersion)
+</p>
+
+
+<h2>Default script references</h2>
+<ul>
+    @foreach (var referenceDisplay in defaultScriptReferences)
+    {
+        <li><code>@referenceDisplay</code></li>
+    }
+</ul>
