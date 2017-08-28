@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 #if !NET462
@@ -44,7 +45,18 @@ namespace netmockery
                         sourceCode;
         }
 
+
 #if NET462
+        public static IEnumerable<MetadataReference> GetDefaultMetadataReferences()
+        {
+            yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location);
+        }
+
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
             Debug.Assert(requestInfo != null);
@@ -53,11 +65,7 @@ namespace netmockery
             {
                 //TODO: Debug logging of referenced assemblies
                 var scriptOptions = ScriptOptions.Default.WithReferences(
-                    MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location), // System.Linq
-                    MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location), // System.Xml.Linq
-                    MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location)
+                    GetDefaultMetadataReferences().ToArray()
                 );
 
                 var script = CSharpScript.Create<string>(
@@ -88,19 +96,28 @@ namespace netmockery
             return await task;
         }
 #else
+        public static IEnumerable<MetadataReference> GetDefaultMetadataReferences() 
+        {
+            yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(Queue<>).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Dynamic.ExpandoObject).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(ExpressionType).GetTypeInfo().Assembly.Location);
+
+        }
+        
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
              //TODO: Only create script object if source has changed
              Debug.Assert(requestInfo != null);
  
              var scriptOptions = ScriptOptions.Default.WithReferences(
-                 MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location), // System.Linq
-                 MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location), // System.Xml.Linq
-                 MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location),
-                 MetadataReference.CreateFromFile(typeof(Queue<>).GetTypeInfo().Assembly.Location)
+                 GetDefaultMetadataReferences().ToArray()
              );
  
              var script = CSharpScript.Create<string>(

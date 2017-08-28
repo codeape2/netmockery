@@ -139,6 +139,43 @@ namespace UnitTests
             await AssertScriptCanIncludeUsingStatementAsync("Newtonsoft.Json");
         }
 
+        [Fact]
+        public async Task UsingSystemDynamic()
+        {
+            await AssertScriptCanIncludeUsingStatementAsync("System.Dynamic");
+        }
+
+        [Fact]
+        public async Task ScriptsCanUseDynamicKeyword()
+        {
+            Assert.Equal("abc", await EvalAsync(@"
+using System.Dynamic;
+dynamic a = new ExpandoObject();
+a.Foobar = ""abc"";
+return a.Foobar;
+"));
+        }
+
+        [Fact]
+        public async Task ScriptsCanCompareDynamic()
+        {
+            Assert.Equal("True", await EvalAsync(@"
+dynamic a = ""abc"";
+var b = ""abc"";
+return (a == b).ToString();
+"));
+        }
+
+        [Fact]
+        public async Task ScriptsCanUseExpandoObject()
+        {
+            Assert.Equal("True", await EvalAsync(@"
+using System.Dynamic;
+var eo = new ExpandoObject();
+return (eo != null).ToString();
+"));
+        }
+
         private async Task AssertScriptCanIncludeUsingStatementAsync(string namespaceName)
         {
             Assert.Equal("OK", await EvalAsync($"using {namespaceName}; return \"OK\";"));
