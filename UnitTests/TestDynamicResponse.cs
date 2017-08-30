@@ -122,6 +122,20 @@ namespace UnitTests
         }
 
         [Fact]
+        public async Task UsingSystemXml()
+        {
+            await AssertScriptCanIncludeUsingStatementAsync("System.Xml");
+
+            Assert.Equal("True", await EvalAsync("using System.Xml; var xnm = typeof(XmlNamespaceManager); return true.ToString();"));
+        }
+
+        [Fact]
+        public async Task UsingSystemXmlXPath()
+        {
+            await AssertScriptCanIncludeUsingStatementAsync("System.Xml.XPath");
+        }
+
+        [Fact]
         public async Task UsingRegex()
         {
             await AssertScriptCanIncludeUsingStatementAsync("System.Text.RegularExpressions");

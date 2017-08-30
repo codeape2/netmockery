@@ -51,6 +51,7 @@ namespace netmockery
         {
             yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Xml.XmlNamespaceManager).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).GetTypeInfo().Assembly.Location);
@@ -100,6 +101,8 @@ namespace netmockery
         {
             yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Xml.XmlNamespaceManager).GetTypeInfo().Assembly.Location);
+            yield return MetadataReference.CreateFromFile(typeof(System.Xml.XPath.Extensions).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.IO.File).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Diagnostics.Debug).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly.Location);
