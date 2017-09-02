@@ -1,7 +1,7 @@
 ﻿@using netmockery
 @model FileResponse
 From file: 
-<a href="@Url.Action("ViewRequestCreatorFile", "Endpoints", new { name = (string)ViewData["endpointName"],  requestCreatorId = (int)ViewData["index"] })">
+<a href="@Url.Action("ViewResponseCreatorFile", "Endpoints", new { name = (string)ViewData["endpointName"],  responseCreatorId = (int)ViewData["index"] })">
     <code>@System.IO.Path.GetFileName(Model.Filename)</code>
 </a>
 

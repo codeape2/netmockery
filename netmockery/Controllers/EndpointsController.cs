@@ -95,17 +95,24 @@ namespace netmockery.Controllers
             return Content(System.IO.File.ReadAllText(System.IO.Path.Combine(endpoint.Directory, "endpoint.json")));
         }
 
-        public ActionResult ViewRequestCreatorFile(string name, int requestCreatorId)
+        public ActionResult ViewResponseCreatorFile(string name, int responseCreatorId)
         {
             var endpoint = _endpointCollection.Get(name);
-            var requestCreator = endpoint.Responses.ElementAt(requestCreatorId).Item2;
-            if (requestCreator is FileDynamicResponseCreator fileDynamicResponseCreator)
+            var responseCreator = endpoint.Responses.ElementAt(responseCreatorId).Item2;
+            if (responseCreator is FileDynamicResponseCreator fileDynamicResponseCreator)
             {
-                return Content(fileDynamicResponseCreator.GetSourceCodeWithIncludesExecuted(), "text/plain");
+                var sourceCode = fileDynamicResponseCreator.GetSourceCodeWithIncludesExecuted();
+                var lines = sourceCode.Split('\n');
+                var sourceWithLineNumber = 
+                    from
+                        i in Enumerable.Range(0, lines.Length)
+                    select 
+                        $"{i + 1}: {lines[i]}"; 
+                return Content(string.Join("\n", sourceWithLineNumber), "text/plain");
             }
-            else if (requestCreator is IResponseCreatorWithFilename requestCreatorWithFilename)
+            else if (responseCreator is IResponseCreatorWithFilename responseCreatorWithFilename)
             {
-                return File(System.IO.File.OpenRead(requestCreatorWithFilename.Filename), "text/plain");
+                return File(System.IO.File.OpenRead(responseCreatorWithFilename.Filename), "text/plain");
             }
             else
             {
