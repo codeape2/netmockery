@@ -1,0 +1,7 @@
+language: csharp
+mono: none
+dotnet: 1.1
+script:
+  - cd UnitTests
+  - dotnet restore -r netcoreapp1.1
+  - dotnet test -f netcoreapp1.1
