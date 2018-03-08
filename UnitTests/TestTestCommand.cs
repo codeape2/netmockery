@@ -118,7 +118,7 @@ namespace UnitTests
             dc.AddFile("tests/response.txt", "Hello world");
             dc.AddFile("tests/now.txt", "2015-01-01 12:01:31");
             dc.AddFile("getnow/endpoint.json", "{'name': 'GetNow', 'pathregex': '/getnow/', 'responses': [{'match': {}, 'script':'getnow.csscript'}]}");
-            dc.AddFile("getnow/getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")");
+            dc.AddFile("getnow/getnow.csscript", "GetNow().ToString(\"yyyy-MM-dd HH':'mm':'ss\")");
         }
 
         public void Dispose()
@@ -190,7 +190,7 @@ namespace UnitTests
         [Fact]
         public async Task SetStaticGetNow()
         {
-            Assert.Equal("2015-06-07 08:09:10", await TestDynamicResponse.EvalAsync("GetNow().ToString(\"yyyy-MM-dd HH:mm:ss\")", now: new DateTime(2015, 6, 7, 8, 9, 10)));
+            Assert.Equal("2015-06-07 08:09:10", await TestDynamicResponse.EvalAsync("GetNow().ToString(\"yyyy-MM-dd HH':'mm':'ss\")", now: new DateTime(2015, 6, 7, 8, 9, 10)));
         }
 
 
