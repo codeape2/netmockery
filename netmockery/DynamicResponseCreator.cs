@@ -58,6 +58,17 @@ namespace netmockery
             yield return MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location);
         }
 
+        public IEnumerable<MetadataReference> GetCustomMetadataReferences()
+        {
+            foreach (var assemblyName in _assembliesToReference)
+            {
+                var assembly = Assembly.Load(assemblyName);
+                Console.WriteLine(assembly);
+                Console.WriteLine(assembly.Location);
+                yield return MetadataReference.CreateFromFile(assembly.Location);
+            }
+        }
+
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
             Debug.Assert(requestInfo != null);
@@ -113,6 +124,14 @@ namespace netmockery
             yield return MetadataReference.CreateFromFile(typeof(ExpressionType).GetTypeInfo().Assembly.Location);
 
         }
+
+        public IEnumerable<MetadataReference> GetCustomMetadataReferences()
+        {
+            foreach (var assemblyName in _assembliesToReference)
+            {
+                yield return MetadataReference.CreateFromFile(assemblyName);
+            }
+        }
         
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
@@ -120,7 +139,7 @@ namespace netmockery
              Debug.Assert(requestInfo != null);
  
              var scriptOptions = ScriptOptions.Default.WithReferences(
-                 GetDefaultMetadataReferences().ToArray()
+                 GetAllReferences().ToArray()
              );
  
              var script = CSharpScript.Create<string>(
@@ -132,6 +151,16 @@ namespace netmockery
              return result.ReturnValue;
         }
 #endif
+        private List<string> _assembliesToReference = new List<string>();
+
+        public IEnumerable<MetadataReference> GetAllReferences() =>
+            GetDefaultMetadataReferences().Concat(GetCustomMetadataReferences());
+
+        public void AddReference(string refName)
+        {
+            _assembliesToReference.Add(refName);
+        }
+
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
         {

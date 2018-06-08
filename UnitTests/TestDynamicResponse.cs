@@ -14,7 +14,7 @@ namespace UnitTests
 
     public class TestDynamicResponse 
     {
-        static public async Task<string> EvalAsync(string code, RequestInfo requestInfo = null, DateTime? now = null)
+        static public async Task<string> EvalAsync(string code, RequestInfo requestInfo = null, DateTime? now = null, string[] extraReferences = null)
         {
             if (requestInfo == null)
             {
@@ -24,7 +24,16 @@ namespace UnitTests
             {
                 requestInfo.SetStaticNow(now.Value);
             }
-            return await new LiteralDynamicResponseCreator(code, new Endpoint("a", "b")).GetBodyAsync(requestInfo);
+            var drc = new LiteralDynamicResponseCreator(code, new Endpoint("a", "b"));
+
+            if (extraReferences != null)
+            {
+                foreach (var reference in extraReferences)
+                {
+                    drc.AddReference(reference);
+                }
+            }
+            return await drc.GetBodyAsync(requestInfo);
         }
 
         [Fact]
@@ -206,6 +215,23 @@ return (eo != null).ToString();
             await EvalAsync("SetParam(\"param\", \"def\"); return \"\";", new RequestInfo { Endpoint = endpoint });
 
             Assert.Equal("def", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
+        }
+
+        [Fact]
+        public async Task ScriptsCanReferenceFrameworkAssemblies()
+        {
+            //System.IO.Compression.ZipFile
+            // net1.1: Absolute path expected: TODO if given filename is relative path, combine with dll directory of running code
+            var asmRef = @"c:\dev\netmockery\UnitTests\bin\Debug\netcoreapp1.1\System.IO.Compression.ZipFile.dll";
+            Assert.Equal(
+                "System.IO.Compression.ZipFile", 
+                await EvalAsync(
+                    "using System.IO.Compression; return typeof(ZipFile).ToString();", 
+                    extraReferences: new[] { asmRef }
+                )
+            );
+
+            // net462: Reference extra by assembly name
         }
 
         [Fact]
