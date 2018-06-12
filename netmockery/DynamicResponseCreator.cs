@@ -129,7 +129,14 @@ namespace netmockery
         {
             foreach (var assemblyName in _assembliesToReference)
             {
-                yield return MetadataReference.CreateFromFile(assemblyName);
+                var fileName = assemblyName;
+                if (! Path.IsPathRooted(assemblyName))
+                {
+                    var assemblyLocation = typeof(DynamicResponseCreatorBase).GetTypeInfo().Assembly.Location;
+                    var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+                    fileName = Path.Combine(assemblyDirectory, assemblyName);
+                }
+                yield return MetadataReference.CreateFromFile(fileName);
             }
         }
         

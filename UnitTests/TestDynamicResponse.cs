@@ -220,9 +220,7 @@ return (eo != null).ToString();
         [Fact]
         public async Task ScriptsCanReferenceFrameworkAssemblies()
         {
-            //System.IO.Compression.ZipFile
-            // net1.1: Absolute path expected: TODO if given filename is relative path, combine with dll directory of running code
-            var asmRef = @"c:\dev\netmockery\UnitTests\bin\Debug\netcoreapp1.1\System.IO.Compression.ZipFile.dll";
+            var asmRef = @"System.IO.Compression.ZipFile.dll";
             Assert.Equal(
                 "System.IO.Compression.ZipFile", 
                 await EvalAsync(
