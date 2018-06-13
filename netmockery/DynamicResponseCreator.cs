@@ -77,7 +77,7 @@ namespace netmockery
             {
                 //TODO: Debug logging of referenced assemblies
                 var scriptOptions = ScriptOptions.Default.WithReferences(
-                    GetDefaultMetadataReferences().ToArray()
+                    GetAllReferences().ToArray()
                 );
 
                 var script = CSharpScript.Create<string>(

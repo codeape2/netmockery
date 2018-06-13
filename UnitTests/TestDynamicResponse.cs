@@ -220,7 +220,11 @@ return (eo != null).ToString();
         [Fact]
         public async Task ScriptsCanReferenceFrameworkAssemblies()
         {
-            var asmRef = @"System.IO.Compression.ZipFile.dll";
+#if NET462
+            var asmRef = "System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+#else
+            var asmRef = "System.IO.Compression.ZipFile.dll";
+#endif
             Assert.Equal(
                 "System.IO.Compression.ZipFile", 
                 await EvalAsync(
@@ -228,9 +232,8 @@ return (eo != null).ToString();
                     extraReferences: new[] { asmRef }
                 )
             );
-
-            // net462: Reference extra by assembly name
         }
+
 
         [Fact]
         public async Task ScriptsCanHandleEndpointObjects()
