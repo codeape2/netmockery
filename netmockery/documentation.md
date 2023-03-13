@@ -360,8 +360,9 @@ Inside a script file, the function ``GetParam(parameterName)`` returns the curre
 For endpoints that define parameters, the web ui displays the table of values on the endpoint details page. The user can change values and reset values to the default value.
 
 
-# Writing tests
+# Endpoint tests
 
+## Writing endpoint tests
 Within a endpoint directory, a ``tests`` directory with a ``tests.json`` file defines test cases for the endpoint directory.
 
 Example ``tests.json`` file:
@@ -405,7 +406,7 @@ Specifying the expectations:
 * ``expectedstatuscode``: Expected response status code
 
 
-## Running tests
+## Running endpoint tests
 
 TODO: Document test modes (network and internal).
 
