@@ -7,7 +7,7 @@ Evaluate XPath <code>@Model.XPathExpresssion</code> against request body
     <br><text>Using namepaces:</text><br>
     @for (var i = 0; i < Model.Namespaces.Length; i++)
     {
-        @Model.Prefixes[i] : @Model.Namespaces[i]<br>
+        <span>@Model.Prefixes[i] : @Model.Namespaces[i]</span><br>
     }
 }
 @Html.Partial("CommonRequestMatcher", Model)

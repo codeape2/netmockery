@@ -12,7 +12,7 @@ namespace UnitTests
         [Fact]
         public void CreateWebHostCorrectly()
         {
-            var webhost = Program.CreateWebHost("examples/example1", ".", null);
+            var webhost = Program.CreateHostBuilder("examples/example1", new string[] {} );
             Assert.NotNull(webhost);
         }
 

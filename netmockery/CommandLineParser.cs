@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace netmockery
 {
     static public class CommandLineParser
     {
         public const int COMMAND_NORMAL = 1;
-        public const int COMMAND_SERVICE = 2;
         public const int COMMAND_TEST = 3;
         public const int COMMAND_DUMP = 4;
         public const int COMMAND_DUMPREFS = 5;
@@ -28,12 +26,10 @@ namespace netmockery
 
         static private Dictionary<int, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<int, string[]> {
             { COMMAND_NORMAL, new[] { VALUE_SWITCH_URL, BOOL_SWITCH_NOTESTMODE } },
-            { COMMAND_SERVICE, new[] { VALUE_SWITCH_URL } },
             { COMMAND_TEST, new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
             { COMMAND_DUMP, new string[0] },
             { COMMAND_DUMPREFS, new string[0] }
         };
-
 
         static public ParsedCommandLine ParseArguments(string[] args)
         {
@@ -95,10 +91,6 @@ namespace netmockery
             {
                 switch (positionalArgs.ElementAt(1))
                 {
-                    case "service":
-                        command = COMMAND_SERVICE;
-                        break;
-
                     case "test":
                         command = COMMAND_TEST;
                         break;
@@ -148,14 +140,12 @@ namespace netmockery
         }
     }
 
-
     public class CommandLineParsingException : Exception
     {
         public CommandLineParsingException(string message) : base(message)
         {
         }
     }
-
 
     public class ParsedCommandLine
     {

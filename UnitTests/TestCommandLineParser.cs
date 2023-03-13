@@ -34,25 +34,6 @@ namespace UnitTests
         }
 
         [Fact]
-        public void SwitchesCanComeBeforePositionalArguments()
-        {
-            var result = ParseArguments(new[] { "--url", "http://*:5000", "c:\\dir\\foo", "service" });
-            Assert.Equal(COMMAND_SERVICE, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal("http://*:5000", result.Url);
-        }
-
-        [Fact]
-        public void SwitchesCanComeBetweenDirectoryAndCommand()
-        {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "--url", "http://*:5000", "service" });
-            Assert.Equal(COMMAND_SERVICE, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal("http://*:5000", result.Url);
-        }
-
-
-        [Fact]
         public void NormalExecutionCanHaveUrl()
         {
             var result = ParseArguments(new[] { "c:\\dir\\foo", "--url", "http://*:5000" });
@@ -60,25 +41,6 @@ namespace UnitTests
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
             Assert.Equal("http://*:5000", result.Url);
         }
-
-        [Fact]
-        public void RunAsService()
-        {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "service", "--url", "http://*:5000" });
-            Assert.Equal(COMMAND_SERVICE, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal("http://*:5000", result.Url);
-        }
-
-        [Fact]
-        public void RunAsServiceWithoutUrl()
-        {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "service" });
-            Assert.Equal(COMMAND_SERVICE, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Null(result.Url);
-        }
-
 
         [Fact]
         public void MissingEndpointDirectoryGivesError()
@@ -140,12 +102,6 @@ namespace UnitTests
         public void InvalidArgumentsForNormalCommand()
         {
             AssertGivesException("'--only' is not a valid argument", new[] { "c:\\foo\\bar", "--only", "2" });
-        }
-
-        [Fact]
-        public void InvalidArgumentsForServiceCommand()
-        {
-            AssertGivesException("'--only' is not a valid argument for the 'service' command", new[] { "c:\\foo\\bar", "service", "--only", "2" });
         }
 
         private void AssertGivesException(string expectedMessage, string[] args)

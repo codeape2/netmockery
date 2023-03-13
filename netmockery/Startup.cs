@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
@@ -36,11 +34,10 @@ namespace netmockery
         {
             ReloadConfig();
 
+            services.AddControllersWithViews();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient(typeof(ResponseRegistry), serviceProvider => _responseRegistry);
             services.AddTransient<EndpointCollection>(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
-
-            services.AddMvc();
         }
 
         public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
@@ -134,12 +131,6 @@ namespace netmockery
         public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
-            app.UseMvc(
-                routes => routes.MapRoute(
-                    name: "Default", 
-                    template: "__netmockery/{controller=Endpoints}/{action=Index}"
-                )
-            );
 
             app.UseStaticFiles();
             

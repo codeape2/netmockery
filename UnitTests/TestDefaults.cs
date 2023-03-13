@@ -109,7 +109,7 @@ namespace UnitTests
                 }
             };
             var globalDefaults = new JSONDefaults { charset = "ascii", contenttype = "application/xml" };
-            var endpointDefaults = new JSONDefaults { charset = "UTF-7", contenttype = "text/plain" };
+            var endpointDefaults = new JSONDefaults { charset = "UTF-8", contenttype = "text/plain" };
 
             directoryCreator.AddFile("defaults.json", JsonConvert.SerializeObject(globalDefaults));
             directoryCreator.AddFile("endpoint1/endpoint.json", JsonConvert.SerializeObject(jsonEndpoint1));
@@ -132,7 +132,7 @@ namespace UnitTests
 
             var responseCreator = endpointCollection.Get("endpointdefaults").Responses.Single().Item2 as SimpleResponseCreator;
             Assert.Equal("text/plain", responseCreator.ContentType);
-            Assert.Equal("utf-7", responseCreator.Encoding.WebName);
+            Assert.Equal("utf-8", responseCreator.Encoding.WebName);
         }
 
         [Fact]

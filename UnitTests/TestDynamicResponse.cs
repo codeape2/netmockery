@@ -86,17 +86,6 @@ namespace UnitTests
             Assert.NotNull(ex);
         }
 
-#if NET462
-        [Fact]
-        public async Task RuntimeErrorsIncludeLineNumber()
-        {
-            var ex = await Assert.ThrowsAsync<DivideByZeroException>(
-                () => EvalAsync("var i = 0; (4 / i).ToString()")
-            );
-            Assert.Contains("in :line 1", ex.StackTrace);
-        }
-#endif
-
         [Fact]
         public async Task UsingSystemLinq()
         {

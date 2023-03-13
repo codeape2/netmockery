@@ -59,7 +59,7 @@ namespace netmockery.Controllers
             builder.DocumentProcessed += (document) =>
             {
                 var headers =
-                    from lrd in document.GetLinkReferenceDefinitions().OfType<HeadingLinkReferenceDefinition>()
+                    from lrd in document.GetLinkReferenceDefinitions(true).OfType<HeadingLinkReferenceDefinition>()
                     select new
                     {
                         level = lrd.Heading.Level,
