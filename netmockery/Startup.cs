@@ -4,7 +4,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.IO;
 
@@ -16,28 +15,40 @@ namespace netmockery
         private EndpointCollectionProvider _endpointCollectionProvider;
         static public bool TestMode { get; set; } = false;
 
-        public ResponseRegistry ResponseRegistry => _responseRegistry;
-
-        public Startup(EndpointCollectionProvider endpointCollectionProvider)
+        public Startup(EndpointCollectionProvider endpointCollectionProvider, ResponseRegistry responseRegistry)
         {
-            Debug.Assert(endpointCollectionProvider != null);
             _endpointCollectionProvider = endpointCollectionProvider;
+            _responseRegistry = responseRegistry;
         }
 
-        
-        public void ReloadConfig()
+        public void Configure(IApplicationBuilder app)
         {
-            _responseRegistry = new ResponseRegistry();
-        }
+            app.UseDeveloperExceptionPage();
+            app.UseMvc(
+                routes => routes.MapRoute(
+                    name: "Default",
+                    template: "__netmockery/{controller=Endpoints}/{action=Index}"
+                )
+            );
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            ReloadConfig();
+            app.UseStaticFiles();
 
-            services.AddControllersWithViews();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient(typeof(ResponseRegistry), serviceProvider => _responseRegistry);
-            services.AddTransient<EndpointCollection>(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
+            app.Run(async (context) =>
+            {
+                var memoryStream = new MemoryStream();
+                await context.Request.Body.CopyToAsync(memoryStream);
+                var requestBodyBytes = memoryStream.ToArray();
+                var requestBody = Encoding.UTF8.GetString(requestBodyBytes);
+
+                if (context.Request.Path.ToString() == "/")
+                {
+                    context.Response.Redirect("/__netmockery/Home");
+                }
+                else
+                {
+                    await HandleRequest(context, requestBody, requestBodyBytes);
+                }
+            });
         }
 
         public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
@@ -126,31 +137,6 @@ namespace netmockery
                 _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                 responseRegistryItem.Error = "No endpoint matches request path";
             }
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseDeveloperExceptionPage();
-
-            app.UseStaticFiles();
-            
-            app.Run(async (context) =>
-            {
-                var memoryStream = new MemoryStream();
-                context.Request.Body.CopyTo(memoryStream);
-                var requestBodyBytes = memoryStream.ToArray();
-                var requestBody = Encoding.UTF8.GetString(requestBodyBytes);
-
-                if (context.Request.Path.ToString() == "/")
-                {
-                    context.Response.Redirect("/__netmockery/Home");
-                }
-                else
-                {
-                    await HandleRequest(context, requestBody, requestBodyBytes);
-                }
-            });
-            
         }
     }
 }

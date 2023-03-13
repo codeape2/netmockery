@@ -1,10 +1,10 @@
 ﻿# Running netmockery
 
-Command line (.NET Framework version):
+Command line:
 
-    netmockery.exe p:\ath\to\endpoint\directory
+    dotnet run --project p:\ath\to\endpoint\directory
 
-Command line (.NET Core version):
+Command line:
 
     dotnet netmockery.dll p:\ath\to\endpoint\directory
 
@@ -13,27 +13,6 @@ Netmockery starts and listens on ``localhost`` port ``5000``.
 To bind to another address/port, use the ``--urls`` command line parameter. The command below binds netmockery to all network interfaces using port 9876.
 
     netmockery.exe p:\ath\to\endpoint\directory --urls http://*:9876
-
-## Installing as windows service
-
-(.NET Framework version only, not supported in .NET Core version)
-
-To install:
-
-    sc create netmockery binPath= "p:\ath\to\netmockery.exe p:\ath\to\endpoint\directory service"
-
-If ``p:\ath\to\netmockery.exe`` or ``p:\ath\to\endpoint\directory`` contains spaces, they must be escaped using ``\"`` . Example:
-
-    sc create netmockery binPath= "p:\ath\to\netmockery.exe \"p:\ath\to\endpoint\directory\with space\" service"
-
-Start/stop service:
-
-    net start netmockery
-    net stop netmockery
-
-To uninstall:
-
-    sc delete netmockery
 
 # Configuring netmockery
 

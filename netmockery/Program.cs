@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -14,22 +14,6 @@ namespace netmockery
 {
     public class Program
     {
-        public static IHostBuilder CreateHostBuilder(string endpointCollectionDirectory, string[] args)
-        {
-            var endpointCollectionProvider = new EndpointCollectionProvider(endpointCollectionDirectory);
-            Action<IServiceCollection> initialServiceCollection = (IServiceCollection serviceCollection) =>
-            {
-                serviceCollection.AddTransient(serviceProvider => endpointCollectionProvider);
-            };
-
-            return Host.CreateDefaultBuilder(args)
-                .ConfigureServices(initialServiceCollection)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-        }
-
         public static void Main(string[] args)
         {
             var source = new CancellationTokenSource();
@@ -73,7 +57,7 @@ namespace netmockery
                     }
                     Console.WriteLine("Admin interface available on /__netmockery");
                     Startup.TestMode = parsedArguments.TestMode;
-                    CreateHostBuilder(parsedArguments.EndpointCollectionDirectory, args).Build().Run();
+                    BuildWebApplication(parsedArguments.EndpointCollectionDirectory, args).Run();
                     break;
 
                 case CommandLineParser.COMMAND_TEST:
@@ -92,6 +76,25 @@ namespace netmockery
                     break;
 
               }
+        }
+
+        public static WebApplication BuildWebApplication(string endpointCollectionDirectory, string[] args)
+        {
+            var endpointCollectionProvider = new EndpointCollectionProvider(endpointCollectionDirectory);
+            var responseRegistry = new ResponseRegistry();
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddTransient(typeof(ResponseRegistry), serviceProvider => responseRegistry);
+            builder.Services.AddTransient(serviceProvider => endpointCollectionProvider);
+            builder.Services.AddTransient<EndpointCollection>(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
+            var app = builder.Build();
+
+            var startup = new Startup(endpointCollectionProvider, responseRegistry);
+            startup.Configure(app);
+
+            return app;
         }
 
         public static async Task TestAsync(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
@@ -199,13 +202,11 @@ namespace netmockery
             Process.Start(diffTool, $"\"{expectedFilename}\" \"{actualFilename}\"");
         }
 
-
         public static void ViewScript(string[] commandArgs)
         {
             var scriptfile = commandArgs[0];
             Console.WriteLine(DynamicResponseCreatorBase.ExecuteIncludes(File.ReadAllText(scriptfile), Path.GetDirectoryName(scriptfile)));
         }
-
 
         public static void Dump(EndpointCollection endpointCollection)
         {
