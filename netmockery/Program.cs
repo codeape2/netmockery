@@ -83,8 +83,8 @@ namespace netmockery
             builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddSingleton(serviceProvider => new ResponseRegistry());
-            builder.Services.AddTransient(serviceProvider => new EndpointCollectionProvider(endpointCollectionDirectory));
-            builder.Services.AddTransient(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
+            builder.Services.AddSingleton(serviceProvider => new EndpointCollectionProvider(endpointCollectionDirectory));
+            builder.Services.AddSingleton(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
             var app = builder.Build();
 
             new Startup().Configure(app);
