@@ -12,7 +12,7 @@ namespace netmockery
         public const int COMMAND_DUMP = 4;
         public const int COMMAND_DUMPREFS = 5;
 
-        private const string VALUE_SWITCH_URL = "--url";
+        private const string VALUE_SWITCH_URLS = "--urls";
         private const string VALUE_SWITCH_ONLY = "--only";
 
         private const string BOOL_SWITCH_SHOWRESPONSE = "--showResponse";
@@ -21,12 +21,12 @@ namespace netmockery
         private const string BOOL_SWITCH_DIFF = "--diff";
         private const string BOOL_SWITCH_LIST = "--list";
 
-        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY };
+        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY };
         static private string[] BOOL_SWITCHES = new[] { BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_NOTESTMODE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST };
 
         static private Dictionary<int, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<int, string[]> {
-            { COMMAND_NORMAL, new[] { VALUE_SWITCH_URL, BOOL_SWITCH_NOTESTMODE } },
-            { COMMAND_TEST, new[] { VALUE_SWITCH_URL, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
+            { COMMAND_NORMAL, new[] { VALUE_SWITCH_URLS, BOOL_SWITCH_NOTESTMODE } },
+            { COMMAND_TEST, new[] { VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
             { COMMAND_DUMP, new string[0] },
             { COMMAND_DUMPREFS, new string[0] }
         };
@@ -128,7 +128,7 @@ namespace netmockery
                 Command = command,
                 EndpointCollectionDirectory = positionalArgs.ElementAt(0),
 
-                Url = switchValues[VALUE_SWITCH_URL],
+                Urls = switchValues[VALUE_SWITCH_URLS],
                 Only = switchValues[VALUE_SWITCH_ONLY],
 
                 ShowResponse = boolValues[BOOL_SWITCH_SHOWRESPONSE],
@@ -152,7 +152,7 @@ namespace netmockery
         public int Command;
         public string EndpointCollectionDirectory;
 
-        public string Url;
+        public string Urls;
         public string Only;
 
         public bool ShowResponse;

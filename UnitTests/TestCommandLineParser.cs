@@ -20,7 +20,7 @@ namespace UnitTests
 
             Assert.Equal(COMMAND_NORMAL, result.Command);
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Null(result.Url);
+            Assert.Null(result.Urls);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace UnitTests
             var result = ParseArguments(new[] { "c:\\dir\\foo", "--url", "http://*:5000" });
             Assert.Equal(COMMAND_NORMAL, result.Command);
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
-            Assert.Equal("http://*:5000", result.Url);
+            Assert.Equal("http://*:5000", result.Urls);
         }
 
         [Fact]
