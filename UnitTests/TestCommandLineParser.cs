@@ -36,7 +36,7 @@ namespace UnitTests
         [Fact]
         public void NormalExecutionCanHaveUrl()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "--url", "http://*:5000" });
+            var result = ParseArguments(new[] { "c:\\dir\\foo", "--urls", "http://*:5000" });
             Assert.Equal(COMMAND_NORMAL, result.Command);
             Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
             Assert.Equal("http://*:5000", result.Urls);
@@ -95,7 +95,7 @@ namespace UnitTests
         public void InvalidArgumentsForDumpCommand()
         {
             AssertGivesException("'--only' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--only", "2" });
-            AssertGivesException("'--url' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--url", "http://localhost:5000/" });
+            AssertGivesException("'--urls' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--urls", "http://localhost:5000/" });
         }
 
         [Fact]
