@@ -2,11 +2,11 @@
 
 Command line:
 ``` bash
-    # Netmockery starts and listens on default port
-    dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory
-    
-    # Netmockery starts and listens on given port
-    dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory --urls http://*:9876
+# Netmockery starts and listens on default port
+dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory
+
+# Netmockery starts and listens on given port
+dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory --urls http://*:9876
 ```
 
 
