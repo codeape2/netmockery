@@ -57,14 +57,12 @@ namespace netmockery
         {
              //TODO: Only create script object if source has changed
              Debug.Assert(requestInfo != null);
- 
-             var scriptOptions = ScriptOptions.Default.WithReferences(
-                 GetDefaultMetadataReferences().ToArray()
-             );
- 
+
              var script = CSharpScript.Create<string>(
-                 GetSourceCodeWithIncludesExecuted(),
-                 scriptOptions,
+                 code: GetSourceCodeWithIncludesExecuted(),
+                 options: ScriptOptions.Default
+                     .WithReferences(GetDefaultMetadataReferences().ToArray())
+                     .WithEmitDebugInformation(true),
                  globalsType: typeof(RequestInfo)
              );
              var result = await script.RunAsync(globals: requestInfo);
@@ -92,7 +90,6 @@ namespace netmockery
                 "#include \"(.*?)\"",
                 mo => File.ReadAllText(Path.GetFullPath(Path.Combine(directory, mo.Groups[1].Value)))
             );
-
         }
 
         public abstract string SourceCode { get; }

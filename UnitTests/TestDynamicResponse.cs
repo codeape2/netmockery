@@ -76,7 +76,6 @@ namespace UnitTests
             Assert.Equal("5", await EvalAsync(code));
         }
 
-
         [Fact]
         public async Task RuntimeErrorsAreThrown()
         {
@@ -84,6 +83,15 @@ namespace UnitTests
                 () => EvalAsync("var i = 0; (4 / i).ToString()")
             );
             Assert.NotNull(ex);
+        }
+
+        [Fact]
+        public async Task RuntimeErrorsIncludeLineNumber()
+        {
+            var ex = await Assert.ThrowsAsync<DivideByZeroException>(
+                () => EvalAsync("var i = 0; (4 / i).ToString()")
+            );
+            Assert.Contains("in :line 1", ex.StackTrace);
         }
 
         [Fact]
