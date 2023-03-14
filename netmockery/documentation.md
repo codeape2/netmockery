@@ -415,7 +415,7 @@ Command line:
     netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N
 
     # execute request specified by test N, but display respons (do not check test expectations)
-    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N --showResponse
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N --showresponse
 
 ## Handling time when testing
 

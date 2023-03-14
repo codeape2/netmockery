@@ -17,11 +17,11 @@ namespace netmockery
         private const string VALUE_SWITCH_URLS = "--urls";
         private const string VALUE_SWITCH_ONLY = "--only";
 
-        private const string VALUE_UT_SWITCH_ENVIRONMENT = "--ENVIRONMENT";
-        private const string VALUE_UT_SWITCH_CONTENTROOT = "--contentRoot";
-        private const string VALUE_UT_SWITCH_APPLICATIONNAME = "--applicationName";
+        private const string VALUE_UT_SWITCH_ENVIRONMENT = "--environment";
+        private const string VALUE_UT_SWITCH_CONTENTROOT = "--contentroot";
+        private const string VALUE_UT_SWITCH_APPLICATIONNAME = "--applicationname";
 
-        private const string BOOL_SWITCH_SHOWRESPONSE = "--showResponse";
+        private const string BOOL_SWITCH_SHOWRESPONSE = "--showresponse";
         private const string BOOL_SWITCH_NOTESTMODE = "--notestmode";
         private const string BOOL_SWITCH_STOP = "--stop";
         private const string BOOL_SWITCH_DIFF = "--diff";
@@ -44,7 +44,7 @@ namespace netmockery
             // Technical debt to support multiple arg input formats, should refactor argument parsing to something standard like System.CommandLine
             // key=value is converted to [key, value]
             args = args
-                .Select(arg => arg.Split("="))
+                .Select(arg => arg.ToLower().Split("="))
                 .SelectMany(args => args)
                 .ToList()
                 .ToArray();

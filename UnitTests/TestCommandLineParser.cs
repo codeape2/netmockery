@@ -18,6 +18,14 @@ namespace UnitTests
         }
 
         [Fact]
+        public void WebCommandWithVaryingCasing()
+        {
+            var result = ParseArguments(new[] { "--COMMAND", "web", "--EndPoints", "c:\\dir\\foo" });
+            Assert.Equal(COMMAND_WEB, result.Command);
+            Assert.Equal("c:\\dir\\foo", result.Endpoints);
+        }
+
+        [Fact]
         public void WebCommandNoTestMode()
         {
             var result = ParseArguments(new[] { "--command", "web", "--endpoints", "c:\\dir\\foo", "--notestmode" });
@@ -66,7 +74,7 @@ namespace UnitTests
         [Fact]
         public void TestCommandWithOptions()
         {
-            var result = ParseArguments(new[] { "--command", "test", "--endpoints", "c:\\dir\\foo", "--only", "1", "--showResponse" });
+            var result = ParseArguments(new[] { "--command", "test", "--endpoints", "c:\\dir\\foo", "--only", "1", "--showresponse" });
             Assert.Equal(COMMAND_TEST, result.Command);
             Assert.Equal("1", result.Only);
             Assert.True(result.ShowResponse);

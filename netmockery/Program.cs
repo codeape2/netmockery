@@ -16,17 +16,10 @@ namespace netmockery
     {
         public static void Main(string[] args)
         {
-            var source = new CancellationTokenSource();
-            Console.CancelKeyPress += (s, e) =>
-            {
-                e.Cancel = true;
-                source.Cancel();
-            };
-
-            MainAsync(args, source.Token).GetAwaiter().GetResult();
+            MainAsync(args).GetAwaiter().GetResult();
         }
 
-        public static async Task MainAsync(string[] args, CancellationToken token)
+        public static async Task MainAsync(string[] args)
         {
             ParsedCommandLine parsedArguments;
             try
