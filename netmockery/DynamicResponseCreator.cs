@@ -39,6 +39,7 @@ namespace netmockery
 
         public static IEnumerable<MetadataReference> GetDefaultMetadataReferences() 
         {
+            yield return MetadataReference.CreateFromFile(typeof(System.Console).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(System.Xml.XmlNamespaceManager).GetTypeInfo().Assembly.Location);
@@ -55,18 +56,23 @@ namespace netmockery
         
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
-             //TODO: Only create script object if source has changed
-             Debug.Assert(requestInfo != null);
+            // TODO: Only create script object if source has changed
+            // Read more: https://github.com/dotnet/roslyn/issues/22219
 
-             var script = CSharpScript.Create<string>(
-                 code: GetSourceCodeWithIncludesExecuted(),
-                 options: ScriptOptions.Default
-                     .WithReferences(GetDefaultMetadataReferences().ToArray())
-                     .WithEmitDebugInformation(true),
-                 globalsType: typeof(RequestInfo)
-             );
-             var result = await script.RunAsync(globals: requestInfo);
-             return result.ReturnValue;
+            Debug.Assert(requestInfo != null);
+
+            var script = CSharpScript.Create<string>(
+                code: GetSourceCodeWithIncludesExecuted(),
+                options: ScriptOptions.Default
+                    .WithReferences(GetDefaultMetadataReferences().ToArray())
+                    .WithEmitDebugInformation(true),
+                globalsType: typeof(RequestInfo)
+            );
+
+            var runner = script.CreateDelegate();
+            var result = await runner(requestInfo);
+            GC.Collect();
+            return result;
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
