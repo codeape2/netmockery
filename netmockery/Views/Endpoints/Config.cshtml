@@ -16,11 +16,6 @@
     @Html.ActionLink("Reload Configuration", "ReloadConfig", routeValues: null, htmlAttributes: new { @class = "btn btn-default" })
 </p>
 
-<h2>Version</h2>
-<p>
-    Netmockery @netmockeryVersion
-</p>
-
 <h2>Reload History</h2>
 <p>
     <ul>
@@ -30,6 +25,11 @@
         }
         <li>Current time: @now</li>
     </ul>
+</p>
+
+<h2>Version</h2>
+<p>
+    Netmockery @netmockeryVersion
 </p>
 
 <h2>Default script references</h2>
