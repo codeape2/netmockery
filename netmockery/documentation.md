@@ -1,18 +1,14 @@
 ﻿# Running netmockery
 
 Command line:
+``` bash
+    # Netmockery starts and listens on default port
+    dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory
+    
+    # Netmockery starts and listens on given port
+    dotnet netmockery.dll --command web --endpoints p:\ath\to\endpoint\directory --urls http://*:9876
+```
 
-    dotnet run --project p:\ath\to\endpoint\directory
-
-Command line:
-
-    dotnet netmockery.dll p:\ath\to\endpoint\directory
-
-Netmockery starts and listens on ``localhost`` port ``5000``.
-
-To bind to another address/port, use the ``--urls`` command line parameter. The command below binds netmockery to all network interfaces using port 9876.
-
-    netmockery.exe p:\ath\to\endpoint\directory --urls http://*:9876
 
 # Configuring netmockery
 
@@ -413,13 +409,13 @@ TODO: Document test modes (network and internal).
 Command line:
 
     # run all tests
-    netmockery.exe p:\ath\to\endpoint\directory test
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory
 
     # run single test, numeric parameter N specifies which test (first test is test 0 (zero))
-    netmockery.exe p:\ath\to\endpoint\directory test --only N
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N
 
     # execute request specified by test N, but display respons (do not check test expectations)
-    netmockery.exe p:\ath\to\endpoint\directory test --only N --showResponse
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N --showResponse
 
 ## Handling time when testing
 

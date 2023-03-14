@@ -39,25 +39,24 @@ namespace netmockery
                 return;
             }            
 
-            if (!Directory.Exists(parsedArguments.EndpointCollectionDirectory))
+            if (!Directory.Exists(parsedArguments.Endpoints))
             {
                 Console.Error.WriteLine("Directory not found");
                 return;
             }
             
-            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.EndpointCollectionDirectory);
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.Endpoints);
 
             switch (parsedArguments.Command)
             {
-                case CommandLineParser.COMMAND_NORMAL:
+                case CommandLineParser.COMMAND_WEB:
                     if (endpointCollection.Endpoints.Count() == 0)
                     {
-                        Console.Error.WriteLine("No endpoints found");
-                        return;
+                        Console.WriteLine("No endpoints found");
                     }
                     Console.WriteLine("Admin interface available on /__netmockery");
                     Startup.TestMode = parsedArguments.TestMode;
-                    BuildWebApplication(parsedArguments.EndpointCollectionDirectory, args).Run();
+                    BuildWebApplication(parsedArguments.Endpoints, args).Run();
                     break;
 
                 case CommandLineParser.COMMAND_TEST:
@@ -80,19 +79,15 @@ namespace netmockery
 
         public static WebApplication BuildWebApplication(string endpointCollectionDirectory, string[] args)
         {
-            var endpointCollectionProvider = new EndpointCollectionProvider(endpointCollectionDirectory);
-            var responseRegistry = new ResponseRegistry();
-
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            builder.Services.AddTransient(typeof(ResponseRegistry), serviceProvider => responseRegistry);
-            builder.Services.AddTransient(serviceProvider => endpointCollectionProvider);
-            builder.Services.AddTransient<EndpointCollection>(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
+            builder.Services.AddSingleton(serviceProvider => new ResponseRegistry());
+            builder.Services.AddTransient(serviceProvider => new EndpointCollectionProvider(endpointCollectionDirectory));
+            builder.Services.AddTransient(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
             var app = builder.Build();
 
-            var startup = new Startup(endpointCollectionProvider, responseRegistry);
-            startup.Configure(app);
+            new Startup().Configure(app);
 
             return app;
         }

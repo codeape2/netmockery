@@ -7,13 +7,19 @@ namespace netmockery
 {
     static public class CommandLineParser
     {
-        public const int COMMAND_NORMAL = 1;
-        public const int COMMAND_TEST = 3;
-        public const int COMMAND_DUMP = 4;
-        public const int COMMAND_DUMPREFS = 5;
+        public const string COMMAND_WEB = "web";
+        public const string COMMAND_TEST = "test";
+        public const string COMMAND_DUMP = "dump";
+        public const string COMMAND_DUMPREFS = "dumprefs";
 
+        private const string VALUE_SWITCH_COMMAND = "--command";
+        private const string VALUE_SWITCH_ENDPOINTS = "--endpoints";
         private const string VALUE_SWITCH_URLS = "--urls";
         private const string VALUE_SWITCH_ONLY = "--only";
+
+        private const string VALUE_UT_SWITCH_ENVIRONMENT = "--ENVIRONMENT";
+        private const string VALUE_UT_SWITCH_CONTENTROOT = "--contentRoot";
+        private const string VALUE_UT_SWITCH_APPLICATIONNAME = "--applicationName";
 
         private const string BOOL_SWITCH_SHOWRESPONSE = "--showResponse";
         private const string BOOL_SWITCH_NOTESTMODE = "--notestmode";
@@ -21,19 +27,29 @@ namespace netmockery
         private const string BOOL_SWITCH_DIFF = "--diff";
         private const string BOOL_SWITCH_LIST = "--list";
 
-        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY };
+        static private string[] COMMAND_VALUES = new[] { COMMAND_WEB, COMMAND_TEST, COMMAND_DUMP, COMMAND_DUMPREFS };
+        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME };
         static private string[] BOOL_SWITCHES = new[] { BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_NOTESTMODE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST };
 
-        static private Dictionary<int, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<int, string[]> {
-            { COMMAND_NORMAL, new[] { VALUE_SWITCH_URLS, BOOL_SWITCH_NOTESTMODE } },
-            { COMMAND_TEST, new[] { VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
-            { COMMAND_DUMP, new string[0] },
-            { COMMAND_DUMPREFS, new string[0] }
+        static private Dictionary<string, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<string, string[]> {
+
+            { COMMAND_WEB, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, BOOL_SWITCH_NOTESTMODE, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME } },
+            { COMMAND_TEST, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
+            { COMMAND_DUMP, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS } },
+            { COMMAND_DUMPREFS, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS } }
         };
 
         static public ParsedCommandLine ParseArguments(string[] args)
         {
-            var positionalArgs = new List<string>();
+            // Technical debt to support multiple arg input formats, should refactor argument parsing to something standard like System.CommandLine
+            // key=value is converted to [key, value]
+            args = args
+                .Select(arg => arg.Split("="))
+                .SelectMany(args => args)
+                .ToList()
+                .ToArray();
+
+            // Parsing
             var seenSwitches = new List<string>();
             var switchValues = new Dictionary<string, string>();
             var boolValues = new Dictionary<string, bool>();
@@ -69,64 +85,35 @@ namespace netmockery
                 }
                 else
                 {
-                    positionalArgs.Add(arg);
+                    throw new CommandLineParsingException($"Positional arguments not supported, got '{arg}'");
                 }
                 i++;
             }
 
-            if (positionalArgs.Count == 0)
-            {
-                throw new CommandLineParsingException("No endpoint directory specified");
-            }
+            // Validation
+            if (switchValues[VALUE_SWITCH_COMMAND] == null)
+                throw new CommandLineParsingException($"Missing required switch {VALUE_SWITCH_COMMAND}");
+            if (switchValues[VALUE_SWITCH_ENDPOINTS] == null)
+                throw new CommandLineParsingException($"Missing required switch {VALUE_SWITCH_ENDPOINTS}");
 
-            if (positionalArgs.Count > 2)
-            {
-                throw new CommandLineParsingException($"Unexpected number ({positionalArgs.Count}) of positional arguments.");
-            }
-
-            Debug.Assert(positionalArgs.Count == 1 || positionalArgs.Count == 2);
+            var command = switchValues[VALUE_SWITCH_COMMAND];
             
-            var command = COMMAND_NORMAL;
-            if (positionalArgs.Count == 2)
-            {
-                switch (positionalArgs.ElementAt(1))
-                {
-                    case "test":
-                        command = COMMAND_TEST;
-                        break;
+            if (!COMMAND_VALUES.Contains(command))
+                throw new CommandLineParsingException($"Unknown command '{command}'");
 
-                    case "dump":
-                        command = COMMAND_DUMP;
-                        break;
-
-                    case "dumprefs":
-                        command = COMMAND_DUMPREFS;
-                        break;
-
-                    default:
-                        throw new CommandLineParsingException($"Unknown command '{positionalArgs.ElementAt(1)}'");
-                }
-            }
-
-            // validation
-            var validSwitchesForCommand = VALID_SWITHCES_BY_COMMAND[command];
             foreach (var seenSwitch in seenSwitches)
             {
-                if (! validSwitchesForCommand.Contains(seenSwitch))
+                if (!VALID_SWITHCES_BY_COMMAND[command].Contains(seenSwitch))
                 {
-                    var message = $"'{seenSwitch}' is not a valid argument";
-                    if (command != COMMAND_NORMAL)
-                    {
-                        message += $" for the '{positionalArgs.ElementAt(1)}' command";
-                    }
-                    throw new CommandLineParsingException(message);
+                    throw new CommandLineParsingException($"'{seenSwitch}' is not a valid argument for the '{command}' command");
                 }
             }
 
+            // Return
             return new ParsedCommandLine
             {
                 Command = command,
-                EndpointCollectionDirectory = positionalArgs.ElementAt(0),
+                Endpoints = switchValues[VALUE_SWITCH_ENDPOINTS],
 
                 Urls = switchValues[VALUE_SWITCH_URLS],
                 Only = switchValues[VALUE_SWITCH_ONLY],
@@ -149,8 +136,8 @@ namespace netmockery
 
     public class ParsedCommandLine
     {
-        public int Command;
-        public string EndpointCollectionDirectory;
+        public string Command;
+        public string Endpoints;
 
         public string Urls;
         public string Only;

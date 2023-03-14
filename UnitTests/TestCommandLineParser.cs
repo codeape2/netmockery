@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using netmockery;
+﻿using netmockery;
 using Xunit;
 
 using static netmockery.CommandLineParser;
-
 
 
 namespace UnitTests
@@ -14,50 +9,55 @@ namespace UnitTests
     public class TestCommandLineParser
     {
         [Fact]
-        public void ParsesWithNoCommand()
+        public void WebCommand()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo" });
-
-            Assert.Equal(COMMAND_NORMAL, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
+            var result = ParseArguments(new[] { "--command", "web", "--endpoints", "c:\\dir\\foo" });
+            Assert.Equal(COMMAND_WEB, result.Command);
+            Assert.Equal("c:\\dir\\foo", result.Endpoints);
             Assert.Null(result.Urls);
         }
 
         [Fact]
-        public void NormalNoTestMode()
+        public void WebCommandNoTestMode()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "--notestmode" });
-            Assert.Equal(COMMAND_NORMAL, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
+            var result = ParseArguments(new[] { "--command", "web", "--endpoints", "c:\\dir\\foo", "--notestmode" });
+            Assert.Equal(COMMAND_WEB, result.Command);
+            Assert.Equal("c:\\dir\\foo", result.Endpoints);
             Assert.True(result.NoTestMode);
 
         }
 
         [Fact]
-        public void NormalExecutionCanHaveUrl()
+        public void WebCommandWithUrls()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "--urls", "http://*:5000" });
-            Assert.Equal(COMMAND_NORMAL, result.Command);
-            Assert.Equal("c:\\dir\\foo", result.EndpointCollectionDirectory);
+            var result = ParseArguments(new[] { "--command", "web", "--endpoints", "c:\\dir\\foo", "--urls", "http://*:5000" });
+            Assert.Equal(COMMAND_WEB, result.Command);
+            Assert.Equal("c:\\dir\\foo", result.Endpoints);
             Assert.Equal("http://*:5000", result.Urls);
         }
 
         [Fact]
-        public void MissingEndpointDirectoryGivesError()
+        public void MissingCommand()
         {
-            AssertGivesException("No endpoint directory specified", new string[0]);
+            AssertGivesException("Missing required switch --command", new[] { "--endpoints", "c:\\foo\\bar" });
         }
 
         [Fact]
         public void UnknownCommand()
         {
-            AssertGivesException("Unknown command 'foobar'", new[] { "c:\\foo\\bar", "foobar" });
+            AssertGivesException("Unknown command 'foobar'", new[] { "--command", "foobar", "--endpoints", "c:\\foo\\bar" });
+        }
+
+        [Fact]
+        public void MissingEndpoints()
+        {
+            AssertGivesException("Missing required switch --endpoints", new[] { "--command", "web" });
         }
 
         [Fact]
         public void TestCommand()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "test" });
+            var result = ParseArguments(new[] { "--command", "test", "--endpoints", "c:\\dir\\foo" });
             Assert.Equal(COMMAND_TEST, result.Command);
             Assert.False(result.ShowResponse);
             Assert.Null(result.Only);
@@ -66,7 +66,7 @@ namespace UnitTests
         [Fact]
         public void TestCommandWithOptions()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "test", "--only", "1", "--showResponse" });
+            var result = ParseArguments(new[] { "--command", "test", "--endpoints", "c:\\dir\\foo", "--only", "1", "--showResponse" });
             Assert.Equal(COMMAND_TEST, result.Command);
             Assert.Equal("1", result.Only);
             Assert.True(result.ShowResponse);
@@ -76,7 +76,7 @@ namespace UnitTests
         [Fact]
         public void TestWithStopOption()
         {
-            var result = ParseArguments(new[] { "c:\\dir\\foo", "test", "--stop" });
+            var result = ParseArguments(new[] { "--command", "test", "--endpoints", "c:\\dir\\foo", "--stop" });
             Assert.Equal(COMMAND_TEST, result.Command);
             Assert.Null(result.Only);
             Assert.False(result.ShowResponse);
@@ -86,22 +86,22 @@ namespace UnitTests
         [Fact]
         public void DumpCommand()
         {
-            var result = ParseArguments(new[] { "c:\\foo\\bar", "dump" });
+            var result = ParseArguments(new[] { "--command", "dump", "--endpoints", "c:\\foo\\bar" });
             Assert.Equal(COMMAND_DUMP, result.Command);
-            Assert.Equal("c:\\foo\\bar", result.EndpointCollectionDirectory);
+            Assert.Equal("c:\\foo\\bar", result.Endpoints);
         }
 
         [Fact]
         public void InvalidArgumentsForDumpCommand()
         {
-            AssertGivesException("'--only' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--only", "2" });
-            AssertGivesException("'--urls' is not a valid argument for the 'dump' command", new[] { "c:\\foo\\bar", "dump", "--urls", "http://localhost:5000/" });
+            AssertGivesException("'--only' is not a valid argument for the 'dump' command", new[] { "--command", "dump", "--endpoints", "c:\\foo\\bar", "--only", "2" });
+            AssertGivesException("'--urls' is not a valid argument for the 'dump' command", new[] { "--command", "dump", "--endpoints", "c:\\foo\\bar", "--urls", "http://localhost:5000/" });
         }
 
         [Fact]
-        public void InvalidArgumentsForNormalCommand()
+        public void InvalidArgumentsForWebCommand()
         {
-            AssertGivesException("'--only' is not a valid argument", new[] { "c:\\foo\\bar", "--only", "2" });
+            AssertGivesException("'--only' is not a valid argument for the 'web' command", new[] { "--command", "web", "--endpoints", "c:\\foo\\bar", "--only", "2" });
         }
 
         private void AssertGivesException(string expectedMessage, string[] args)

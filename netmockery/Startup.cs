@@ -6,23 +6,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Text;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace netmockery
 {
     public class Startup
     {
-        private ResponseRegistry _responseRegistry;
-        private EndpointCollectionProvider _endpointCollectionProvider;
         static public bool TestMode { get; set; } = false;
-
-        public Startup(EndpointCollectionProvider endpointCollectionProvider, ResponseRegistry responseRegistry)
-        {
-            _endpointCollectionProvider = endpointCollectionProvider;
-            _responseRegistry = responseRegistry;
-        }
 
         public void Configure(IApplicationBuilder app)
         {
+            var responseRegistry = app.ApplicationServices.GetService<ResponseRegistry>();
+            var endpointCollectionProvider = app.ApplicationServices.GetService<EndpointCollectionProvider>();
+
             app.UseDeveloperExceptionPage();
             app.UseMvc(
                 routes => routes.MapRoute(
@@ -46,12 +42,12 @@ namespace netmockery
                 }
                 else
                 {
-                    await HandleRequest(context, requestBody, requestBodyBytes);
+                    await HandleRequest(responseRegistry, endpointCollectionProvider, context, requestBody, requestBodyBytes);
                 }
             });
         }
 
-        public async Task HandleRequest(HttpContext context, string requestBody, byte[] requestBodyBytes)
+        public async Task HandleRequest(ResponseRegistry responseRegistry, EndpointCollectionProvider ecp, HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
             Debug.Assert(context != null);
             var responseRegistryItem = new ResponseRegistryItem
@@ -66,7 +62,7 @@ namespace netmockery
 
             try
             {
-                await HandleRequestInner(responseRegistryItem, context, requestBody, requestBodyBytes);
+                await HandleRequestInner(responseRegistry, ecp, responseRegistryItem, context, requestBody, requestBodyBytes);
             }
             catch (Exception e)
             {
@@ -74,7 +70,7 @@ namespace netmockery
                 responseRegistryItem.Error = e.ToString();
                 if (! responseRegistryItem.HasBeenAddedToRegistry)
                 {
-                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                    responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                 }
                 context.Response.StatusCode = 500;
                 await context.Response.WriteAsync( "*********************\n");
@@ -90,11 +86,11 @@ namespace netmockery
 
         }
 
-        public async Task HandleRequestInner(ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
+        public async Task HandleRequestInner(ResponseRegistry responseRegistry, EndpointCollectionProvider ecp, ResponseRegistryItem responseRegistryItem, HttpContext context, string requestBody, byte[] requestBodyBytes)
         {
-            Debug.Assert(_endpointCollectionProvider != null);
+            Debug.Assert(ecp != null);
             Debug.Assert(responseRegistryItem != null);
-            var endpointCollection = _endpointCollectionProvider.EndpointCollection;
+            var endpointCollection = ecp.EndpointCollection;
             var endpoint = endpointCollection.Resolve(context.Request.Path.ToString());
             responseRegistryItem.Endpoint = endpoint;
             if (endpoint != null)
@@ -104,7 +100,7 @@ namespace netmockery
                 {
                     if (endpoint.RecordRequests)
                     {
-                        _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                        responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                     }                    
                     var responseCreator = matcher_and_creator.ResponseCreator;
 
@@ -128,13 +124,13 @@ namespace netmockery
                 }
                 else
                 {
-                    _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                    responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                     responseRegistryItem.Error = "Endpoint has no match for request";
                 }
             }
             else
             {
-                _responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
+                responseRegistry.AddAndWriteIncomingInfoToConsole(responseRegistryItem);
                 responseRegistryItem.Error = "No endpoint matches request path";
             }
         }
