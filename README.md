@@ -17,5 +17,5 @@ DEPLOYMENT PACKAGES
 ===================
 
 ```
-dotnet publish .\netmockery.sl
+dotnet publish .\netmockery.sln
 ```
