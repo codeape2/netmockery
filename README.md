@@ -23,21 +23,21 @@ RUNNING
 
 Run from code with watch
 ```
-dotnet watch run --project .\netmockery\netmockery.csproj --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
+dotnet watch run --project .\netmockery\netmockery.csproj --command web --endpoints [YourEndpointFilesPath] --urls http://localhost:9876
 ```
 
 Run published .dll
 ```
 dotnet publish .\netmockery.sln
 
-dotnet .\netmockery\bin\Debug\net6.0\publish\netmockery.dll --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
+dotnet .\netmockery\bin\Debug\net6.0\publish\netmockery.dll --command web --endpoints [YourEndpointFilesPath] --urls http://localhost:9876
 ```
 
 Run published .exe
 ```
 dotnet publish .\netmockery.sln
 
-.\netmockery\bin\Debug\net6.0\publish\netmockery.exe --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
+.\netmockery\bin\Debug\net6.0\publish\netmockery.exe --command web --endpoints [YourEndpointFilesPath] --urls http://localhost:9876
 ```
 
 
