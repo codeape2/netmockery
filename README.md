@@ -20,8 +20,24 @@ docker run --rm -v ${PWD}\:/mnt/repo/ -w /mnt/repo mcr.microsoft.com/dotnet/sdk:
 
 RUNNING
 ====================
+
+Run from code with watch
 ```
-dotnet run --project .\netmockery\netmockery.csproj --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://*:9876
+dotnet watch run --project .\netmockery\netmockery.csproj --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
+```
+
+Run published .dll
+```
+dotnet publish .\netmockery.sln
+
+dotnet .\netmockery\bin\Debug\net6.0\publish\netmockery.dll --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
+```
+
+Run published .exe
+```
+dotnet publish .\netmockery.sln
+
+.\netmockery\bin\Debug\net6.0\publish\netmockery.exe --command web --endpoints C:\Projects\NHN\Helsenorge\Test\netmockery_config\helsenorge_endpoints --urls http://localhost:9876
 ```
 
 

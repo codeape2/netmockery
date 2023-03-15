@@ -7,7 +7,7 @@
     <FileVersion>0.11.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <Content Update="wwwroot\*" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
     <Content Include="documentation.md" CopyToPublishDirectory="Always" CopyToOutputDirectory="Always" />
   </ItemGroup>
   <ItemGroup>

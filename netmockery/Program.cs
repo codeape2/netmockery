@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace netmockery
@@ -72,7 +71,11 @@ namespace netmockery
 
         public static WebApplication BuildWebApplication(string endpointCollectionDirectory, string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            {
+                Args = args,
+                ContentRootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+            });
             builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddSingleton(serviceProvider => new ResponseRegistry());
