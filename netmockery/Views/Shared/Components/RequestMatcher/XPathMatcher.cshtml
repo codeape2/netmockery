@@ -10,4 +10,4 @@ Evaluate XPath <code>@Model.XPathExpresssion</code> against request body
         <span>@Model.Prefixes[i] : @Model.Namespaces[i]</span><br>
     }
 }
-@Html.Partial("CommonRequestMatcher", Model)
+@await Html.PartialAsync("CommonRequestMatcher", Model)
