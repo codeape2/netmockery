@@ -27,7 +27,7 @@ namespace UnitTests
             var ep0 = endpointCollection.Get("Endpoint1");
             Assert.Equal("Endpoint1", ep0.Name);
             Assert.Equal("^/ep1/", ep0.PathRegex);
-            Assert.Equal(0, ep0.Responses.Count());
+            Assert.Empty(ep0.Responses);
             Assert.Equal(Path.Combine(dc.DirectoryName, "endpoint1"), ep0.Directory);
 
             var ep1 = endpointCollection.Get("foo");
@@ -54,7 +54,7 @@ namespace UnitTests
         public void CanLoadOK()
         {
             var endpointCollection = EndpointCollectionReader.ReadFromDirectory(dc.DirectoryName);
-            Assert.Equal(1, endpointCollection.Endpoints.Count());
+            Assert.Single(endpointCollection.Endpoints);
         }
 
         public void Dispose()

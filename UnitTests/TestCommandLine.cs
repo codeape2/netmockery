@@ -40,7 +40,7 @@ namespace UnitTests
         [Fact]
         public void OnlyNoMatch()
         {
-            Assert.Equal(0, Program.ParseOnlyArgument("foobar", NAMES).Length);
+            Assert.Empty(Program.ParseOnlyArgument("foobar", NAMES));
         }
     }
 }

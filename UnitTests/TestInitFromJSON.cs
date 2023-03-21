@@ -80,7 +80,7 @@ namespace UnitTests
             Assert.Equal(P("p:/ath/to/endpoint/directory/content.txt"), rc0.Filename);
             Assert.Equal("text/plain", rc0.ContentType);
             Assert.Equal(10, rc0.Delay);
-            Assert.Equal(0, rc0.Replacements.Length);
+            Assert.Empty(rc0.Replacements);
 
             var rm1 = responses[1].Item1 as AnyMatcher;
             var rc1 = responses[1].Item2 as FileDynamicResponseCreator;
@@ -100,7 +100,7 @@ namespace UnitTests
             var xpathMatcher = response.Item1 as XPathMatcher;
             Assert.NotNull(xpathMatcher);
             Assert.Equal("foo", xpathMatcher.XPathExpresssion);
-            Assert.Equal(1, xpathMatcher.Namespaces.Length);
+            Assert.Single(xpathMatcher.Namespaces);
             Assert.Equal("urn:foo", xpathMatcher.Namespaces[0]);
         }
 

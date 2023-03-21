@@ -100,13 +100,13 @@ namespace UnitTests
         public async Task NoError()
         {
             await CompileAndRunAsync(SOURCE_WITHOUT_ERROR);
-            Assert.Equal(1, stringList.Count);
+            Assert.Single(stringList);
             Assert.Equal("no errors", stringList[0]);
         }
 
         private Task CompileAndRunAsync(string sourceCode)
         {
-            Assert.Equal(0, stringList.Count);
+            Assert.Empty(stringList);
             return CSharpScript.RunAsync(sourceCode, globals: this);
         }
     }

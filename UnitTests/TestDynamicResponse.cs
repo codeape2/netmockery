@@ -254,8 +254,7 @@ return (eo != null).ToString();
             var endpoint = new Endpoint("foo", "bar");
             var responseCreator = new LiteralDynamicResponseCreator("ContentType = \"image/png\";", endpoint);
             var response = new TestableHttpResponse();
-            await Assert.ThrowsAsync(
-                typeof(ArgumentNullException),
+            await Assert.ThrowsAsync<ArgumentNullException>(
                 async () => await responseCreator.CreateResponseAsync(new TestableHttpRequest("/", null), new byte[0], response, endpoint)
             );
         }

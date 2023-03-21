@@ -48,7 +48,7 @@ namespace UnitTests
             var endpoint = new Endpoint("Mock service", "^/NHNPersonvern/");
             endpoint.Add(new AnyMatcher(), new LiteralResponse("foobar", new Endpoint("a", "b")));
 
-            Assert.Throws(typeof(ArgumentException), () => {
+            Assert.Throws<ArgumentException>(() => {
                 endpoint.Add(new RegexMatcher("foo"), new LiteralResponse("foobar", new Endpoint("a", "b")));
             });
         }
