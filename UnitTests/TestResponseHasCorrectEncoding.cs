@@ -12,8 +12,8 @@ namespace UnitTests
 {
     public class TestResponseHasCorrectEncoding : IDisposable
     {
-        private readonly DirectoryCreator _dc;
-        private readonly HttpClient _client;
+        DirectoryCreator _dc;
+        HttpClient _client;
 
         public TestResponseHasCorrectEncoding()
         {
