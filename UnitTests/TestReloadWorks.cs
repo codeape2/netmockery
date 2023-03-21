@@ -12,21 +12,21 @@ namespace UnitTests
 {
     public class TestReloadWorks : IDisposable
     {
-        DirectoryCreator _dc;
-        HttpClient _client;
+        DirectoryCreator dc;
+        HttpClient client;
 
         public TestReloadWorks()
         {
-            _dc = new DirectoryCreator();
-            _dc.AddFile(
+            dc = new DirectoryCreator();
+            dc.AddFile(
                 "endpoint1/endpoint.json",
                 JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("foobar", "myfile.txt"))
             );
-            _dc.AddFile("endpoint1/myfile.txt", "Hello world");
-            var ecp = new EndpointCollectionProvider(_dc.DirectoryName);
+            dc.AddFile("endpoint1/myfile.txt", "Hello world");
+            var ecp = new EndpointCollectionProvider(dc.DirectoryName);
 
             var factory = new CustomWebApplicationFactory<Program>(ecp);
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            client = factory.CreateClient(new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false,
             });
@@ -34,7 +34,7 @@ namespace UnitTests
 
         public void Dispose()
         {
-            _dc.Dispose();
+            dc.Dispose();
         }
 
         [Fact]
@@ -48,15 +48,15 @@ namespace UnitTests
         {
             Assert.Equal(new[] { "foobar" }, await GetEndpointNames());
 
-            _dc.AddFile(
+            dc.AddFile(
                 "endpoint2/endpoint.json",
                 JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("baz", "myfile.txt"))
             );
-            _dc.AddFile("endpoint2/myfile.txt", "Hello world");
+            dc.AddFile("endpoint2/myfile.txt", "Hello world");
 
             Assert.Equal(new[] { "foobar" }, await GetEndpointNames());
 
-            var response = await _client.GetAsync("/__netmockery/endpoints/reloadconfig");
+            var response = await client.GetAsync("/__netmockery/endpoints/reloadconfig");
             Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
 
             Assert.Equal(new[] { "baz", "foobar" }, await GetEndpointNames());
@@ -64,7 +64,7 @@ namespace UnitTests
 
         private async Task<string[]> GetEndpointNames()
         {
-            var response = await _client.GetAsync("/__netmockery/endpoints/endpointnames");
+            var response = await client.GetAsync("/__netmockery/endpoints/endpointnames");
             response.EnsureSuccessStatusCode();
             return (from arrayitem in JsonConvert.DeserializeObject<string[]>(await response.Content.ReadAsStringAsync()) orderby arrayitem select arrayitem).ToArray();
         }
