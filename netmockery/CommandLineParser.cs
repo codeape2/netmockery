@@ -103,12 +103,12 @@ namespace netmockery
         static private (Dictionary<string, string> StringSwitches, Dictionary<string, bool> BoolSwitches) ParseSwitches(string command, string[] args)
         {
             var seenSwitches = new List<string>();
-            var stringSwitch = new Dictionary<string, string>();
+            var stringSwitches = new Dictionary<string, string>();
             var boolSwitches = new Dictionary<string, bool>();
 
             foreach (var valueSwitch in VALUE_SWITCHES)
             {
-                stringSwitch[valueSwitch] = null;
+                stringSwitches[valueSwitch] = null;
             }
 
             foreach (var boolSwitch in BOOL_SWITCHES)
@@ -123,7 +123,7 @@ namespace netmockery
                 if (VALUE_SWITCHES.Contains(arg))
                 {
                     var value = args[++i];
-                    stringSwitch[arg] = value;
+                    stringSwitches[arg] = value;
                     seenSwitches.Add(arg);
                 }
                 else if (BOOL_SWITCHES.Contains(arg))
@@ -143,7 +143,7 @@ namespace netmockery
             }
 
             // Validation
-            if (stringSwitch[VALUE_SWITCH_ENDPOINTS] == null)
+            if (stringSwitches[VALUE_SWITCH_ENDPOINTS] == null)
                 throw new CommandLineParsingException($"Missing required switch {VALUE_SWITCH_ENDPOINTS}");
 
             foreach (var seenSwitch in seenSwitches)
@@ -154,7 +154,7 @@ namespace netmockery
                 }
             }
 
-            return (stringSwitch, boolSwitches);
+            return (stringSwitches, boolSwitches);
         }
     }
 
