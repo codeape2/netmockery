@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace netmockery
@@ -12,7 +11,6 @@ namespace netmockery
         public const string COMMAND_DUMP = "dump";
         public const string COMMAND_DUMPREFS = "dumprefs";
 
-        private const string VALUE_SWITCH_COMMAND = "--command";
         private const string VALUE_SWITCH_ENDPOINTS = "--endpoints";
         private const string VALUE_SWITCH_URLS = "--urls";
         private const string VALUE_SWITCH_ONLY = "--only";
@@ -27,20 +25,22 @@ namespace netmockery
         private const string BOOL_SWITCH_DIFF = "--diff";
         private const string BOOL_SWITCH_LIST = "--list";
 
-        static private string[] COMMAND_VALUES = new[] { COMMAND_WEB, COMMAND_TEST, COMMAND_DUMP, COMMAND_DUMPREFS };
-        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME };
+        static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME };
         static private string[] BOOL_SWITCHES = new[] { BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_NOTESTMODE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST };
 
         static private Dictionary<string, string[]> VALID_SWITHCES_BY_COMMAND = new Dictionary<string, string[]> {
 
-            { COMMAND_WEB, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, BOOL_SWITCH_NOTESTMODE, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME } },
-            { COMMAND_TEST, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
-            { COMMAND_DUMP, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS } },
-            { COMMAND_DUMPREFS, new[] { VALUE_SWITCH_COMMAND, VALUE_SWITCH_ENDPOINTS } }
+            { COMMAND_WEB, new[] { VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, BOOL_SWITCH_NOTESTMODE, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME } },
+            { COMMAND_TEST, new[] { VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST} },
+            { COMMAND_DUMP, new[] { VALUE_SWITCH_ENDPOINTS } },
+            { COMMAND_DUMPREFS, new[] { VALUE_SWITCH_ENDPOINTS } }
         };
 
         static public ParsedCommandLine ParseArguments(string[] args)
         {
+            if (args.Length == 0)
+                throw new CommandLineParsingException("No arguments");
+
             // Technical debt to support multiple arg input formats, should refactor argument parsing to something standard like System.CommandLine
             // key=value is converted to [key, value]
             args = args
@@ -50,18 +50,70 @@ namespace netmockery
                 .ToArray();
 
             // Parsing
+            (var command, args) = ParseCommand(args);
+            (var stringSwiches, var boolSwitches) = ParseSwitches(command, args);
+
+            // Return
+            return new ParsedCommandLine
+            {
+                Command = command,
+                Endpoints = stringSwiches[VALUE_SWITCH_ENDPOINTS],
+
+                Urls = stringSwiches[VALUE_SWITCH_URLS],
+                Only = stringSwiches[VALUE_SWITCH_ONLY],
+
+                ShowResponse = boolSwitches[BOOL_SWITCH_SHOWRESPONSE],
+                NoTestMode = boolSwitches[BOOL_SWITCH_NOTESTMODE],
+                Stop = boolSwitches[BOOL_SWITCH_STOP],
+                Diff = boolSwitches[BOOL_SWITCH_DIFF],
+                List = boolSwitches[BOOL_SWITCH_LIST]
+            };
+        }
+
+        static private (string Command, string[] RemaingArgs) ParseCommand(string[] args)
+        {
+            string first = args.First();
+
+            if (first == COMMAND_WEB)
+            {
+                return (COMMAND_WEB, args.Skip(1).ToArray());
+            }
+            else if (first == COMMAND_TEST)
+            {
+                return (COMMAND_TEST, args.Skip(1).ToArray());
+            }
+            else if (first == COMMAND_DUMP)
+            {
+                return (COMMAND_DUMP, args.Skip(1).ToArray());
+            }
+            else if (first == COMMAND_DUMPREFS)
+            {
+                return (COMMAND_DUMPREFS, args.Skip(1).ToArray());
+            }
+            else if (!first.StartsWith("--"))
+            {
+                throw new CommandLineParsingException($"Unknown command '{first}'");
+            }
+            else
+            {
+                return (COMMAND_WEB, args.ToArray());
+            }
+        }
+
+        static private (Dictionary<string, string> StringSwitches, Dictionary<string, bool> BoolSwitches) ParseSwitches(string command, string[] args)
+        {
             var seenSwitches = new List<string>();
-            var switchValues = new Dictionary<string, string>();
-            var boolValues = new Dictionary<string, bool>();
+            var stringSwitch = new Dictionary<string, string>();
+            var boolSwitches = new Dictionary<string, bool>();
 
             foreach (var valueSwitch in VALUE_SWITCHES)
             {
-                switchValues[valueSwitch] = null;
+                stringSwitch[valueSwitch] = null;
             }
 
             foreach (var boolSwitch in BOOL_SWITCHES)
             {
-                boolValues[boolSwitch] = false;
+                boolSwitches[boolSwitch] = false;
             }
 
             var i = 0;
@@ -71,12 +123,12 @@ namespace netmockery
                 if (VALUE_SWITCHES.Contains(arg))
                 {
                     var value = args[++i];
-                    switchValues[arg] = value;
+                    stringSwitch[arg] = value;
                     seenSwitches.Add(arg);
                 }
                 else if (BOOL_SWITCHES.Contains(arg))
                 {
-                    boolValues[arg] = true;
+                    boolSwitches[arg] = true;
                     seenSwitches.Add(arg);
                 }
                 else if (arg.StartsWith("--"))
@@ -91,15 +143,8 @@ namespace netmockery
             }
 
             // Validation
-            if (switchValues[VALUE_SWITCH_COMMAND] == null)
-                throw new CommandLineParsingException($"Missing required switch {VALUE_SWITCH_COMMAND}");
-            if (switchValues[VALUE_SWITCH_ENDPOINTS] == null)
+            if (stringSwitch[VALUE_SWITCH_ENDPOINTS] == null)
                 throw new CommandLineParsingException($"Missing required switch {VALUE_SWITCH_ENDPOINTS}");
-
-            var command = switchValues[VALUE_SWITCH_COMMAND];
-            
-            if (!COMMAND_VALUES.Contains(command))
-                throw new CommandLineParsingException($"Unknown command '{command}'");
 
             foreach (var seenSwitch in seenSwitches)
             {
@@ -109,21 +154,7 @@ namespace netmockery
                 }
             }
 
-            // Return
-            return new ParsedCommandLine
-            {
-                Command = command,
-                Endpoints = switchValues[VALUE_SWITCH_ENDPOINTS],
-
-                Urls = switchValues[VALUE_SWITCH_URLS],
-                Only = switchValues[VALUE_SWITCH_ONLY],
-
-                ShowResponse = boolValues[BOOL_SWITCH_SHOWRESPONSE],
-                NoTestMode = boolValues[BOOL_SWITCH_NOTESTMODE],
-                Stop = boolValues[BOOL_SWITCH_STOP],
-                Diff = boolValues[BOOL_SWITCH_DIFF],
-                List = boolValues[BOOL_SWITCH_LIST]
-            };
+            return (stringSwitch, boolSwitches);
         }
     }
 

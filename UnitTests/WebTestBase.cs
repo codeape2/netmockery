@@ -17,7 +17,6 @@ namespace UnitTests
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            builder.UseSetting("command", "web");
             builder.UseSetting("endpoints", ".."); // EndpointCollectionProvider is mocked anyway
 
             builder.ConfigureServices(services =>
