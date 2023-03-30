@@ -1,74 +1,25 @@
-﻿using Microsoft.AspNetCore.Hosting;
-#if NET462
-using Microsoft.AspNetCore.Hosting.WindowsServices;
-#endif
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using static System.Console;
 
 namespace netmockery
 {
     public class Program
     {
-        public static IWebHost CreateWebHost(string endpointCollectionDirectory, string contentRoot, string url)
-        {
-            var endpointCollectionProvider = new EndpointCollectionProvider(endpointCollectionDirectory);
-            Action<IServiceCollection> initialSvcConfig = (IServiceCollection serviceCollection) =>
-            {
-                serviceCollection.AddTransient(serviceProvider => endpointCollectionProvider);
-            };
-            var webhostbuilder = new WebHostBuilder()
-                .ConfigureServices(initialSvcConfig)
-                .UseKestrel()
-                .UseContentRoot(contentRoot);
-            if (url != null)
-            {
-                webhostbuilder = webhostbuilder.UseUrls(url);
-            }
-
-            return webhostbuilder
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build();
-        }
-
-        private static void SetUtf8OutputEncodingIfOutputIsRedirected()
-        {
-            if (IsOutputRedirected)
-            {
-                OutputEncoding = Encoding.UTF8;
-            }
-        }
-
         public static void Main(string[] args)
         {
-            var source = new CancellationTokenSource();
-            CancelKeyPress += (s, e) =>
-            {
-                e.Cancel = true;
-                source.Cancel();
-            };
-
-            MainAsync(args, source.Token).GetAwaiter().GetResult();
+            MainAsync(args).GetAwaiter().GetResult();
         }
 
-        public static async Task MainAsync(string[] args, CancellationToken token)
+        public static async Task MainAsync(string[] args)
         {
-            WriteLine($"Netmockery v {NetmockeryVersion} ({FrameworkVersion})");
-
-#if NET462
-            System.Net.ServicePointManager.ServerCertificateValidationCallback =
-                ((sender, certificate, chain, sslPolicyErrors) => true);
-#endif
             ParsedCommandLine parsedArguments;
             try
             {
@@ -76,38 +27,28 @@ namespace netmockery
             }
             catch (CommandLineParsingException clpe)
             {
-                Error.WriteLine($"ERROR: {clpe.Message}");
+                Console.Error.WriteLine($"ERROR: {clpe.Message}");
                 return;
             }            
 
-            if (!Directory.Exists(parsedArguments.EndpointCollectionDirectory))
+            if (!Directory.Exists(parsedArguments.Endpoints))
             {
-                Error.WriteLine("Directory not found");
+                Console.Error.WriteLine("Directory not found");
                 return;
             }
             
-            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.EndpointCollectionDirectory);
-
-            if (parsedArguments.Command != CommandLineParser.COMMAND_SERVICE)
-            {
-                SetUtf8OutputEncodingIfOutputIsRedirected();
-            }
+            var endpointCollection = EndpointCollectionReader.ReadFromDirectory(parsedArguments.Endpoints);
 
             switch (parsedArguments.Command)
             {
-                case CommandLineParser.COMMAND_NORMAL:
+                case CommandLineParser.COMMAND_WEB:
                     if (endpointCollection.Endpoints.Count() == 0)
                     {
-                        Error.WriteLine("No endpoints found");
-                        return;
+                        Console.WriteLine("No endpoints found");
                     }
-                    WriteLine("Admin interface available on /__netmockery");
+                    Console.WriteLine("Admin interface available on /__netmockery");
                     Startup.TestMode = parsedArguments.TestMode;
-                    CreateWebHost(parsedArguments.EndpointCollectionDirectory, Directory.GetCurrentDirectory(), parsedArguments.Url).Run();
-                    break;
-
-                case CommandLineParser.COMMAND_SERVICE:
-                    RunAsService(parsedArguments);
+                    BuildWebApplication(parsedArguments.Endpoints, args).Run();
                     break;
 
                 case CommandLineParser.COMMAND_TEST:
@@ -128,42 +69,47 @@ namespace netmockery
               }
         }
 
-        static public void RunAsService(ParsedCommandLine commandArgs)
+        public static WebApplication BuildWebApplication(string endpointCollectionDirectory, string[] args)
         {
-#if NET462
-            CreateWebHost(commandArgs.EndpointCollectionDirectory, AppDomain.CurrentDomain.BaseDirectory, commandArgs.Url).RunAsService();
-#else
-            Error.WriteLine("ERROR: Service mode not supported for .NET Core");
-#endif
-        }
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            {
+                Args = args,
+                ContentRootPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+            });
+            builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton(serviceProvider => new ResponseRegistry());
+            builder.Services.AddSingleton(serviceProvider => new EndpointCollectionProvider(endpointCollectionDirectory));
+            builder.Services.AddSingleton(serviceProvider => serviceProvider.GetService<EndpointCollectionProvider>().EndpointCollection);
+            var app = builder.Build();
 
+            new Startup().Configure(app);
+
+            return app;
+        }
 
         public static async Task TestAsync(ParsedCommandLine commandArgs, EndpointCollection endpointCollection)
         {
             if (!TestRunner.HasTestSuite(endpointCollection.SourceDirectory))
             {
-                Error.WriteLine("ERROR: No test suite found");
+                Console.Error.WriteLine("ERROR: No test suite found");
                 return;
             }
 
             if (commandArgs.Diff && commandArgs.Only == null)
             {
-                Error.WriteLine("ERROR: --diff can only be specified with --only");
+                Console.Error.WriteLine("ERROR: --diff can only be specified with --only");
                 return;
             }
 
             var testRunner = new ConsoleTestRunner(endpointCollection);
-            if (commandArgs.Url != null)
-            {
-                testRunner.Url = commandArgs.Url;
-            }
 
             if (commandArgs.Only != null)
             {
                 var indexes = ParseOnlyArgument(commandArgs.Only, (from testCase in testRunner.Tests select testCase.Name).ToArray());
                 if (indexes.Length == 0)
                 {
-                    Error.WriteLine("ERROR: No testcases matches --only");
+                    Console.Error.WriteLine("ERROR: No testcases matches --only");
                 }
 
                 foreach (var index in indexes)
@@ -173,21 +119,21 @@ namespace netmockery
                         var diffTool = Environment.GetEnvironmentVariable("DIFFTOOL");
                         if (diffTool == null)
                         {
-                            Error.WriteLine("ERROR: No diff tool configured. Set DIFFTOOL environment variable to point to executable.");
+                            Console.Error.WriteLine("ERROR: No diff tool configured. Set DIFFTOOL environment variable to point to executable.");
                             return;
                         }
 
                         var testCase = testRunner.Tests.ElementAt(index);
                         if (testCase.ExpectedResponseBody == null)
                         {
-                            Error.WriteLine($"ERROR: Test case has no expected response body");
+                            Console.Error.WriteLine($"ERROR: Test case has no expected response body");
                             return;
                         }
 
                         var responseTuple = await testCase.GetResponseAsync(endpointCollection, testRunner.Now);
                         if (responseTuple.Item2 != null)
                         {
-                            Error.WriteLine($"ERROR: {responseTuple.Item2}");
+                            Console.Error.WriteLine($"ERROR: {responseTuple.Item2}");
                             return;
                         }
 
@@ -243,10 +189,9 @@ namespace netmockery
             Debug.Assert(diffTool != null);
             Debug.Assert(File.Exists(expectedFilename));
             Debug.Assert(File.Exists(actualFilename));
-            WriteLine($"Starting external diff tool {diffTool}");
+            Console.WriteLine($"Starting external diff tool {diffTool}");
             Process.Start(diffTool, $"\"{expectedFilename}\" \"{actualFilename}\"");
         }
-
 
         public static void ViewScript(string[] commandArgs)
         {
@@ -254,28 +199,15 @@ namespace netmockery
             Console.WriteLine(DynamicResponseCreatorBase.ExecuteIncludes(File.ReadAllText(scriptfile), Path.GetDirectoryName(scriptfile)));
         }
 
-
         public static void Dump(EndpointCollection endpointCollection)
         {
             foreach (var endpoint in endpointCollection.Endpoints)
             {
-                WriteLine($"{endpoint.Name} {endpoint.PathRegex}");
+                Console.WriteLine($"{endpoint.Name} {endpoint.PathRegex}");
                 foreach (var response in endpoint.Responses)
                 {
-                    WriteLine($"    {response.Item1} -> {response.Item2}");
+                    Console.WriteLine($"    {response.Item1} -> {response.Item2}");
                 }
-            }
-        }
-
-        public static string FrameworkVersion
-        {
-            get
-            {
-#if NET462
-                return "Full .NET Framework";
-#else
-                return ".NET Core";
-#endif
             }
         }
 

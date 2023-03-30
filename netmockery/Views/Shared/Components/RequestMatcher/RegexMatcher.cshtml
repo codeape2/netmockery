@@ -3,4 +3,4 @@
 
 Evaluate regex <code>@Model.Expression</code> against <span title="request path, querystring and request body">request</span>
 
-@Html.Partial("CommonRequestMatcher", Model)
+@await Html.PartialAsync("CommonRequestMatcher", Model)

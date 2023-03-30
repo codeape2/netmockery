@@ -212,7 +212,7 @@ namespace UnitTests
             Assert.NotNull(coverageInfo);
 
             Assert.Equal(new[] { "foo", "GetNow" }, coverageInfo.EndpointsCovered);
-            Assert.Equal(0, coverageInfo.EndpointsNotCovered.Length);
+            Assert.Empty(coverageInfo.EndpointsNotCovered);
         }
 
         [Fact]

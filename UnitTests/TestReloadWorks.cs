@@ -1,31 +1,36 @@
-﻿using netmockery;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
+using netmockery;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests
 {
-    public class TestReloadWorks : WebTestBase, IDisposable
+    public class TestReloadWorks : IDisposable
     {
-        EndpointCollectionProvider ecp;
         DirectoryCreator dc;
+        HttpClient client;
+
         public TestReloadWorks()
         {
             dc = new DirectoryCreator();
             dc.AddFile(
-                "endpoint1/endpoint.json", 
+                "endpoint1/endpoint.json",
                 JsonConvert.SerializeObject(DataUtils.CreateSimpleEndpoint("foobar", "myfile.txt"))
             );
             dc.AddFile("endpoint1/myfile.txt", "Hello world");
-            ecp = new EndpointCollectionProvider(dc.DirectoryName);
-            CreateServerAndClient();
-        }
+            var ecp = new EndpointCollectionProvider(dc.DirectoryName);
 
-        public override EndpointCollectionProvider GetEndpointCollectionProvider() => ecp;
+            var factory = new CustomWebApplicationFactory<Program>(ecp);
+            client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
+        }
 
         public void Dispose()
         {
@@ -52,7 +57,7 @@ namespace UnitTests
             Assert.Equal(new[] { "foobar" }, await GetEndpointNames());
 
             var response = await client.GetAsync("/__netmockery/endpoints/reloadconfig");
-            Assert.Equal(System.Net.HttpStatusCode.Redirect, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
 
             Assert.Equal(new[] { "baz", "foobar" }, await GetEndpointNames());
         }

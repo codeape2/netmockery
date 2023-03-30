@@ -1,15 +1,29 @@
 ﻿@using netmockery
 
-@{ 
+@{
     Layout = "Base";
-    var now = (DateTime) ViewData["Now"];
+
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var contentRootPath = ViewData["ContentRootPath"];
+    var webRootPath = ViewData["WebRootPath"];
+    var netmockeryVersion = Program.NetmockeryVersion;
+
+    var now = DateTime.Now;
     var reloadTimestamps = (DateTime[])ViewData["ReloadTimestamps"];
 
-    var netmockeryVersion = (string)ViewData["NetmockeryVersion"];
-    var frameworkVersion = (string)ViewData["FrameworkVersion"];
     var defaultScriptReferences = (IEnumerable<string>)ViewData["DefaultScriptReferences"];
+
 }
 <h2>Configuration</h2>
+<p>
+    Environment <code>@environment</code>
+</p>
+<p>
+    ContentRootPath <code>@contentRootPath</code>
+</p>
+<p>
+    WebRootPath <code>@webRootPath</code>
+</p>
 <p>
     Configuration directory: <code>@ViewData["SourceDirectory"]</code>
 </p>
@@ -29,11 +43,9 @@
 </p>
 
 <h2>Version</h2>
-
 <p>
-    Netmockery @netmockeryVersion (@frameworkVersion)
+    Netmockery @netmockeryVersion
 </p>
-
 
 <h2>Default script references</h2>
 <ul>

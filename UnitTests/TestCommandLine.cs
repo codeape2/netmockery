@@ -12,7 +12,7 @@ namespace UnitTests
         [Fact]
         public void CreateWebHostCorrectly()
         {
-            var webhost = Program.CreateWebHost("examples/example1", ".", null);
+            var webhost = Program.BuildWebApplication("examples/example1", new string[] {} );
             Assert.NotNull(webhost);
         }
 
@@ -40,7 +40,7 @@ namespace UnitTests
         [Fact]
         public void OnlyNoMatch()
         {
-            Assert.Equal(0, Program.ParseOnlyArgument("foobar", NAMES).Length);
+            Assert.Empty(Program.ParseOnlyArgument("foobar", NAMES));
         }
     }
 }

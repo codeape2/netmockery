@@ -1,39 +1,14 @@
 ﻿# Running netmockery
 
-Command line (.NET Framework version):
+Command line:
+``` bash
+# Netmockery starts and listens on default port
+dotnet netmockery.dll web --endpoints [YourEndpointFilesPath]
 
-    netmockery.exe p:\ath\to\endpoint\directory
+# Netmockery starts and listens on given port
+dotnet netmockery.dll web --endpoints [YourEndpointFilesPath] --urls http://*:9876
+```
 
-Command line (.NET Core version):
-
-    dotnet netmockery.dll p:\ath\to\endpoint\directory
-
-Netmockery starts and listens on ``localhost`` port ``5000``.
-
-To bind to another address/port, use the ``--url`` command line parameter. The command below binds netmockery to all network interfaces using port 9876.
-
-    netmockery.exe p:\ath\to\endpoint\directory --url http://*:9876
-
-## Installing as windows service
-
-(.NET Framework version only, not supported in .NET Core version)
-
-To install:
-
-    sc create netmockery binPath= "p:\ath\to\netmockery.exe p:\ath\to\endpoint\directory service"
-
-If ``p:\ath\to\netmockery.exe`` or ``p:\ath\to\endpoint\directory`` contains spaces, they must be escaped using ``\"`` . Example:
-
-    sc create netmockery binPath= "p:\ath\to\netmockery.exe \"p:\ath\to\endpoint\directory\with space\" service"
-
-Start/stop service:
-
-    net start netmockery
-    net stop netmockery
-
-To uninstall:
-
-    sc delete netmockery
 
 # Configuring netmockery
 
@@ -265,109 +240,18 @@ If no defaults are used, the default for ``charset`` is utf-8. There is no defau
 
 ### Valid charset names (not case sensitive)
 
-    .NET Framework and .NET Core
+    .NET Core
 
     US-ASCII
     ISO_8859-1:1987
-    UNICODE-1-1-UTF-7
     UTF-8
     ISO-10646-UCS-2
-    UTF-7
     UTF-16BE
     UTF-16LE
     UTF-16
     UTF-32
     UTF-32BE
     UTF-32LE
-
-
-    .NET Framework only
-
-    ISO_8859-2:1987
-    ISO_8859-3:1988
-    ISO_8859-4:1988
-    ISO_8859-5:1988
-    ISO_8859-6:1987
-    ISO_8859-7:1987
-    ISO_8859-8:1988
-    ISO_8859-9:1989
-    Shift_JIS
-    Extended_UNIX_Code_Packed_Format_for_Japanese
-    DIN_66003
-    NS_4551-1
-    SEN_850200_B
-    KS_C_5601-1987
-    ISO-2022-KR
-    EUC-KR
-    ISO-2022-JP
-    GB_2312-80
-    ISO-8859-13
-    ISO-8859-15
-    GBK
-    GB18030
-    IBM850
-    IBM862
-    IBM-Thai
-    GB2312
-    Big5
-    macintosh
-    IBM037
-    IBM273
-    IBM277
-    IBM278
-    IBM280
-    IBM284
-    IBM285
-    IBM290
-    IBM297
-    IBM420
-    IBM423
-    IBM424
-    IBM437
-    IBM500
-    IBM852
-    IBM855
-    IBM857
-    IBM860
-    IBM861
-    IBM863
-    IBM864
-    IBM865
-    IBM869
-    IBM870
-    IBM871
-    IBM880
-    IBM905
-    IBM1026
-    KOI8-R
-    HZ-GB-2312
-    IBM866
-    IBM775
-    KOI8-U
-    IBM00858
-    IBM00924
-    IBM01140
-    IBM01141
-    IBM01142
-    IBM01143
-    IBM01144
-    IBM01145
-    IBM01146
-    IBM01147
-    IBM01148
-    IBM01149
-    Big5-HKSCS
-    windows-874
-    windows-1250
-    windows-1251
-    windows-1252
-    windows-1253
-    windows-1254
-    windows-1255
-    windows-1256
-    windows-1257
-    windows-1258
-    TIS-620
 
 
 # Run-time adjustable parameters
@@ -472,8 +356,9 @@ Inside a script file, the function ``GetParam(parameterName)`` returns the curre
 For endpoints that define parameters, the web ui displays the table of values on the endpoint details page. The user can change values and reset values to the default value.
 
 
-# Writing tests
+# Endpoint tests
 
+## Writing endpoint tests
 Within a endpoint directory, a ``tests`` directory with a ``tests.json`` file defines test cases for the endpoint directory.
 
 Example ``tests.json`` file:
@@ -517,20 +402,20 @@ Specifying the expectations:
 * ``expectedstatuscode``: Expected response status code
 
 
-## Running tests
+## Running endpoint tests
 
 TODO: Document test modes (network and internal).
 
 Command line:
 
     # run all tests
-    netmockery.exe p:\ath\to\endpoint\directory test
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory
 
     # run single test, numeric parameter N specifies which test (first test is test 0 (zero))
-    netmockery.exe p:\ath\to\endpoint\directory test --only N
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N
 
     # execute request specified by test N, but display respons (do not check test expectations)
-    netmockery.exe p:\ath\to\endpoint\directory test --only N --showResponse
+    netmockery.exe --command test --endpoints p:\ath\to\endpoint\directory --only N --showresponse
 
 ## Handling time when testing
 

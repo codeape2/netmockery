@@ -25,9 +25,9 @@ namespace netmockery.Controllers
 
     public class DocumentationController : Controller
     {
-        private IHostingEnvironment _env;
+        private IWebHostEnvironment _env;
 
-        public DocumentationController(IHostingEnvironment env)
+        public DocumentationController(IWebHostEnvironment env)
         {
             _env = env;  
         }
@@ -59,7 +59,7 @@ namespace netmockery.Controllers
             builder.DocumentProcessed += (document) =>
             {
                 var headers =
-                    from lrd in document.GetLinkReferenceDefinitions().OfType<HeadingLinkReferenceDefinition>()
+                    from lrd in document.GetLinkReferenceDefinitions(true).OfType<HeadingLinkReferenceDefinition>()
                     select new
                     {
                         level = lrd.Heading.Level,

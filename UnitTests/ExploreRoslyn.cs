@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,32 +10,29 @@ namespace UnitTests
 {
     public class ExploreRoslyn
     {
-        const string SOURCE_WITH_COMPILATION_ERROR =
-@"
-using System;
-Console.WriteLine(""Hello world"");
-Console.WrightLine(""foo bar"");
-";
+        const string SOURCE_WITH_COMPILATION_ERROR = @"
+            using System;
+            Console.WriteLine(""Hello world"");
+            Console.WrightLine(""foo bar"");
+        ";
 
-        const string SOURCE_WITH_RUNTIME_ERROR =
-@"
-stringList.Add(""1"");
-string s = null;
-stringList.Add(""2"");
-var i = s.Length;
-stringList.Add(""3"");
-";
+        const string SOURCE_WITH_RUNTIME_ERROR = @"
+            stringList.Add(""1"");
+            string s = null;
+            stringList.Add(""2"");
+            var i = s.Length;
+            stringList.Add(""3"");
+        ";
 
-        const string SOURCE_WITHOUT_ERROR =
-@"
-var msg = ""no errors"";
-stringList.Add(msg);
-";
+        const string SOURCE_WITHOUT_ERROR = @"
+            var msg = ""no errors"";
+            stringList.Add(msg);
+        ";
 
         public List<string> stringList = new List<string>();
 
         [Fact]
-        async Task ScriptWithRuntimeError()
+        public async Task ScriptWithRuntimeError()
         {
             var code = @"
             var a = 0;
@@ -53,7 +49,7 @@ stringList.Add(msg);
         }
 
         [Fact]
-        async Task ScriptWithWrappedRuntimeError()
+        public async Task ScriptWithWrappedRuntimeError()
         {
             var code = @"
             try  {
@@ -86,7 +82,7 @@ stringList.Add(msg);
         public async Task ExploreCompileTimeError()
         {
             var exception = await Assert.ThrowsAsync<CompilationErrorException>(() => CompileAndRunAsync(SOURCE_WITH_COMPILATION_ERROR) );
-            Assert.StartsWith("(4,9): error CS0117: 'Console' does not contain", exception.Message);
+            Assert.StartsWith("(4,21): error CS0117: 'Console' does not contain", exception.Message);
         }
 
         [Fact]
@@ -104,13 +100,13 @@ stringList.Add(msg);
         public async Task NoError()
         {
             await CompileAndRunAsync(SOURCE_WITHOUT_ERROR);
-            Assert.Equal(1, stringList.Count);
+            Assert.Single(stringList);
             Assert.Equal("no errors", stringList[0]);
         }
 
         private Task CompileAndRunAsync(string sourceCode)
         {
-            Assert.Equal(0, stringList.Count);
+            Assert.Empty(stringList);
             return CSharpScript.RunAsync(sourceCode, globals: this);
         }
     }

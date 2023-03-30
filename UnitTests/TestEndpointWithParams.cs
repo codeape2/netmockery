@@ -94,7 +94,7 @@ namespace UnitTests
         public void CanReadParams()
         {
             var ecr = CreateEndpointWithScript();
-            Assert.Equal(1, ecr.Endpoints.Count());
+            Assert.Single(ecr.Endpoints);
 
             var endpoint = ecr.Endpoints.First();
             Assert.Equal(2, endpoint.ParameterCount);

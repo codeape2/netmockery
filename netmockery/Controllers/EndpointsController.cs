@@ -1,20 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace netmockery.Controllers
 {
     public class EndpointsController : Controller
     {
+        private IWebHostEnvironment _env;
         private EndpointCollectionProvider _endpointCollectionProvider;
         private EndpointCollection _endpointCollection;
         private ResponseRegistry _responseRegistry;
 
-        public EndpointsController(EndpointCollectionProvider endpointCollectionProvider, ResponseRegistry responseRegistry)
+        public EndpointsController(IWebHostEnvironment env, EndpointCollectionProvider endpointCollectionProvider, ResponseRegistry responseRegistry)
         {
+            _env = env;
             _endpointCollectionProvider = endpointCollectionProvider;
             _endpointCollection = _endpointCollectionProvider.EndpointCollection;
             _responseRegistry = responseRegistry;
@@ -30,11 +30,10 @@ namespace netmockery.Controllers
 
         public ActionResult Config()
         {
-            ViewData["Now"] = DateTime.Now;
+            ViewData["ContentRootPath"] = _env.ContentRootPath;
+            ViewData["WebRootPath"] = _env.WebRootPath;
             ViewData["ReloadTimestamps"] = _endpointCollectionProvider.ReloadTimestamps;
             ViewData["SourceDirectory"] = _endpointCollection.SourceDirectory;
-            ViewData["FrameworkVersion"] = Program.FrameworkVersion;
-            ViewData["NetmockeryVersion"] = Program.NetmockeryVersion;
             ViewData["DefaultScriptReferences"] = 
                     from 
                         metadatareference in DynamicResponseCreatorBase.GetDefaultMetadataReferences()

@@ -1,18 +1,20 @@
-﻿using netmockery;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
+using netmockery;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace UnitTests
 {
-    public class TestResponseHasCorrectEncoding : WebTestBase, IDisposable
+    public class TestResponseHasCorrectEncoding : IDisposable
     {
         DirectoryCreator dc;
-        EndpointCollectionProvider ecp;
+        HttpClient client;
+
         public TestResponseHasCorrectEncoding()
         {
             dc = new DirectoryCreator();
@@ -28,18 +30,18 @@ namespace UnitTests
             });
             dc.AddFile("tests/tests.json", JsonConvert.SerializeObject(tests));
 
-            ecp = new EndpointCollectionProvider(dc.DirectoryName);
-            CreateServerAndClient();
+            var ecp = new EndpointCollectionProvider(dc.DirectoryName);
+
+            var factory = new CustomWebApplicationFactory<Program>(ecp);
+            client = factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+            });
         }
 
         public void Dispose()
         {
             dc.Dispose();
-        }
-
-        public override EndpointCollectionProvider GetEndpointCollectionProvider()
-        {
-            return ecp;
         }
 
         [Fact]

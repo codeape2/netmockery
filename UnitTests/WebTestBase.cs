@@ -1,84 +1,28 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using netmockery;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Testing;
+
 
 namespace UnitTests
 {
-    public abstract class WebTestBase
+    public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
     {
-        public TestServer server;
-        public HttpClient client;
+        private EndpointCollectionProvider _endpointCollectionProvider;
 
-        public void CreateServerAndClient()
+        public CustomWebApplicationFactory(EndpointCollectionProvider endpointCollectionProvider) : base()
         {
-            server = new TestServer(CreateWebHostBuilder());
-            client = server.CreateClient();
+            _endpointCollectionProvider = endpointCollectionProvider;
         }
 
-        private PortableExecutableReference MetadataReferenceForTypesAssembly(Type type)
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            var assembly = type.GetTypeInfo().Assembly;
-            return MetadataReference.CreateFromFile(assembly.Location);
+            builder.UseSetting("endpoints", ".."); // EndpointCollectionProvider is mocked anyway
+
+            builder.ConfigureServices(services =>
+            {
+                services.AddTransient(serviceProvider => _endpointCollectionProvider);
+            });
         }
-
-        public IWebHostBuilder CreateWebHostBuilder()
-        {
-            IWebHostBuilder webhostBuilder = new WebHostBuilder();
-            webhostBuilder.ConfigureServices(InitialServiceConfiguration);
-
-            // thanks to https://github.com/aspnet/Hosting/issues/954
-            webhostBuilder = webhostBuilder
-                .UseContentRoot("../../../../netmockery")
-                .UseStartup<Startup>()
-                .ConfigureServices(services => 
-                {
-                    services.Configure((RazorViewEngineOptions options) =>
-                    {
-                        var previous = options.CompilationCallback;
-                        options.CompilationCallback = (context) =>
-                        {
-                            previous?.Invoke(context);
-
-                            var assembly = typeof(Startup).GetTypeInfo().Assembly;
-                            var assemblies = assembly.GetReferencedAssemblies().Select(
-                                x => MetadataReference.CreateFromFile(Assembly.Load(x).Location)
-                            ).ToList();
-
-                            assemblies.Add(MetadataReferenceForTypesAssembly(typeof(Microsoft.AspNetCore.Html.IHtmlContent)));
-                            assemblies.Add(MetadataReferenceForTypesAssembly(typeof(Microsoft.AspNetCore.Razor.RazorTemplateEngine)));
-                            assemblies.Add(MetadataReferenceForTypesAssembly(typeof(Microsoft.AspNetCore.Razor.Runtime.TagHelpers.ITagHelperDescriptorFactory)));
-                            assemblies.Add(MetadataReferenceForTypesAssembly(typeof(System.Text.Encodings.Web.HtmlEncoder)));
-                            
-                            assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("mscorlib")).Location));
-#if NET462
-                            assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location));
-#else
-                            assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Private.Corelib")).Location));
-#endif
-                            assemblies.Add(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("Microsoft.AspNetCore.Razor")).Location));
-
-                            context.Compilation = context.Compilation.AddReferences(assemblies);
-                        };
-                    });
-                });
-            return webhostBuilder;
-        }
-        
-
-        public void InitialServiceConfiguration(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddTransient(serviceProvider => GetEndpointCollectionProvider());
-        }
-
-        public abstract EndpointCollectionProvider GetEndpointCollectionProvider();
     }
 }

@@ -76,7 +76,6 @@ namespace UnitTests
             Assert.Equal("5", await EvalAsync(code));
         }
 
-
         [Fact]
         public async Task RuntimeErrorsAreThrown()
         {
@@ -86,7 +85,6 @@ namespace UnitTests
             Assert.NotNull(ex);
         }
 
-#if NET462
         [Fact]
         public async Task RuntimeErrorsIncludeLineNumber()
         {
@@ -95,7 +93,6 @@ namespace UnitTests
             );
             Assert.Contains("in :line 1", ex.StackTrace);
         }
-#endif
 
         [Fact]
         public async Task UsingSystemLinq()
@@ -257,8 +254,7 @@ return (eo != null).ToString();
             var endpoint = new Endpoint("foo", "bar");
             var responseCreator = new LiteralDynamicResponseCreator("ContentType = \"image/png\";", endpoint);
             var response = new TestableHttpResponse();
-            await Assert.ThrowsAsync(
-                typeof(ArgumentNullException),
+            await Assert.ThrowsAsync<ArgumentNullException>(
                 async () => await responseCreator.CreateResponseAsync(new TestableHttpRequest("/", null), new byte[0], response, endpoint)
             );
         }

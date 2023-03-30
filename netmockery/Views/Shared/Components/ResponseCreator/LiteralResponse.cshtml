@@ -2,4 +2,4 @@
 @model LiteralResponse
 Literal string: 
 <pre>@Model.Body</pre>
-@Html.Partial("CommonSimpleResponseCreator", Model)
+@await Html.PartialAsync("CommonSimpleResponseCreator", Model)
