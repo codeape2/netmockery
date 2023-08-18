@@ -17,6 +17,8 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
+        private readonly Dictionary<string, Script<string>> compiled = new Dictionary<string, Script<string>>();
+
         public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
 
         public virtual string FileSystemDirectory { get { return null; } }
@@ -56,23 +58,34 @@ namespace netmockery
         
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
-            // TODO: Only create script object if source has changed
-            // Read more: https://github.com/dotnet/roslyn/issues/22219
-
             Debug.Assert(requestInfo != null);
 
-            var script = CSharpScript.Create<string>(
-                code: GetSourceCodeWithIncludesExecuted(),
-                options: ScriptOptions.Default
-                    .WithReferences(GetDefaultMetadataReferences().ToArray())
-                    .WithEmitDebugInformation(true),
-                globalsType: typeof(RequestInfo)
-            );
-
+            var script = GetCompiledOrCreateScript();
             var runner = script.CreateDelegate();
             var result = await runner(requestInfo);
             GC.Collect();
             return result;
+        }
+
+        private Script<string> GetCompiledOrCreateScript()
+        {
+            string sourceCode = GetSourceCodeWithIncludesExecuted();
+
+            Script<string> script;
+            if (!compiled.TryGetValue(sourceCode, out script))
+            {
+                script = CSharpScript.Create<string>(
+                    code: sourceCode,
+                    options: ScriptOptions.Default
+                        .WithReferences(GetDefaultMetadataReferences().ToArray())
+                        .WithEmitDebugInformation(true),
+                    globalsType: typeof(RequestInfo)
+                );
+                script.Compile();
+                compiled.Add(sourceCode, script);
+            }
+
+            return script;
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
