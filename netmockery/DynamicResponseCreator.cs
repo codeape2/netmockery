@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using netmockery.globals;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,7 +36,6 @@ namespace netmockery
                         :
                         sourceCode;
         }
-
 
         public static IEnumerable<MetadataReference> GetDefaultMetadataReferences() 
         {
@@ -106,7 +106,7 @@ namespace netmockery
         {
             Debug.Assert(requestInfo != null);
             Debug.Assert(response != null);
-            if (requestInfo.StatusCode != RequestInfo.USE_CONFIGURED_STATUS_CODE)
+            if (requestInfo.StatusCode != RequestInfo.DEFAULT_STATUS_CODE)
             {
                 response.HttpStatusCode = (HttpStatusCode)requestInfo.StatusCode;
             }
@@ -120,7 +120,7 @@ namespace netmockery
         {
             Debug.Assert(requestInfo != null);
             Debug.Assert(response != null);
-            if (requestInfo.ContentType != RequestInfo.USE_CONFIGURED_CONTENT_TYPE)
+            if (requestInfo.ContentType != RequestInfo.DEFAULT_CONTENT_TYPE)
             {
                 response.ContentType = requestInfo.ContentType;
             }

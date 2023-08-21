@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Net;
+using netmockery.globals;
 
 namespace netmockery
 {    
@@ -82,44 +83,6 @@ namespace netmockery
     public interface IResponseCreatorWithFilename
     {
         string Filename { get; }
-    }
-
-    public class RequestInfo
-    {
-        public const int USE_CONFIGURED_STATUS_CODE = -1;
-        public const string USE_CONFIGURED_CONTENT_TYPE = null;
-
-        private static object _locker = new object();
-
-        private DateTime _now = DateTime.MinValue;
-
-        public string RequestPath;
-        public string QueryString;
-        public string RequestBody;
-        public int StatusCode = USE_CONFIGURED_STATUS_CODE;
-        public string ContentType = USE_CONFIGURED_CONTENT_TYPE;
-        public IHeaderDictionary Headers;
-        public Endpoint Endpoint;
-        public string EndpointDirectory => Endpoint.Directory;
-
-        public DateTime GetNow() => _now == DateTime.MinValue ? DateTime.Now : _now;
-        public string GetParam(string name)
-        {
-            return Endpoint.GetParameter(name).Value;
-        }
-
-        public void SetParam(string name, string value)
-        {
-            lock (_locker)
-            {
-                Endpoint.GetParameter(name).Value = value;
-            }            
-        }
-
-        public void SetStaticNow(DateTime now)
-        {
-            _now = now;
-        }
     }
 
     public class BodyReplacement
@@ -214,7 +177,7 @@ namespace netmockery
                 QueryString = request.QueryString.ToString(),
                 RequestBody = Encoding.UTF8.GetString(requestBody),
                 Headers = request.Headers,
-                Endpoint = endpoint
+                EndpointDirectory = endpoint.Directory
             };
             var responseBody = await GetBodyAndExecuteReplacementsAsync(requestInfo);
 

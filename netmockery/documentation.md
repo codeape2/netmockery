@@ -133,7 +133,6 @@ Inside a script, the following global variables and functions are available:
 * ``QueryString`` (string): The incoming request query string
 * ``RequestBody`` (string): The incoming request body
 * ``GetNow()`` (returns System.DateTime): The current time. See below for why you might want to use ``GetNow()`` inside your scripts instead of using ``System.DateTime.Now``.
-* ``GetParam(string paramname)`` (returns string): The value of the specified run-time parameter.
 
 Source files can be included in scripts using the following syntax:
 
@@ -346,10 +345,6 @@ Example ``endpoint.json`` (using the ``params.json`` from above):
             }
         ]
     }
-
-## Using parameter values in scripts
-
-Inside a script file, the function ``GetParam(parameterName)`` returns the current value of a run time parameter.
 
 ## Adjusting in the web UI
 

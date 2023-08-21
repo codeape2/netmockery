@@ -1,11 +1,12 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netmockery", "netmockery\netmockery.csproj", "{B498D333-84E3-4D46-AB1F-DDE23FAD47BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "netmockery", "netmockery\netmockery.csproj", "{B498D333-84E3-4D46-AB1F-DDE23FAD47BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{940FE39A-0275-4BE1-B39B-37CF75F0E4E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{940FE39A-0275-4BE1-B39B-37CF75F0E4E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netmockery.globals", "netmockery.globals\netmockery.globals.csproj", "{FD763C06-FA28-4060-A20F-0DF571D3D3EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B498D333-84E3-4D46-AB1F-DDE23FAD47BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -44,5 +42,23 @@ Global
 		{940FE39A-0275-4BE1-B39B-37CF75F0E4E9}.Release|x64.Build.0 = Release|x64
 		{940FE39A-0275-4BE1-B39B-37CF75F0E4E9}.Release|x86.ActiveCfg = Release|x86
 		{940FE39A-0275-4BE1-B39B-37CF75F0E4E9}.Release|x86.Build.0 = Release|x86
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|x64.Build.0 = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Debug|x86.Build.0 = Debug|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|x64.ActiveCfg = Release|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|x64.Build.0 = Release|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|x86.ActiveCfg = Release|Any CPU
+		{FD763C06-FA28-4060-A20F-0DF571D3D3EF}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83C871D1-13C3-4AA1-BD4E-690FFEBD5BCD}
 	EndGlobalSection
 EndGlobal

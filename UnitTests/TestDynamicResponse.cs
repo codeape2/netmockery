@@ -1,4 +1,5 @@
 ﻿using netmockery;
+using netmockery.globals;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +10,6 @@ using Xunit;
 
 namespace UnitTests
 {
-    using Microsoft.CodeAnalysis.Scripting;
     using static TestUtils;
 
     public class TestDynamicResponse 
@@ -190,40 +190,6 @@ return (eo != null).ToString();
         private async Task AssertScriptCanIncludeUsingStatementAsync(string namespaceName)
         {
             Assert.Equal("OK", await EvalAsync($"using {namespaceName}; return \"OK\";"));
-        }
-
-        [Fact]
-        public async Task ScriptsCanSetParams()
-        {
-            var endpoint = new Endpoint("foo", "bar");
-            endpoint.AddParameter(new EndpointParameter { Name = "param", Value = "abc" });
-
-            Assert.Equal("abc", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
-
-            await EvalAsync("SetParam(\"param\", \"def\"); return \"\";", new RequestInfo { Endpoint = endpoint });
-
-            Assert.Equal("def", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
-        }
-
-        [Fact]
-        public async Task ScriptsCanHandleEndpointObjects()
-        {
-            var endpoint = new Endpoint("foo", "bar");
-
-            endpoint.ScriptObjects["obj"] = new Dictionary<string, string>();
-            var obj = (Dictionary <string, string>) endpoint.ScriptObjects["obj"];
-
-            obj["a"] = "b";
-            Assert.Equal(
-                "b", 
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
-            );
-
-            obj["a"] = "c";
-            Assert.Equal(
-                "c",
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
-            );
         }
 
         [Fact]
