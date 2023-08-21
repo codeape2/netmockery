@@ -26,5 +26,4 @@ namespace netmockery.globals
             _now = now;
         }
     }
-
 }
