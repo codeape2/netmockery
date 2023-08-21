@@ -17,8 +17,6 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
-        private readonly Dictionary<string, Script<string>> compiled = new Dictionary<string, Script<string>>();
-
         public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
 
         public virtual string FileSystemDirectory { get { return null; } }
@@ -58,34 +56,25 @@ namespace netmockery
         
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
-            Debug.Assert(requestInfo != null);
-
-            var script = GetCompiledOrCreateScript();
-            var runner = script.CreateDelegate();
-            var result = await runner(requestInfo);
+            var result = await GetBodyInnerAsync(requestInfo);
             GC.Collect();
             return result;
         }
 
-        private Script<string> GetCompiledOrCreateScript()
+        private async Task<string> GetBodyInnerAsync(RequestInfo requestInfo)
         {
-            string sourceCode = GetSourceCodeWithIncludesExecuted();
+            Debug.Assert(requestInfo != null);
 
-            Script<string> script;
-            if (!compiled.TryGetValue(sourceCode, out script))
-            {
-                script = CSharpScript.Create<string>(
-                    code: sourceCode,
-                    options: ScriptOptions.Default
-                        .WithReferences(GetDefaultMetadataReferences().ToArray())
-                        .WithEmitDebugInformation(true),
-                    globalsType: typeof(RequestInfo)
-                );
-                script.Compile();
-                compiled.Add(sourceCode, script);
-            }
-
-            return script;
+            var script = CSharpScript.Create<string>(
+                code: GetSourceCodeWithIncludesExecuted(),
+                options: ScriptOptions.Default
+                    .WithReferences(GetDefaultMetadataReferences().ToArray())
+                    .WithEmitDebugInformation(true),
+                globalsType: typeof(RequestInfo)
+            );
+            script.Compile();
+            var runner = script.CreateDelegate();
+            return await runner(requestInfo);
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
