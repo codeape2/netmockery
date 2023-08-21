@@ -132,6 +132,7 @@ Inside a script, the following global variables and functions are available:
 * ``RequestPath`` (string): The incoming request path
 * ``QueryString`` (string): The incoming request query string
 * ``RequestBody`` (string): The incoming request body
+* ``Headers`` (Dictionary<string, StringValues>): The incoming request headers
 * ``GetNow()`` (returns System.DateTime): The current time. See below for why you might want to use ``GetNow()`` inside your scripts instead of using ``System.DateTime.Now``.
 
 Source files can be included in scripts using the following syntax:

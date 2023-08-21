@@ -1,4 +1,5 @@
-﻿using netmockery;
+﻿using Microsoft.Extensions.Primitives;
+using netmockery;
 using netmockery.globals;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,16 @@ namespace UnitTests
         public async Task CanAccessQueryString()
         {
             Assert.Equal("foobar?ama", await EvalAsync("RequestBody + RequestPath + QueryString", new RequestInfo { RequestBody = "foo", RequestPath = "bar", QueryString = "?ama" }));
+        }
+
+        [Fact]
+        public async Task CanAccessHeaders()
+        {
+            var headers = new Dictionary<string, StringValues>()
+            {
+                { "foo", new StringValues("bar") }
+            };
+            Assert.Equal(headers["foo"], await EvalAsync("Headers[\"foo\"]", new RequestInfo { Headers = headers }));
         }
 
         [Fact]
