@@ -61,7 +61,7 @@ namespace netmockery
 
                 Urls = stringSwiches[VALUE_SWITCH_URLS],
                 Only = stringSwiches[VALUE_SWITCH_ONLY],
-
+                
                 ShowResponse = boolSwitches[BOOL_SWITCH_SHOWRESPONSE],
                 NoTestMode = boolSwitches[BOOL_SWITCH_NOTESTMODE],
                 Stop = boolSwitches[BOOL_SWITCH_STOP],

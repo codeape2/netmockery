@@ -1,9 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using netmockery.globals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,11 +8,19 @@ using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Caching.Memory;
+using netmockery.globals;
 
 namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
+        private static IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 4 });
+
         public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
 
         public virtual string FileSystemDirectory { get { return null; } }
@@ -26,18 +29,16 @@ namespace netmockery
         {
             var sourceCode = SourceCode;
 
-            return 
-                FileSystemDirectory != null
-                        ?
-                        ExecuteIncludes(
-                            CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
-                            FileSystemDirectory
-                        )
-                        :
-                        sourceCode;
+            return
+            FileSystemDirectory != null ?
+                ExecuteIncludes(
+                    CreateCorrectPathsInLoadStatements(sourceCode, FileSystemDirectory),
+                    FileSystemDirectory
+                ) :
+                sourceCode;
         }
 
-        public static IEnumerable<MetadataReference> GetDefaultMetadataReferences() 
+        public static IEnumerable<MetadataReference> GetDefaultMetadataReferences()
         {
             yield return MetadataReference.CreateFromFile(typeof(System.Console).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(Enumerable).GetTypeInfo().Assembly.Location);
@@ -53,11 +54,15 @@ namespace netmockery
             yield return MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.RuntimeBinderException).GetTypeInfo().Assembly.Location);
             yield return MetadataReference.CreateFromFile(typeof(ExpressionType).GetTypeInfo().Assembly.Location);
         }
-        
+
         public override async Task<string> GetBodyAsync(RequestInfo requestInfo)
         {
             var result = await GetBodyInnerAsync(requestInfo);
-            GC.Collect();
+
+            // CSharpScript has a memory leak only reproduced in a linux container with limited memory
+            // This helps mitigate that, but not completely
+            GC.Collect(5, GCCollectionMode.Forced, true, true);
+            
             return result;
         }
 
@@ -65,16 +70,31 @@ namespace netmockery
         {
             Debug.Assert(requestInfo != null);
 
-            var script = CSharpScript.Create<string>(
-                code: GetSourceCodeWithIncludesExecuted(),
-                options: ScriptOptions.Default
-                    .WithReferences(GetDefaultMetadataReferences().ToArray())
-                    .WithEmitDebugInformation(true),
-                globalsType: typeof(RequestInfo)
-            );
-            script.Compile();
+            var script = GetOrCreateScript();
             var runner = script.CreateDelegate();
             return await runner(requestInfo);
+        }
+
+        public Script<string> GetOrCreateScript()
+        {
+            var sourceCode = GetSourceCodeWithIncludesExecuted();
+
+            return _memoryCache.GetOrCreate(
+                sourceCode,
+                cacheEntry =>
+                {
+                    cacheEntry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+                    cacheEntry.Size = 1;
+
+                    Console.WriteLine("Creating script");
+                    return CSharpScript.Create<string>(
+                        code: sourceCode,
+                        options: ScriptOptions.Default
+                        .WithReferences(GetDefaultMetadataReferences().ToArray())
+                        .WithEmitDebugInformation(false),
+                        globalsType : typeof(RequestInfo)
+                    );
+                });
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
@@ -82,7 +102,7 @@ namespace netmockery
             Debug.Assert(sourceCode != null);
             Debug.Assert(directory != null);
             return Regex.Replace(
-                sourceCode, 
+                sourceCode,
                 "#load \"(.*?)\"",
                 mo => "#load \"" + Path.GetFullPath(Path.Combine(directory, mo.Groups[1].Value)) + "\""
             );
@@ -113,7 +133,7 @@ namespace netmockery
             else
             {
                 base.SetStatusCode(requestInfo, response);
-            }                           
+            }
         }
 
         protected override void SetContentType(RequestInfo requestInfo, IHttpResponseWrapper response)
@@ -127,7 +147,7 @@ namespace netmockery
             else
             {
                 base.SetContentType(requestInfo, response);
-            }            
+            }
         }
     }
 

@@ -102,7 +102,7 @@ namespace UnitTests
             var ex = await Assert.ThrowsAsync<DivideByZeroException>(
                 () => EvalAsync("var i = 0; (4 / i).ToString()")
             );
-            Assert.Contains("in :line 1", ex.StackTrace);
+            Assert.Equal("Attempted to divide by zero.", ex.Message);
         }
 
         [Fact]
