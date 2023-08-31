@@ -61,7 +61,7 @@ namespace netmockery
 
             // CSharpScript has a memory leak only reproduced in a linux container with limited memory
             // This helps mitigate that, but not completely
-            GC.Collect(5, GCCollectionMode.Forced, true, true);
+            GC.Collect(2, GCCollectionMode.Forced, true, true);
             
             return result;
         }
