@@ -26,8 +26,6 @@ namespace UnitTests
             var configurationsToTest = new List<string>
             {
                 "examples/example1",
-
-                "examples/withparams",
                 "examples/documentation"
             };
             if (File.Exists(FILENAME))

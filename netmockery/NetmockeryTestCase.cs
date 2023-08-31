@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net.Http;
 using System.Net;
+using netmockery.globals;
 
 namespace netmockery
 {
@@ -259,11 +260,11 @@ namespace netmockery
 
                     var requestInfo = new RequestInfo
                     {
-                        Endpoint = endpoint,
                         Headers = null,
                         RequestPath = RequestPath,
                         QueryString = QueryString,
-                        RequestBody = RequestBody
+                        RequestBody = RequestBody,
+                        EndpointDirectory = endpoint.Directory,
                     };
                     if (now != null)
                     {
@@ -308,11 +309,11 @@ namespace netmockery
 
                 var requestInfo = new RequestInfo
                 {
-                    Endpoint= endpoint,
                     Headers = null,
                     QueryString = QueryString,
                     RequestBody = RequestBody,
-                    RequestPath = RequestPath
+                    RequestPath = RequestPath,
+                    EndpointDirectory = endpoint.Directory,
                 };
                 if (now != null)
                 {

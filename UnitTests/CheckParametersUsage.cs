@@ -143,22 +143,6 @@ namespace UnitTests
             return retval;
         }
 
-
-        [Fact]
-        public async Task CanUseParamForScriptFilename()
-        {
-            dc.AddFile("file.txt", "return \"I am file.txt: \" + GetParam(\"filename\");");
-            dc.AddFile("another.txt", "return \"I am another.txt: \" + GetParam(\"filename\");");
-
-            var responseCreator = new FileDynamicResponseCreator("$filename", endpoint);
-            Assert.Equal(Path.Combine(endpoint.Directory, "file.txt"), responseCreator.Filename);
-            Assert.Equal("I am file.txt: file.txt", (await GetResponseAsync(responseCreator)).WrittenContent);
-
-            filenameParam.Value = "another.txt";
-            Assert.Equal(Path.Combine(endpoint.Directory, "another.txt"), responseCreator.Filename);
-            Assert.Equal("I am another.txt: another.txt", (await GetResponseAsync(responseCreator)).WrittenContent);
-        }
-
         [Fact]
         public void CanUseParamForDelay()
         {

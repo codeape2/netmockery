@@ -1,4 +1,6 @@
-﻿using netmockery;
+﻿using Microsoft.Extensions.Primitives;
+using netmockery;
+using netmockery.globals;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +11,6 @@ using Xunit;
 
 namespace UnitTests
 {
-    using Microsoft.CodeAnalysis.Scripting;
     using static TestUtils;
 
     public class TestDynamicResponse 
@@ -63,6 +64,16 @@ namespace UnitTests
         }
 
         [Fact]
+        public async Task CanAccessHeaders()
+        {
+            var headers = new Dictionary<string, StringValues>()
+            {
+                { "foo", new StringValues("bar") }
+            };
+            Assert.Equal(headers["foo"], await EvalAsync("Headers[\"foo\"]", new RequestInfo { Headers = headers }));
+        }
+
+        [Fact]
         public async Task MultilineScript()
         {
             var code = @"var a = 2; var b = 3; (a + b).ToString()";
@@ -91,7 +102,7 @@ namespace UnitTests
             var ex = await Assert.ThrowsAsync<DivideByZeroException>(
                 () => EvalAsync("var i = 0; (4 / i).ToString()")
             );
-            Assert.Contains("in :line 1", ex.StackTrace);
+            Assert.Equal("Attempted to divide by zero.", ex.Message);
         }
 
         [Fact]
@@ -190,40 +201,6 @@ return (eo != null).ToString();
         private async Task AssertScriptCanIncludeUsingStatementAsync(string namespaceName)
         {
             Assert.Equal("OK", await EvalAsync($"using {namespaceName}; return \"OK\";"));
-        }
-
-        [Fact]
-        public async Task ScriptsCanSetParams()
-        {
-            var endpoint = new Endpoint("foo", "bar");
-            endpoint.AddParameter(new EndpointParameter { Name = "param", Value = "abc" });
-
-            Assert.Equal("abc", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
-
-            await EvalAsync("SetParam(\"param\", \"def\"); return \"\";", new RequestInfo { Endpoint = endpoint });
-
-            Assert.Equal("def", await EvalAsync("return GetParam(\"param\");", new RequestInfo { Endpoint = endpoint }));
-        }
-
-        [Fact]
-        public async Task ScriptsCanHandleEndpointObjects()
-        {
-            var endpoint = new Endpoint("foo", "bar");
-
-            endpoint.ScriptObjects["obj"] = new Dictionary<string, string>();
-            var obj = (Dictionary <string, string>) endpoint.ScriptObjects["obj"];
-
-            obj["a"] = "b";
-            Assert.Equal(
-                "b", 
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
-            );
-
-            obj["a"] = "c";
-            Assert.Equal(
-                "c",
-                await EvalAsync("using System.Collections.Generic; return ((Dictionary<string, string>)Endpoint.ScriptObjects[\"obj\"])[\"a\"];", new RequestInfo { Endpoint = endpoint })
-            );
         }
 
         [Fact]
