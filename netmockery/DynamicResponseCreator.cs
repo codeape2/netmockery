@@ -71,11 +71,11 @@ namespace netmockery
             Debug.Assert(requestInfo != null);
 
             var script = GetOrCreateScript();
-            var runner = script.CreateDelegate();
+            var runner = await CreateDelegate(script);
             return await runner(requestInfo);
         }
 
-        public Script<string> GetOrCreateScript()
+        private Script<string> GetOrCreateScript()
         {
             var sourceCode = GetSourceCodeWithIncludesExecuted();
 
@@ -95,6 +95,25 @@ namespace netmockery
                         globalsType : typeof(RequestInfo)
                     );
                 });
+        }
+
+        private async Task<ScriptRunner<string>> CreateDelegate(Script<string> script, int attempt = 1)
+        {
+            int attemptLimit = 5;
+            if (attempt > attemptLimit)
+                throw new Exception($"CreateDelegate retry count exceeded limit of {attemptLimit}");
+
+            try
+            {
+                return script.CreateDelegate();
+            }
+            // The web endpoints may be spammed with high concurrency, which may trigger an assembly loading exception, to handle this we add sleep and retry.
+            catch (FileLoadException ex)
+            {
+                Console.WriteLine($"Attempt {attempt}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
+                await Task.Delay(100);
+                return await CreateDelegate(script, attempt + 1);
+            }
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
