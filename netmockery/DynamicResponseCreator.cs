@@ -107,8 +107,8 @@ namespace netmockery
             {
                 return script.CreateDelegate();
             }
-            // The web endpoints may be spammed with high concurrency, which may trigger an assembly loading exception, to handle this we add sleep and retry.
-            // Exact exception: System.IO.FileLoadException: Assembly with same name is already loaded
+            // The web endpoints may be spammed with high concurrency, which may trigger 'FileLoadException: Assembly with same name is already loaded'
+            // To handle this we add sleep and retry.
             catch (FileLoadException ex)
             {
                 Console.WriteLine($"Attempt {attempt}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
