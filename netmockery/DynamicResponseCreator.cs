@@ -99,7 +99,7 @@ namespace netmockery
 
         private async Task<ScriptRunner<string>> CreateDelegate(Script<string> script, int attempt = 1)
         {
-            int attemptLimit = 5;
+            const int attemptLimit = 5;
             if (attempt > attemptLimit)
                 throw new Exception($"CreateDelegate retry count exceeded limit of {attemptLimit}");
 
