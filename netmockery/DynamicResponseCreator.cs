@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,6 +20,7 @@ namespace netmockery
 {
     public abstract class DynamicResponseCreatorBase : SimpleResponseCreator
     {
+        private static readonly SemaphoreSlim ScriptDelegateSemaphore = new SemaphoreSlim(1, 1);
         private static IMemoryCache _memoryCache = new MemoryCache(new MemoryCacheOptions { SizeLimit = 4 });
 
         public DynamicResponseCreatorBase(Endpoint endpoint) : base(endpoint) { }
@@ -71,7 +73,7 @@ namespace netmockery
             Debug.Assert(requestInfo != null);
 
             var script = GetOrCreateScript();
-            var runner = await CreateDelegate(script);
+            var runner = await CreateScriptRunner(script);
             return await runner(requestInfo);
         }
 
@@ -97,26 +99,17 @@ namespace netmockery
                 });
         }
 
-        private async Task<ScriptRunner<string>> CreateDelegate(Script<string> script)
+        private async Task<ScriptRunner<string>> CreateScriptRunner(Script<string> script)
         {
-            const int attemptLimit = 5;
-
-            for (int i = 1; i <= attemptLimit; i++)
+            await ScriptDelegateSemaphore.WaitAsync().ConfigureAwait(false);
+            try
             {
-                try
-                {
-                    return script.CreateDelegate();
-                }
-                // The web endpoints may be spammed with high concurrency, which may trigger 'FileLoadException: Assembly with same name is already loaded'
-                // To handle this we add sleep and retry.
-                catch (FileLoadException ex)
-                {
-                    Console.WriteLine($"Attempt {i}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
-                    await Task.Delay(50);
-                }
+                return script.CreateDelegate();
             }
-
-            throw new Exception($"{nameof(CreateDelegate)} retry count exceeded limit of {attemptLimit}");
+            finally
+            {
+                ScriptDelegateSemaphore.Release();
+            }
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
