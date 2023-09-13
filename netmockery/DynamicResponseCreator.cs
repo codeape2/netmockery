@@ -97,24 +97,26 @@ namespace netmockery
                 });
         }
 
-        private async Task<ScriptRunner<string>> CreateDelegate(Script<string> script, int attempt = 1)
+        private async Task<ScriptRunner<string>> CreateDelegate(Script<string> script)
         {
             const int attemptLimit = 5;
-            if (attempt > attemptLimit)
-                throw new Exception($"CreateDelegate retry count exceeded limit of {attemptLimit}");
 
-            try
+            for (int i = 1; i <= attemptLimit; i++)
             {
-                return script.CreateDelegate();
+                try
+                {
+                    return script.CreateDelegate();
+                }
+                // The web endpoints may be spammed with high concurrency, which may trigger 'FileLoadException: Assembly with same name is already loaded'
+                // To handle this we add sleep and retry.
+                catch (FileLoadException ex)
+                {
+                    Console.WriteLine($"Attempt {i}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
+                    await Task.Delay(100);
+                }
             }
-            // The web endpoints may be spammed with high concurrency, which may trigger 'FileLoadException: Assembly with same name is already loaded'
-            // To handle this we add sleep and retry.
-            catch (FileLoadException ex)
-            {
-                Console.WriteLine($"Attempt {attempt}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
-                await Task.Delay(100);
-                return await CreateDelegate(script, attempt + 1);
-            }
+
+            throw new Exception($"{nameof(CreateDelegate)} retry count exceeded limit of {attemptLimit}");
         }
 
         static public string CreateCorrectPathsInLoadStatements(string sourceCode, string directory)
