@@ -112,7 +112,7 @@ namespace netmockery
                 catch (FileLoadException ex)
                 {
                     Console.WriteLine($"Attempt {i}/{attemptLimit} failed to create delegate, retrying. Exception: {ex}");
-                    await Task.Delay(100);
+                    await Task.Delay(50);
                 }
             }
 
