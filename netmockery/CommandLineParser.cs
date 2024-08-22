@@ -25,6 +25,7 @@ namespace netmockery
         private const string BOOL_SWITCH_DIFF = "--diff";
         private const string BOOL_SWITCH_LIST = "--list";
 
+        static private string[] VALUE_SWICTHES_IGNORED = new[] { "--http_ports" }; // Not used, ports are part of urls
         static private string[] VALUE_SWITCHES = new[] { VALUE_SWITCH_ENDPOINTS, VALUE_SWITCH_URLS, VALUE_SWITCH_ONLY, VALUE_UT_SWITCH_ENVIRONMENT, VALUE_UT_SWITCH_CONTENTROOT, VALUE_UT_SWITCH_APPLICATIONNAME };
         static private string[] BOOL_SWITCHES = new[] { BOOL_SWITCH_SHOWRESPONSE, BOOL_SWITCH_NOTESTMODE, BOOL_SWITCH_STOP, BOOL_SWITCH_DIFF, BOOL_SWITCH_LIST };
 
@@ -120,7 +121,11 @@ namespace netmockery
             while (i < args.Length)
             {
                 var arg = args[i];
-                if (VALUE_SWITCHES.Contains(arg))
+                if (VALUE_SWICTHES_IGNORED.Contains(arg))
+                {
+                    i++;
+                }
+                else if (VALUE_SWITCHES.Contains(arg))
                 {
                     var value = args[++i];
                     stringSwitches[arg] = value;
