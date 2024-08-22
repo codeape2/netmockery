@@ -15,7 +15,7 @@ dotnet test .\netmockery.sln
 
 In linux container
 ```
-docker run --rm -v ${PWD}\:/mnt/repo/ -w /mnt/repo mcr.microsoft.com/dotnet/sdk:6.0 dotnet test .\netmockery.sln
+docker run --rm -v ${PWD}\:/mnt/repo/ -w /mnt/repo mcr.microsoft.com/dotnet/sdk:8.0 dotnet test .\netmockery.sln
 ```
 
 RUNNING
