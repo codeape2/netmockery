@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,16 +20,7 @@ namespace netmockery
 
         public static async Task MainAsync(string[] args)
         {
-            ParsedCommandLine parsedArguments;
-            try
-            {
-                parsedArguments = CommandLineParser.ParseArguments(args);
-            }
-            catch (CommandLineParsingException clpe)
-            {
-                Console.Error.WriteLine($"ERROR: {clpe.Message}");
-                return;
-            }            
+            ParsedCommandLine parsedArguments = CommandLineParser.ParseArguments(args);       
 
             if (!Directory.Exists(parsedArguments.Endpoints))
             {
